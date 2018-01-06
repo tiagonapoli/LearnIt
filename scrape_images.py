@@ -12,19 +12,54 @@ Usage:
 
 from apiclient.discovery import build
 from PIL import Image
+from urllib.request import urlopen,Request
+from io import StringIO
 
-import cStringIO
+import urllib.error
 import os
 import sys
-import urllib2
+import socket
+
+#URL RETRIEVE TIMEOUT
+socket.setdefaulttimeout(1)
+arq = open("google_credentials.txt", "r")
+DEV_KEY,CSE_ID = arq.read().split(' ')
+CSE_ID = CSE_ID.replace('\n','')
+arq.close()
+
+opener = urllib.request.build_opener()
+opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
+urllib.request.install_opener(opener)
 
 
-DEV_KEY = '<My dev key>'
-CSE_ID = '<My CSE Id>'
+def geturl(link,local):
+	try:
+		urllib.request.urlretrieve(link,local)
+		print ('Saved {}'.format(local))
+		return 1
+	except:
+		# Link probably returned non-image data (redirect, etc)
+		print ('ERROR: Failed to read/save image')
+		return 0
 
+def get_image_type(name):
+	aux = []
+	for i in range(len(name)-1,-1,-1):
+		if name[i] == '.':
+			break
+		aux.append(name[i])
+	aux = aux[::-1]
+	res = []
+	if '?' in aux:
+		pos = aux.index('?')
+		res = aux[:pos:]
+	else:
+		res = aux
+	res = ''.join(res)
+	return res
 
 def fetch_images(query, directory, num_requests=1, start_idx=0):
-    '''
+	'''
     Fetches images from Google search and stores them as {###}.jpg.
 
     Args:
@@ -35,51 +70,40 @@ def fetch_images(query, directory, num_requests=1, start_idx=0):
             10 images grabbed per request).
         start_idx (int): The starting index to search from. Images will be
             named accordingly.
-    '''
+	'''
 
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-    service = build('customsearch', 'v1', developerKey=DEV_KEY)
-
-    count = start_idx
-
-    num_results = 10 # I believe this is the max number of results allowed
-                     # per request
-
-    for i in range(0, num_requests): # Make n number of requests, saving 10
-                                     # images each
-        res = service.cse().list(
+	if not os.path.exists(directory):
+		os.makedirs(directory)
+	service = build('customsearch', 'v1', developerKey=DEV_KEY)
+	count = start_idx
+	num_results = 10 # I believe this is the max number of results allowed
+	
+	for i in range(0, num_requests): # Make n number of requests, saving 10
+		res = service.cse().list(
             q = query,
             cx = CSE_ID,
             searchType = 'image',
             num = num_results,
             start = i*num_results+1,
-        ).execute()
+		).execute()
 
-        for item in res['items']:
+		for item in res['items']:
+			print(item['link'])
+			url = item['link']
+			filename = '{}/{}{:03d}.{}'.format(directory,query.replace(' ','_'),count, get_image_type(url))
+			count += geturl(url,filename)
+		
+		return count
 
-            try:
-                filename = '{}/{:03d}.jpg'.format(directory, count)
-
-                contents = urllib2.urlopen(item['link'], timeout=5).read()
-                data = cStringIO.StringIO(contents)
-                Image.open(data).convert('RGB').save(filename, 'JPEG')
-
-                print 'Saved {}'.format(filename)
-                count += 1
-
-            except urllib2.URLError:
-                # urllib2 either couldn't open link or timed out
-                print 'ERROR: Failed to load URL'
-            except:
-                # Link probably returned non-image data (redirect, etc)
-                print 'ERROR: Failed to read/save image'
 
 
 if __name__ == '__main__':
-    ''' Scrapes images for 6 different queries. '''
-
+	''' Scrapes images for 6 different queries. '''
+	d = urllib.request.urlopen("http://e360.yale.edu/assets/site/Trees_JeroenVanNieuwenhoveFlickr.jpg")
+	#IDEAS: USE CONTENT-TYPE TO GET IMAGE TYPE!!!
+	#CHECK CONTENT LENGTH - MAXIMUM
+	print (d.info())
+	'''
     base_directory = 'images'
     num_requests = 1
 
@@ -100,3 +124,5 @@ if __name__ == '__main__':
     for query in queries:
         directory = '{}/{}'.format(base_directory, query)
         fetch_images(query, directory, num_requests=num_requests)
+	'''
+	

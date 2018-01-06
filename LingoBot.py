@@ -1,6 +1,7 @@
 import os
 import telebot
 import time
+import scrape_images
 
 arq = open("bot_token.txt", "r")
 TOKEN = (arq.read().splitlines())[0]
@@ -81,5 +82,11 @@ def get_vocab_name(message):
 	f.write("{} {}\n".format(temp_user[ID],message.text))
 	f.close();
 
+
+def turn_off():
+	print("YESSSSS")
+
+
 setup()
 BOT.polling()
+turn_off()
