@@ -10,10 +10,10 @@ BOT = telebot.TeleBot(TOKEN)
 
 
 temp_user = {}
-knownUsers = []
+knownUsers = set()
 userState = {}
-step_id = {'0': 'IDLE',
-		   '1': 'get_vocab_inf->WAITING VOCABULARY'}
+step_id = {0: 'IDLE',
+		   1: 'get_vocab_inf->WAITING VOCABULARY'}
 
 
 def setup():
@@ -23,38 +23,46 @@ def setup():
 		f  = open(filename, "w")
 	else:
 		f  = open(filename, "r+")
-		knownUsers = list(map(int, f.read().split(' ')))
-		print(knownUsers)
+		knownusers = f.read().split(' ')
+		for user in knownusers:
+			knownUsers.add(int(user))
+			userState[int(user)] = 0
 	f.close()
 
 def get_user_state(ID):
 	print("id:{}  state:{}".format(ID, userState[ID]))
 	return userState[ID]
 
-def add_user(ID)
-	knownUsers.append(ID)
+def add_user(ID):
+	if ID in knownUsers:
+		return
+
+	knownUsers.add(ID)
+	userState[ID] = 0
+	f = open("knownusers.txt", "a")
+	f.write(' ' + str(ID))
+	f.close()
 
 @BOT.message_handler(commands = ['start'])
 def setup_user(message):
 	ID = message.chat.id;
 	print("NEW USER {}".format(ID))
 	BOT.send_message(ID,"Welcome to LingoBot")
-	knownUsers.append(ID)
+	add_user(ID)
 	userState[ID] = 0
-
 
 @BOT.message_handler(commands = ['add_vocabulary'])
 def get_vocab_info(message):
 	ID = message.chat.id
-	vocab = message.text[16:].split(' ')
+	vocab = message.text[16:]
 	
-	i = 0
-	for s in vocab:
-		print("{}: {}".format(i,s))
-	
+	if len(vocab) == 0:
+		BOT.send_message(ID, "Please, try again with a non-empty word")
+		return
+
 	markup = telebot.types.ForceReply(selective = False)
-	BOT.send_message(ID, "Type english translation", reply_markup=markup)	
-	temp_user[ID] = vocab[0]
+	BOT.send_message(ID, "Type english translation", reply_markup=markup)
+	temp_user[ID] = vocab
 	userState[ID] = 1;
 
 @BOT.message_handler(commands = ['set_state'])
@@ -69,12 +77,9 @@ def set_state(message):
 def get_vocab_name(message):
 	ID = message.chat.id
 	
-	f = open(string(ID), "a")
+	f = open(str(ID), "a")
 	f.write("{} {}\n".format(temp_user[ID],message.text))
 	f.close();
 
-
-
-
 setup()
-#BOT.polling()
+BOT.polling()
