@@ -77,7 +77,7 @@ def set_state(message):
 def get_vocab_name(message):
 	ID = message.chat.id
 	
-	f = open(str(ID), "a")
+	f = open(str(ID) + '.txt', "a")
 	f.write("{} {}\n".format(temp_user[ID],message.text))
 	f.close();
 
