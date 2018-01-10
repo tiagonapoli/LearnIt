@@ -8,6 +8,9 @@ Python script to scrape images from Google CSE.
 Usage:
     python scrape_images.py {directory} {num_queries}
 
+
+Needs:
+	pip -> google-api-python-client
 '''
 
 from apiclient.discovery import build

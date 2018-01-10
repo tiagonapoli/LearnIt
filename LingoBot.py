@@ -92,29 +92,29 @@ def get_vocab_info(message):
 	temp_user[ID] = vocab
 	userState[ID] = '1'
 
-@BOT.message_handler(func= lambda message: get_user_state(message.chat.id) == 1)
+@BOT.message_handler(func= lambda m: (get_user_state(m.chat.id) == '1'))
 def get_vocab_name(message):
-	print("get vocab name")	
 	ID = message.chat.id
-	f = open(str(ID) + '.txt', "a")
-	f.write("{} {}\n".format(temp_user[ID],message.text))
-	f.close();
-	markup = types.ReplyKeyboardMarkup()
-	itembtn1 = types.KeyboardButton('Send image')
-	itembtn2 = types.KeyboardButton('Choose image from suggestions')
-	markup.add(itembtn1, itembtn2)
+#	f = open(str(ID) + '.txt', "a")
+#	f.write("{} {}\n".format(temp_user[ID],message.text))
+#	f.close();
+	btn1 = telebot.types.KeyboardButton('Send image')
+	btn2 = telebot.types.KeyboardButton('Choose one from suggestions')
+	markup = telebot.types.ReplyKeyboardMarkup(row_width=1)
+	markup.add(btn1)
+	markup.add(btn2)
 	BOT.send_message(ID, "Choose one way to link images to vocab: ", reply_markup=markup)
 	userState[ID] = '2'
 
 
-@BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == 2) and message.text == "Send image")
+@BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '2') and message.text == "Send image")
 def receive_image(message):
+	
+	ID = message.chat.id
+	markup = telebot.types.ReplyKeyboardRemove()
+	BOT.send_message(ID,"Send an image:",reply_markup=markup)
 	userState[ID] = '3'
 	print("WOLOLOOOOOOOO")
-
-@BOT.message_handler(func= lambda message: get_user_state(message.chat.id) == 2) 
-
-
 
 
 @BOT.message_handler(commands = ['set_state'])
@@ -125,7 +125,7 @@ def set_state(message):
 		BOT.sent_message(ID, "don't forget the new state")
 		return 0
 	print("new state:{}".format(int(number)))
-	userState[ID] = int(number)
+	userState[ID] = str(int(number))
 	print("id:{} state:{}".format(ID, userState[ID]))
 
 
