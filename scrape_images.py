@@ -79,7 +79,7 @@ def fetch_images(query, directory, num_requests=1, start_idx=0):
 		os.makedirs(directory)
 	service = build('customsearch', 'v1', developerKey=DEV_KEY)
 	count = start_idx
-	num_results = 10 # I believe this is the max number of results allowed
+	num_results = 5 # I believe this is the max number of results allowed
 	
 	for i in range(0, num_requests): # Make n number of requests, saving 10
 		res = service.cse().list(
