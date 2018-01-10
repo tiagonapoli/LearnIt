@@ -10,13 +10,16 @@ arq.close()
 BOT = telebot.TeleBot(TOKEN)
 
 
+loop = {}
 temp_user = {}
 knownUsers = set()
 userState = {}
 step_id = {'0': 'IDLE',
 		   '1': 'get_vocab_info->WAITING VOCABULARY',
 		   '2': 'get_vocab_info->IMAGE_SOURCE',
-		   '3': 'get_vocab_info->Waiting images' 
+		   '3': 'get_vocab_info->Receiving images', 
+		   '4': 'get_vocab_info->Send image loop',
+		   '5': 'get_vocab_info->Google image selection loop'
 		   }
 
 
@@ -81,27 +84,64 @@ def get_vocab_info(message):
 @BOT.message_handler(func= lambda m: (get_user_state(m.chat.id) == '1'))
 def get_vocab_name(message):
 	ID = message.chat.id
+	temp_user[ID] = message.text
 #	f = open(str(ID) + '.txt', "a")
 #	f.write("{} {}\n".format(temp_user[ID],message.text))
 #	f.close();
 	btn1 = telebot.types.KeyboardButton('Send image')
 	btn2 = telebot.types.KeyboardButton('Choose one from suggestions')
-	markup = telebot.types.ReplyKeyboardMarkup(row_width=1)
-	markup.add(btn1)
-	markup.add(btn2)
+	btn3 = telebot.types.KeyboardButton('Use only english translation')
+	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+	markup.row(btn1,btn2)
+	markup.row(btn3)
 	BOT.send_message(ID, "Choose one way to link images to vocab: ", reply_markup=markup)
 	userState[ID] = '2'
 
 
 @BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '2') and message.text == "Send image")
-def receive_image(message):
-	
+def get_vocab_receive_image(message):
 	ID = message.chat.id
 	markup = telebot.types.ReplyKeyboardRemove()
 	BOT.send_message(ID,"Send an image:",reply_markup=markup)
 	userState[ID] = '3'
-	print("WOLOLOOOOOOOO")
 
+@BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '3'))
+def get_vocab_receive_images_loop(message):
+	#SAVE IMAGE
+	ID = message.chat.id
+	btn1 = telebot.types.KeyboardButton('Send another image')
+	btn2 = telebot.types.KeyboardButton('End')
+	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+	markup.row(btn1,btn2)
+	BOT.send_message(ID, "Another image?: ", reply_markup=markup)
+	userState[ID] = '4'
+
+@BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '4'))
+def get_vocab_receive_loop_decide (message):
+	ID = message.chat.id
+	if message.text == "Send another image":
+		userState[ID] = '3'
+	elif message.text == "End":
+		#END REGISTRATION
+		#FALTA
+		userState[ID] = '0'
+	else:
+		#TRATARRRR
+		print("MSG INESPERADA")
+
+@BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '2') and message.text == "Choose one from suggestions")
+def get_vocab_google_images(message):
+	ID = message.chat.id
+	fetch_images(temp_user[ID],"tmp/{}".format(ID))
+	loop[ID].clear()
+	loop[ID] = os.listdir()
+	userState[ID] = '5'
+	
+
+
+@BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '2') and message.text == "Use only english translation")
+def get_vocab_english_translation(message):
+	return 0
 
 @BOT.message_handler(commands = ['set_state'])
 def set_state(message):
