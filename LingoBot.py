@@ -2,12 +2,31 @@ import os
 import telebot
 import time
 import scrape_images
+import psycopg2
 
-arq = open("bot_token.txt", "r")
-TOKEN = (arq.read().splitlines())[0]
-arq.close()
+try:
+	arq = open("bot_token.txt", "r")
+	TOKEN = (arq.read().splitlines())[0]
+	arq.close()
 
-BOT = telebot.TeleBot(TOKEN)
+	BOT = telebot.TeleBot(TOKEN)
+except Exception as e:
+	print("Can't retrieve the bot's token")
+	print(e)
+
+try:
+	arq = open("connect_str.txt", "r")
+	connect_str = arq.read()
+	arq.close()
+	print(connect_str)
+	# use our connection values to establish a connection
+	conn = psycopg2.connect(connect_str)
+	# create a psycopg2 cursor that can execute queries
+	cursor = conn.cursor()
+	print("Connected with database!")
+except Exception as e:
+	print("Uh oh, can't connect. Invalid dbname, user or password?")
+	print(e)
 
 
 temp_user = {}
@@ -41,20 +60,21 @@ def get_user_state(ID):
 	return userState[ID]
 
 def add_user(ID):
-	if ID in knownUsers:
-		return
+	cursor.execute("SELECT id from users")
+	rows = cursor.fetchall()
+	for row in rows:
+		if row[0] == ID:
+			BOT.send_message(ID, "Welcome back to LingoBot!")
+			return
 
-	knownUsers.add(ID)
-	userState[ID] = 0
-	f = open("knownusers.txt", "a")
-	f.write(' ' + str(ID))
-	f.close()
+	cursor.execute("INSERT INTO users VALUES ({}, 0);".format(ID))
+	conn.commit()
+	BOT.send_message(ID,"Welcome to LingoBot")	
 
 @BOT.message_handler(commands = ['start'])
 def setup_user(message):
 	ID = message.chat.id;
 	print("NEW USER {}".format(ID))
-	BOT.send_message(ID,"Welcome to LingoBot")
 	add_user(ID)
 	userState[ID] = '0'
 
@@ -114,6 +134,8 @@ def set_settings(message):
 	return 0	
 
 def turn_off():
+	conn.close()
+	cursor.close()
 	print("YESSSSS")
 
 
