@@ -42,23 +42,6 @@ step_id = {'0': 'IDLE',
 		   '5': 'get_word_info->Google image selection loop'
 		   }
 
-
-def setup():
-	filename = "knownusers.txt"
-	f = 0
-	if os.path.isfile(filename) == False:
-		f  = open(filename, "w")
-	else:
-		f  = open(filename, "r+")
-		knownusers = f.read().split(' ')
-		for user in knownusers:
-			knownUsers.add(int(user))
-			userState[int(user)] = 0
-	f.close()
-	
-	for user in knownUsers:
-		print("{} : {}".format(user, userState[user]))
-
 def get_user_state(ID):
 	print("id:{}  state:{}".format(ID, userState[ID]))
 	return userState[ID]
@@ -82,7 +65,7 @@ def setup_user(message):
 	add_user(ID)
 	userState[ID] = '0'
 
-@BOT.message_handler(commands = ['add_vocabulary'])
+@BOT.message_handler(commands = ['add_word'])
 def get_word_info(message):
 	ID = message.chat.id
 	vocab = message.text[16:]
