@@ -75,6 +75,10 @@ def add_user(ID):
 	conn.commit()
 	BOT.send_message(ID,"Welcome to LingoBot")
 
+def add_word(ID):
+	#temp_user -> ingles outro_idioma path1 path2 path3 ... final da lista
+
+
 @BOT.message_handler(commands = ['start'])
 def setup_user(message):
 	ID = message.chat.id;
@@ -93,13 +97,14 @@ def get_word_info(message):
 
 	markup = telebot.types.ForceReply(selective = False)
 	BOT.send_message(ID, "Type english translation", reply_markup=markup)
-	temp_user[ID] = vocab
+	temp_user[ID].clear()
+	temp_user[ID].append(vocab)
 	userState[ID] = '1'
 
 @BOT.message_handler(func= lambda m: (get_user_state(m.chat.id) == '1'))
 def get_word_name(message):
 	ID = message.chat.id
-	temp_user[ID] = message.text
+	temp_user[ID].append(message.text)
 #	f = open(str(ID) + '.txt', "a")
 #	f.write("{} {}\n".format(temp_user[ID],message.text))
 #	f.close();
@@ -129,7 +134,7 @@ def get_word_receive_images_loop(message):
 		markup.row(btn1,btn2)
 		userState[ID] = '4'
 	elif message.text == "Done":
-		save_word()
+		add_word(ID)
 		userState[ID] = '0'
 	#SAVE IMAGE
 
