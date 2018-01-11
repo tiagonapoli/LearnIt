@@ -120,29 +120,18 @@ def get_word_receive_image(message):
 	BOT.send_message(ID,"Send an image:",reply_markup=markup)
 	userState[ID] = '3'
 
-@BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '3'))
+@BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '3' or get_user_state(message.chat.id) == '4'))
 def get_word_receive_images_loop(message):
-	#SAVE IMAGE
 	ID = message.chat.id
-	btn1 = telebot.types.KeyboardButton('Send another image')
-	btn2 = telebot.types.KeyboardButton('End')
-	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-	markup.row(btn1,btn2)
-	BOT.send_message(ID, "Another image?: ", reply_markup=markup)
-	userState[ID] = '4'
-
-@BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '4'))
-def get_word_receive_loop_decide (message):
-	ID = message.chat.id
-	if message.text == "Send another image":
-		userState[ID] = '3'
-	elif message.text == "End":
-		#END REGISTRATION
-		#FALTA
+	if get_user_state(ID) == '3':
+		btn2 = telebot.types.KeyboardButton('Done')
+		markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+		markup.row(btn1,btn2)
+		userState[ID] = '4'
+	elif message.text == "Done":
+		save_word()
 		userState[ID] = '0'
-	else:
-		#TRATARRRR
-		print("MSG INESPERADA")
+	#SAVE IMAGE
 
 @BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '2') and message.text == "Choose one from suggestions")
 def get_word_google_images(message):
