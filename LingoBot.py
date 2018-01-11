@@ -35,11 +35,11 @@ temp_user = {}
 knownUsers = set()
 userState = {}
 step_id = {'0': 'IDLE',
-		   '1': 'get_vocab_info->WAITING VOCABULARY',
-		   '2': 'get_vocab_info->IMAGE_SOURCE',
-		   '3': 'get_vocab_info->Receiving images', 
-		   '4': 'get_vocab_info->Send image loop',
-		   '5': 'get_vocab_info->Google image selection loop'
+		   '1': 'get_word_info->WAITING VOCABULARY',
+		   '2': 'get_word_info->IMAGE_SOURCE',
+		   '3': 'get_word_info->Receiving images', 
+		   '4': 'get_word_info->Send image loop',
+		   '5': 'get_word_info->Google image selection loop'
 		   }
 
 
@@ -83,7 +83,7 @@ def setup_user(message):
 	userState[ID] = '0'
 
 @BOT.message_handler(commands = ['add_vocabulary'])
-def get_vocab_info(message):
+def get_word_info(message):
 	ID = message.chat.id
 	vocab = message.text[16:]
 	
@@ -97,7 +97,7 @@ def get_vocab_info(message):
 	userState[ID] = '1'
 
 @BOT.message_handler(func= lambda m: (get_user_state(m.chat.id) == '1'))
-def get_vocab_name(message):
+def get_word_name(message):
 	ID = message.chat.id
 	temp_user[ID] = message.text
 #	f = open(str(ID) + '.txt', "a")
@@ -114,14 +114,14 @@ def get_vocab_name(message):
 
 
 @BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '2') and message.text == "Send image")
-def get_vocab_receive_image(message):
+def get_word_receive_image(message):
 	ID = message.chat.id
 	markup = telebot.types.ReplyKeyboardRemove()
 	BOT.send_message(ID,"Send an image:",reply_markup=markup)
 	userState[ID] = '3'
 
 @BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '3'))
-def get_vocab_receive_images_loop(message):
+def get_word_receive_images_loop(message):
 	#SAVE IMAGE
 	ID = message.chat.id
 	btn1 = telebot.types.KeyboardButton('Send another image')
@@ -132,7 +132,7 @@ def get_vocab_receive_images_loop(message):
 	userState[ID] = '4'
 
 @BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '4'))
-def get_vocab_receive_loop_decide (message):
+def get_word_receive_loop_decide (message):
 	ID = message.chat.id
 	if message.text == "Send another image":
 		userState[ID] = '3'
@@ -145,7 +145,7 @@ def get_vocab_receive_loop_decide (message):
 		print("MSG INESPERADA")
 
 @BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '2') and message.text == "Choose one from suggestions")
-def get_vocab_google_images(message):
+def get_word_google_images(message):
 	ID = message.chat.id
 	fetch_images(temp_user[ID],"tmp/{}".format(ID))
 	loop[ID].clear()
@@ -155,7 +155,7 @@ def get_vocab_google_images(message):
 
 
 @BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '2') and message.text == "Use only english translation")
-def get_vocab_english_translation(message):
+def get_word_english_translation(message):
 	return 0
 
 @BOT.message_handler(commands = ['set_state'])
