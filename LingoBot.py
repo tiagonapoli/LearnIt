@@ -10,6 +10,7 @@ try:
 	arq.close()
 
 	BOT = telebot.TeleBot(TOKEN)
+	print("Bot initialized successfully!")
 except Exception as e:
 	print("Can't retrieve the bot's token")
 	print(e)
@@ -72,7 +73,7 @@ def add_user(ID):
 
 	cursor.execute("INSERT INTO users VALUES ({}, 0);".format(ID))
 	conn.commit()
-	BOT.send_message(ID,"Welcome to LingoBot")	
+	BOT.send_message(ID,"Welcome to LingoBot")
 
 @BOT.message_handler(commands = ['start'])
 def setup_user(message):
