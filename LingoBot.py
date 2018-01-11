@@ -64,7 +64,7 @@ def get_user_state(ID):
 	return userState[ID]
 
 def add_user(ID):
-	cursor.execute("SELECT id from users")
+	cursor.execute("SELECT id from users WHERE id={}".format(ID))
 	rows = cursor.fetchall()
 	for row in rows:
 		if row[0] == ID:
