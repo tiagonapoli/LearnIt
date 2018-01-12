@@ -8,7 +8,6 @@ try:
 	arq = open("bot_token.txt", "r")
 	TOKEN = (arq.read().splitlines())[0]
 	arq.close()
-
 	BOT = telebot.TeleBot(TOKEN)
 	print("Bot initialized successfully!")
 except Exception as e:
@@ -34,6 +33,7 @@ loop = {}
 temp_user = {}
 knownUsers = set()
 userState = {}
+contador_user = {}
 step_id = {'0': 'IDLE',
 		   '1': 'get_word_info->WAITING VOCABULARY',
 		   '2': 'get_word_info->IMAGE_SOURCE',
@@ -82,19 +82,24 @@ def erase_word(ID, idiom, foreign_word):
 		return
 
 	cursor.execute("DELETE FROM word WHERE id = {} AND idiom = '{}' AND foreign_word = '{}'".format(ID, idiom, foreign_word))
+
 	conn.commit()
 	BOT.send_message(ID, "Word erased successfully!")
 
 def save_image(image_msg, path):
-	return 0
+	f = image_msg.photo[-1].file_id
+	arq = bot.get_file(f)
+	downloaded_file = bot.download_file(arq.file_path)
+	tipo = []
+	for c in arq.file_path[::-1]:
+		print(c)
+		if c == '.' :
+			break
+		tipo.append(c)
+	tipo = "".join(tipo[::-1])
+	with open(path + "." + tipo, 'wb') as new_file:
+		new_file.write(downloaded_file)
 	
-@BOT.message_hander(content_type=['photo'])
-def asdasd(message):
-	print(message.photo.file_id)
-	print(message.photo.width)
-	print(message.photo.height)
-	print(message.photo.file_size)
-
 @BOT.message_handler(commands = ['start'])
 def setup_user(message):
 	ID = message.chat.id;
@@ -144,15 +149,16 @@ def get_word_receive_image(message):
 @BOT.message_handler(func= lambda message: get_user_state(message.chat.id) == '3', content_type=['photo'])
 def get_word_ImagesFromUser1(message):
 	ID = message.chat.id
-	if get_user_state(ID) == '3':
-		btn2 = telebot.types.KeyboardButton('Done')
-		markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-		markup.row(btn1,btn2)
-		userState[ID] = '4'
-	#SAVE IMAGE
+	contador_user[ID] = 0
+	btn2 = telebot.types.KeyboardButton('Done')
+	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+	markup.row(btn1,btn2)
+	userState[ID] = '4'
+	save_image(message,"{}/{}/img{}".format(ID,tempo_user[ID][0],contador_user[ID]))
 
 @BOT.message_handler(func= lambda message: get_user_state(message.chat.id) == '4', content_type=['photo', 'text'])
 def get_word_ImagesFromUser2(message):
+	contador_user[ID] += 1
 	ID = message.chat.id
 	if message.text == "Done":
 		add_word(ID)
@@ -160,8 +166,7 @@ def get_word_ImagesFromUser2(message):
 		markup = telebot.types.ReplyKeyboardRemove()
 		BOT.send_message(ID,"Successfully done!",reply_markup=markup)
 	else:
-		return 0
-		#SAVE IMAGE
+		save_image(message,"{}/{}/img{}".format(ID,tempo_user[ID][0],contador_user[ID]))
 
 
 @BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '2') and message.text == "Choose one from suggestions")
@@ -200,6 +205,5 @@ def turn_off():
 	print("YESSSSS")
 
 
-# setup()
 BOT.polling()
 turn_off()
