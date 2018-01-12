@@ -60,8 +60,28 @@ def add_user(ID):
 
 def add_word(ID):
 	#temp_user -> ingles outro_idioma path1 path2 path3 ... final da lista
-	return 0
+	english_word = temp_user[ID][0]
+	foreign_word = temp_user[ID][1]
 
+	cursor.execute("INSERT INTO word VALUES ({}, '{}', '{}')".format(ID, english_word, foreign_word))	
+
+	for i in range(2, len(temp_user[ID])):
+		img_path = temp_user[ID][i]
+		cursor.execute("INSERT INTO word VALUES ({}, '{}', '{}', DEFAULT, '{}')".format(ID, english_word, foreign_word, img_path))
+
+	conn.commit()
+	BOT.send_message(ID, "Word and images added successfully!")
+
+def erase_word(ID, english_word, foreign_word):
+	cursor.execute("SELECT FROM word WHERE id = {} AND english_word = '{}' AND foreign_word = '{}'".format(ID, english_word, foreign_word))
+	rows = cursos.fetchall
+	
+	if len(rows) == 0:
+		BOT.send_message(ID, "Invalid english word or foreign word")
+		return
+	cursor.execute("DELETE FROM word WHERE id = {} AND english_word = '{}' AND foreign_word = '{}'".format(ID, english_word, foreign_word))
+	conn.commit()
+	BOT.send_message(ID, "Word erased successfully!")
 
 def save_image(image_msg, path):
 	f = image_msg.photo[-1].file_id
@@ -77,7 +97,6 @@ def save_image(image_msg, path):
 	with open(path + "." + tipo, 'wb') as new_file:
 		new_file.write(downloaded_file)
 	
-
 @BOT.message_handler(commands = ['start'])
 def setup_user(message):
 	ID = message.chat.id;

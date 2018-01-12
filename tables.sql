@@ -5,16 +5,18 @@ CREATE TABLE users(
 
 CREATE TABLE word(
 	user_id int,
-	word varchar(50),
-	primary key (user_id, word),
-	foreign key (user_id) references users(id)
+	english_word varchar(50),
+	foreign_word varchar(50),
+	primary key (user_id, english_word, foreign_word),
+	foreign key (user_id) references users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE image(
 	user_id int,
-	word varchar(50),
+	english_word varchar(50),
+	foreign_word varchar(50),
 	id serial,
 	img_path varchar(50),
-	primary key (user_id, word, id),
-	foreign key (user_id, word) references word(user_id, word)
+	primary key (user_id, english_word, foreign_word, id),
+	foreign key (user_id, english_word, foreign_word) references word(user_id, english_word, foreign_word) ON DELETE CASCADE
 );
