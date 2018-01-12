@@ -118,7 +118,7 @@ def get_word_info(message):
 
 	markup = telebot.types.ForceReply(selective = False)
 	BOT.send_message(ID, "Type english translation", reply_markup=markup)
-	temp_user[ID].clear()
+	temp_user[ID] = []
 	temp_user[ID].append(vocab)
 	userState[ID] = '1'
 
