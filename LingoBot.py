@@ -73,10 +73,26 @@ def add_word(ID):
 	BOT.send_message(ID, "Word and images added successfully!")
 
 def erase_word(ID, english_word, foreign_word):
+	cursor.execute("SELECT FROM word WHERE id = {} AND english_word = '{}' AND foreign_word = '{}'".format(ID, english_word, foreign_word))
+	rows = cursos.fetchall
+	
+	if len(rows) == 0:
+		BOT.send_message(ID, "Invalid english word or foreign word")
+		return
+
 	cursor.execute("DELETE FROM word WHERE id = {} AND english_word = '{}' AND foreign_word = '{}'".format(ID, english_word, foreign_word))
 	conn.commit()
 	BOT.send_message(ID, "Word erased successfully!")
 
+def save_image(image_msg, path):
+	return 0
+	
+@BOT.message_hander(content_type=['photo'])
+def asdasd(message):
+	print(message.photo.file_id)
+	print(message.photo.width)
+	print(message.photo.height)
+	print(message.photo.file_size)
 
 @BOT.message_handler(commands = ['start'])
 def setup_user(message):
@@ -124,18 +140,28 @@ def get_word_receive_image(message):
 	BOT.send_message(ID,"Send an image:",reply_markup=markup)
 	userState[ID] = '3'
 
-@BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '3' or get_user_state(message.chat.id) == '4'))
-def get_word_receive_images_loop(message):
+@BOT.message_handler(func= lambda message: get_user_state(message.chat.id) == '3', content_type=['photo'])
+def get_word_ImagesFromUser1(message):
 	ID = message.chat.id
 	if get_user_state(ID) == '3':
 		btn2 = telebot.types.KeyboardButton('Done')
 		markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 		markup.row(btn1,btn2)
 		userState[ID] = '4'
-	elif message.text == "Done":
+	#SAVE IMAGE
+
+@BOT.message_handler(func= lambda message: get_user_state(message.chat.id) == '4', content_type=['photo', 'text'])
+def get_word_ImagesFromUser2(message):
+	ID = message.chat.id
+	if message.text == "Done":
 		add_word(ID)
 		userState[ID] = '0'
-	#SAVE IMAGE
+		markup = telebot.types.ReplyKeyboardRemove()
+		BOT.send_message(ID,"Successfully done!",reply_markup=markup)
+	else:
+		return 0
+		#SAVE IMAGE
+
 
 @BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '2') and message.text == "Choose one from suggestions")
 def get_word_google_images(message):
