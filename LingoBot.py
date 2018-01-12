@@ -59,28 +59,29 @@ def add_user(ID):
 	BOT.send_message(ID,"Welcome to LingoBot")
 
 def add_word(ID):
-	#temp_user -> ingles outro_idioma path1 path2 path3 ... final da lista
-	english_word = temp_user[ID][0]
+	#temp_user -> idioma outro_idioma ingles path1 path2 path3 ... final da lista
+	idiom = temp_user[ID][0]
 	foreign_word = temp_user[ID][1]
+	english_word = temp_user[ID][2]
 
-	cursor.execute("INSERT INTO word VALUES ({}, '{}', '{}')".format(ID, english_word, foreign_word))	
+	cursor.execute("INSERT INTO words VALUES ({}, '{}', '{}', '{}')".format(ID, idiom, foreign_word, english_word))	
 
-	for i in range(2, len(temp_user[ID])):
+	for i in range(3, len(temp_user[ID])):
 		img_path = temp_user[ID][i]
-		cursor.execute("INSERT INTO word VALUES ({}, '{}', '{}', DEFAULT, '{}')".format(ID, english_word, foreign_word, img_path))
+		cursor.execute("INSERT INTO images VALUES ({}, '{}', '{}', DEFAULT, '{}')".format(ID, idiom, foreign_word, img_path))
 
 	conn.commit()
 	BOT.send_message(ID, "Word and images added successfully!")
 
-def erase_word(ID, english_word, foreign_word):
-	cursor.execute("SELECT FROM word WHERE id = {} AND english_word = '{}' AND foreign_word = '{}'".format(ID, english_word, foreign_word))
+def erase_word(ID, idiom, foreign_word):
+	cursor.execute("SELECT FROM word WHERE id = {} AND english_word = '{}' AND foreign_word = '{}'".format(ID, idiom, foreign_word))
 	rows = cursos.fetchall
 	
 	if len(rows) == 0:
 		BOT.send_message(ID, "Invalid english word or foreign word")
 		return
 
-	cursor.execute("DELETE FROM word WHERE id = {} AND english_word = '{}' AND foreign_word = '{}'".format(ID, english_word, foreign_word))
+	cursor.execute("DELETE FROM word WHERE id = {} AND idiom = '{}' AND foreign_word = '{}'".format(ID, idiom, foreign_word))
 	conn.commit()
 	BOT.send_message(ID, "Word erased successfully!")
 

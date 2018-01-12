@@ -3,20 +3,21 @@ CREATE TABLE users(
 	messages_per_day integer
 );
 
-CREATE TABLE word(
+CREATE TABLE words(
 	user_id int,
-	english_word varchar(50),
+	idiom varchar(50),
 	foreign_word varchar(50),
-	primary key (user_id, english_word, foreign_word),
+	english_word varchar(50),
+	primary key (user_id, idiom, foreign_word),
 	foreign key (user_id) references users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE image(
+CREATE TABLE images(
 	user_id int,
-	english_word varchar(50),
+	idiom varchar(50),
 	foreign_word varchar(50),
 	id serial,
 	img_path varchar(50),
-	primary key (user_id, english_word, foreign_word, id),
-	foreign key (user_id, english_word, foreign_word) references word(user_id, english_word, foreign_word) ON DELETE CASCADE
+	primary key (user_id, idiom, foreign_word, id),
+	foreign key (user_id, idiom, foreign_word) references words(user_id, idiom, foreign_word) ON DELETE CASCADE
 );
