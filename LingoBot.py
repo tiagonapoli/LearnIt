@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+import sys
 import os
 import telebot
 import time
@@ -5,6 +7,7 @@ import scrape_images
 import psycopg2
 import flags
 import utils
+import signal
 from RuntimeData import RuntimeData
 
 try:
@@ -176,6 +179,13 @@ def set_state(message):
 def set_settings(message):
 	return 0	
 
+def signal_handler(signal, frame):
+	utils.turn_off()
+	print('Exiting bot...')
+	sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+print('Press Ctrl+C to exit gently')
+signal.pause()
 
 BOT.polling()
-turn_off()

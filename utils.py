@@ -18,5 +18,4 @@ def save_image(image_msg, path, image_name, bot):
 	return path + image_name + "." + tipo
 
 def turn_off():
-	print("YESSSSS")
-
+	return 0
