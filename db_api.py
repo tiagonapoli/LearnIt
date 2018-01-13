@@ -1,5 +1,4 @@
 import psycopg2
-import flags
 
 class Database:
 	conn = None

@@ -5,7 +5,6 @@ import telebot
 import time
 import scrape_images
 import psycopg2
-import flags
 import utils
 import signal
 from RuntimeData import RuntimeData
