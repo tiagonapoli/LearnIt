@@ -102,9 +102,14 @@ def save_image(image_msg, path):
 	
 @BOT.message_handler(commands = ['start'])
 def setup_user(message):
-	ID = message.chat.id;
+	ID = message.chat.id
 	print("NEW USER {}".format(ID))
 	add_user(ID)
+	userState[ID] = '0'
+
+@BOT.message_handler(commands = ['cancel'])
+def cancel(message):
+	ID = message.chat.id
 	userState[ID] = '0'
 
 @BOT.message_handler(commands = ['add_word'])
@@ -135,7 +140,7 @@ def get_word_name(message):
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	markup.row(btn1,btn2)
 	markup.row(btn3)
-	BOT.send_message(ID, "Choose one way to link images to vocab: ", reply_markup=markup)
+	BOT.send_message(ID, "Choose one way to link images to word: ", reply_markup=markup)
 	userState[ID] = '2'
 
 
@@ -150,11 +155,11 @@ def get_word_receive_image(message):
 def get_word_ImagesFromUser1(message):
 	ID = message.chat.id
 	contador_user[ID] = 0
-	btn2 = telebot.types.KeyboardButton('Done')
+	btn1 = telebot.types.KeyboardButton('Done')
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-	markup.row(btn1,btn2)
+	markup.row(btn1)
 	userState[ID] = '4'
-	save_image(message,"{}/{}/img{}".format(ID,tempo_user[ID][0],contador_user[ID]))
+	save_image(message,"{}/{}/img{}".format(ID,temp_user[ID][0],contador_user[ID]))
 
 @BOT.message_handler(func= lambda message: get_user_state(message.chat.id) == '4', content_type=['photo', 'text'])
 def get_word_ImagesFromUser2(message):
@@ -166,7 +171,7 @@ def get_word_ImagesFromUser2(message):
 		markup = telebot.types.ReplyKeyboardRemove()
 		BOT.send_message(ID,"Successfully done!",reply_markup=markup)
 	else:
-		save_image(message,"{}/{}/img{}".format(ID,tempo_user[ID][0],contador_user[ID]))
+		save_image(message,"{}/{}/img{}".format(ID,temp_user[ID][0],contador_user[ID]))
 
 
 @BOT.message_handler(func= lambda message: (get_user_state(message.chat.id) == '2') and message.text == "Choose one from suggestions")
