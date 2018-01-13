@@ -3,6 +3,9 @@ import telebot
 import time
 import scrape_images
 import psycopg2
+import utils
+import flags
+from db_api import Database
 
 try:
 	arq = open("bot_token.txt", "r")
@@ -14,97 +17,17 @@ except Exception as e:
 	print("Can't retrieve the bot's token")
 	print(e)
 
-try:
-	arq = open("connect_str.txt", "r")
-	connect_str = arq.read()
-	arq.close()
-	print(connect_str)
-	# use our connection values to establish a connection
-	conn = psycopg2.connect(connect_str)
-	# create a psycopg2 cursor that can execute queries
-	cursor = conn.cursor()
-	print("Connected with database!")
-except Exception as e:
-	print("Uh oh, can't connect. Invalid dbname, user or password?")
-	print(e)
-
-
-loop = {}
-temp_user = {}
-knownUsers = set()
-userState = {}
-contador_user = {}
-step_id = {'0': 'IDLE',
-		   '1': 'get_word_info->WAITING VOCABULARY',
-		   '2': 'get_word_info->IMAGE_SOURCE',
-		   '3': 'get_word_info->Receiving images', 
-		   '4': 'get_word_info->Send image loop',
-		   '5': 'get_word_info->Google image selection loop'
-		   }
-
-def get_user_state(ID):
-	print("id:{}  state:{}".format(ID, userState[ID]))
-	return userState[ID]
-
-def add_user(ID):
-	cursor.execute("SELECT id from users WHERE id={}".format(ID))
-	rows = cursor.fetchall()
-	for row in rows:
-		if row[0] == ID:
-			BOT.send_message(ID, "Welcome back to LingoBot!")
-			return
-
-	cursor.execute("INSERT INTO users VALUES ({}, 0);".format(ID))
-	conn.commit()
-	BOT.send_message(ID,"Welcome to LingoBot")
-
-def add_word(ID):
-	#temp_user -> idioma outro_idioma ingles path1 path2 path3 ... final da lista
-	idiom = temp_user[ID][0]
-	foreign_word = temp_user[ID][1]
-	english_word = temp_user[ID][2]
-
-	cursor.execute("INSERT INTO words VALUES ({}, '{}', '{}', '{}')".format(ID, idiom, foreign_word, english_word))	
-
-	for i in range(3, len(temp_user[ID])):
-		img_path = temp_user[ID][i]
-		cursor.execute("INSERT INTO images VALUES ({}, '{}', '{}', DEFAULT, '{}')".format(ID, idiom, foreign_word, img_path))
-
-	conn.commit()
-	BOT.send_message(ID, "Word and images added successfully!")
-
-def erase_word(ID, idiom, foreign_word):
-	cursor.execute("SELECT FROM word WHERE id = {} AND english_word = '{}' AND foreign_word = '{}'".format(ID, idiom, foreign_word))
-	rows = cursos.fetchall
-	
-	if len(rows) == 0:
-		BOT.send_message(ID, "Invalid english word or foreign word")
-		return
-
-	cursor.execute("DELETE FROM word WHERE id = {} AND idiom = '{}' AND foreign_word = '{}'".format(ID, idiom, foreign_word))
-
-	conn.commit()
-	BOT.send_message(ID, "Word erased successfully!")
-
-def save_image(image_msg, path):
-	f = image_msg.photo[-1].file_id
-	arq = bot.get_file(f)
-	downloaded_file = bot.download_file(arq.file_path)
-	tipo = []
-	for c in arq.file_path[::-1]:
-		print(c)
-		if c == '.' :
-			break
-		tipo.append(c)
-	tipo = "".join(tipo[::-1])
-	with open(path + "." + tipo, 'wb') as new_file:
-		new_file.write(downloaded_file)
+db = Database()
 	
 @BOT.message_handler(commands = ['start'])
 def setup_user(message):
 	ID = message.chat.id
 	print("NEW USER {}".format(ID))
-	add_user(ID)
+	m = db.add_user(ID)
+	if m == flags.Message.WELCOME:
+		BOT.send_message(ID, "Welcome to LingoBot!")
+	else:
+		BOT.send_message(ID, "Welcome back to LingBot!")
 	userState[ID] = '0'
 
 @BOT.message_handler(commands = ['cancel'])
@@ -203,11 +126,6 @@ def set_state(message):
 @BOT.message_handler(commads = ['settings'])
 def set_settings(message):
 	return 0	
-
-def turn_off():
-	conn.close()
-	cursor.close()
-	print("YESSSSS")
 
 
 BOT.polling()
