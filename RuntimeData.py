@@ -1,5 +1,3 @@
-import os
-
 class RuntimeData: 
 	loop = None
 	temp_user = None
@@ -9,27 +7,30 @@ class RuntimeData:
 	db = None
 
 	def __init__(self):
-		db = Database()
+		self.db = Database()
 		self.loop = {}
 		self.temp_user = {}
-		self.knownUsers = db.get_knownUsers()
+		self.knownUsers = db.get_known_users()
 		self.userState = {}
 		for user in knownUsers:
-			userState[user] = '0'
+			self.userState[user] = '0'
 		self.contador_user = {}
 
-	def add_user(ID):
-		return db.add_user(ID)
+	def add_user(self,ID):
+		m = self.db.add_user(ID)
+		self.knownUsers.add(ID)
+		self.set_state(ID,'0')
+		return m
 	
-	def add_word(ID):
+	def add_word(self,ID):
 		try:
-			return db.add_word(ID,temp_user[ID])
+			return self.db.add_word(ID,temp_user[ID])
 		except:
-			print("There is no temp_user data for {}.\n".format(ID))
+			print("There is no temp_user data for {}.".format(ID))
 			return 'Error'
 	
-	def erase_word(ID, idiom, foreign_word):
-		return db.erase_word(ID,idiom,foreign_word)
+	def erase_word(self,D, idiom, foreign_word):
+		return self.db.erase_word(ID,idiom,foreign_word)
 
 	def get_state(self, user):
 		try:
@@ -41,31 +42,6 @@ class RuntimeData:
 			return 'Error'
 
 	def set_state(self, user, new_state):
-			self.userState[user] = new_state;
+		self.userState[user] = new_state;
 
-
-
-
-
-
-
-
-
-
-def save_image(image_msg, path):
-	f = image_msg.photo[-1].file_id
-	arq = bot.get_file(f)
-	downloaded_file = bot.download_file(arq.file_path)
-	tipo = []
-	for c in arq.file_path[::-1]:
-		print(c)
-		if c == '.' :
-			break
-		tipo.append(c)
-	tipo = "".join(tipo[::-1])
-	with open(path + "." + tipo, 'wb') as new_file:
-		new_file.write(downloaded_file)
-
-def turn_off():
-	print("YESSSSS")
 
