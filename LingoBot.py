@@ -113,7 +113,7 @@ def get_word_translation(message):
 	rt_data.set_state(ID, '4')
 
 @BOT.message_handler(func= lambda message: (rt_data.get_state(get_id(message)) == '4') and message.text == "Send image")
-def get_word_receive_image(message):
+def get_word_receive_image_option(message):
 	ID = get_id(message)
 	markup = telebot.types.ReplyKeyboardRemove()
 	BOT.send_message(ID,"Send an image:",reply_markup=markup)
@@ -128,9 +128,10 @@ def get_word_ImagesFromUser1(message):
 	markup.row(btn1)
 
 	BOT.send_message(ID, "Keep sending images or click on the 'Done' button", reply_markup=markup)
-
+	
 	rt_data.set_state(ID, '6')
-	path = utils.save_image(message,"{}/{}/".format(ID, rt_data.temp_user[ID][0]), "img{}".format(rt_data.contador_user[ID]), BOT)
+	filename = rt_data.temp_user[ID][1].replace(' ', '_')
+	path = utils.save_image(message,"{}/{}/".format(ID, rt_data.temp_user[ID][0]), "{}{}".format(filename,rt_data.contador_user[ID]), BOT)
 	rt_data.temp_user[ID].append(path)
 
 @BOT.message_handler(func= lambda message: rt_data.get_state(get_id(message)) == '6', content_types=['photo', 'text'])
@@ -143,7 +144,8 @@ def get_word_ImagesFromUser2(message):
 		markup = telebot.types.ReplyKeyboardRemove()
 		BOT.send_message(ID,"Successfully done!",reply_markup=markup)
 	else:
-		path = utils.save_image(message,"{}/{}/".format(ID, rt_data.temp_user[ID][0]), "img{}".format(rt_data.contador_user[ID]), BOT)
+		filename = rt_data.temp_user[ID][1].replace(' ', '_')
+		path = utils.save_image(message,"{}/{}/".format(ID, rt_data.temp_user[ID][0]), "{}{}".format(filename,rt_data.contador_user[ID]), BOT)
 		rt_data.temp_user[ID].append(path)
 
 @BOT.message_handler(func= lambda message: (rt_data.get_state(get_id(message)) == '2') and message.text == "Choose one from suggestions")
