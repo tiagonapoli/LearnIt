@@ -1,0 +1,3 @@
+add_language - Adds a language into your language list
+add_word - Adds a word into a language vocabulary
+cancel - Cancel any existing process
