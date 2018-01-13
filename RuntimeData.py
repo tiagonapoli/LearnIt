@@ -25,7 +25,7 @@ class RuntimeData:
 		try:
 			return db.add_word(ID,temp_user[ID])
 		except:
-			print("There is no temp_user data for {}.\n".format(ID))
+			print("There is no temp_user data for {}.".format(ID))
 			return 'Error'
 	
 	def erase_word(ID, idiom, foreign_word):
@@ -41,16 +41,7 @@ class RuntimeData:
 			return 'Error'
 
 	def set_state(self, user, new_state):
-			self.userState[user] = new_state;
-
-
-
-
-
-
-
-
-
+		self.userState[user] = new_state;
 
 def save_image(image_msg, path):
 	f = image_msg.photo[-1].file_id

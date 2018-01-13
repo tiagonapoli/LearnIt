@@ -29,14 +29,14 @@ class Database:
 		rows = self.cursor.fetchall()
 		for row in rows:
 			if row[0] == ID:
-				return flags.Message.WELCOME
+				return "Welcome to LingoBot!"
 
 		self.cursor.execute("INSERT INTO users VALUES ({}, 0);".format(ID))
 		self.conn.commit()
-		return flags.Message.WELCOME_BACK
+		return "Welcome back to LingoBot!"
 
 	def add_language(ID, language):
-		self.cursor.execute("SELECT language_name FROM languages WHERE language_name={}".format(language))
+		self.cursor.execute("SELECT language_name FROM languages WHERE language_name={};".format(language))
 		rows = self.cursor.fetchall()
 		for row in rows:
 			if row[0] == language:
@@ -47,7 +47,7 @@ class Database:
 		return "{} added successfully to your languages".format(language)
 
 	def erase_language(ID, language):
-		self.cursor.execute("SELECT language_name FROM languages WHERE language_name={}".format(language))
+		self.cursor.execute("SELECT language_name FROM languages WHERE language_name={};".format(language))
 		rows = self.cursor.fetchall()
 		if(len(rows) == 0):
 			return "{} is not in your languages".format(language)
@@ -62,24 +62,41 @@ class Database:
 		foreign_word = temp_user[ID][1]
 		english_word = temp_user[ID][2]
 
-		cursor.execute("INSERT INTO words VALUES ({}, '{}', '{}', '{}')".format(ID, language, foreign_word, english_word))
+		self.cursor.execute("INSERT INTO words VALUES ({}, '{}', '{}', '{}')".format(ID, language, foreign_word, english_word))
 
 		for i in range(3, len(temp_user[ID])):
 			image_path = temp_user[ID][i]
-			cursor.execute("INSERT INTO images VALUES ({}, '{}', '{}', DEFAULT, '{}')".format(ID, language, foreign_word, image_path))
+			cursor.execute("INSERT INTO images VALUES ({}, '{}', '{}', DEFAULT, '{}');".format(ID, language, foreign_word, image_path))
 
 		self.conn.commit()
-		BOT.send_message(ID, "Word and images added successfully!")
+		return "Word and images added successfully!"
 
-	def erase_word(ID, idiom, foreign_word):
-		cursor.execute("SELECT FROM word WHERE id = {} AND english_word = '{}' AND foreign_word = '{}'".format(ID, idiom, foreign_word))
-		rows = cursos.fetchall
+	def erase_word(ID, language, foreign_word):
+		self.cursor.execute("SELECT FROM words WHERE id = {} AND language = '{}' AND foreign_word = '{}';".format(ID, language, foreign_word))
+		rows = self.cursos.fetchall
 		
 		if len(rows) == 0:
-			BOT.send_message(ID, "Invalid english word or foreign word")
-			return
+			return "Invalid english word or foreign word"
 
-		cursor.execute("DELETE FROM word WHERE id = {} AND idiom = '{}' AND foreign_word = '{}'".format(ID, idiom, foreign_word))
+		self.cursor.execute("DELETE FROM words WHERE id = {} AND language = '{}' AND foreign_word = '{}';".format(ID, language, foreign_word))
 
-		conn.commit()
-		BOT.send_message(ID, "Word erased successfully!")
+		self.conn.commit()
+		return "Word erased successfully!"
+
+	def get_known_users():
+		known = set()
+		self.cursor.execute("SELECT id FROM users;")
+		rows = self.cursor.fetchall()
+		for row in rows:
+			known.add(row[0])
+
+		return known
+
+	def get_user_languages(ID):
+		languages = []
+		self.cursor.execute("SELECT language_name FROM languages WHERE user_id={};".format(ID))
+		rows = self.cursor.fetchall()
+		for row in rows:
+			languages.append(row[0])
+
+		return languages
