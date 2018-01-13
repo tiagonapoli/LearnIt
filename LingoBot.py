@@ -22,9 +22,8 @@ rt_data = RuntimeData()
 def get_id(message):
 	return message.chat.id
 
-def get_keybutton(text):
+def create_key_button(text):
 	return telebot.types.KeyboardButton(text)
-
 
 @BOT.message_handler(commands = ['start'])
 def setup_user(message):
@@ -38,22 +37,38 @@ def cancel(message):
 	ID = get_id(message)
 	rt_data.set_state(ID, '0')
 
+@BOT.message_handler(commands = ['add_language'])
+def add_language(message):
+	ID = get_id(message)
+	language = message.text[14:]
+	
+	if(len(language) == 0):
+		BOT.reply_to(message, "Usage: /add_language 'language you want to add' (without quotes)")
+		return
+
+	rt_data.add_language(ID, language)
+
 @BOT.message_handler(commands = ['add_word'])
 def get_word_info(message):
 	ID = get_id(message)
-	vocab = message.text[16:]
+	known_languages = rt_data.get_user_languages()
 	
-	if len(vocab) == 0:
-		BOT.send_message(ID, "Please, try again with a non-empty word")
-		return
+	btn = []
+	for language in known_languages:
+		btn.append(create_key_button(language))
+	
+	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 
-	markup = telebot.types.ForceReply(selective = False)
-	BOT.send_message(ID, "Type english translation", reply_markup=markup)
-	temp_user[ID] = []
-	temp_user[ID].append(vocab)
+	for i in range(0,len(btn)/2):
+		markup.row(btn[2*i], btn[2*i+1])
+
+	if len(btn)%2 == 1:
+		markup.row(btn[len(btn)-1])
+
+	BOT.send_message(ID, "Please select the word's language", reply_markup=markup)	
 	rt_data.set_state(ID, '1')
-@BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == '1'))
 
+@BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == '1'))
 def get_word_name(message):
 	ID = get_id(message)
 	temp_user[ID].append(message.text)

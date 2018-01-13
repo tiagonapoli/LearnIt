@@ -13,7 +13,7 @@ class RuntimeData:
 		self.knownUsers = db.get_known_users()
 		self.userState = {}
 		for user in knownUsers:
-			self.userState[user] = '0'
+		self.userState[user] = '0'
 		self.contador_user = {}
 
 	def add_user(self,ID):
