@@ -41,17 +41,19 @@ def cancel(message):
 def add_language(message):
 	ID = get_id(message)
 	language = message.text[14:]
+	language = language.lstrip().rstrip()
+	print(language)
 	
 	if(len(language) == 0):
 		BOT.reply_to(message, "Usage: /add_language 'language you want to add' (without quotes)")
 		return
 
-	rt_data.add_language(ID, language)
+	BOT.send_message(ID, rt_data.add_language(ID, language))
 
 @BOT.message_handler(commands = ['add_word'])
 def get_word_info(message):
 	ID = get_id(message)
-	known_languages = rt_data.get_user_languages()
+	known_languages = rt_data.get_user_languages(ID)
 	
 	btn = []
 	for language in known_languages:
@@ -59,7 +61,7 @@ def get_word_info(message):
 	
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 
-	for i in range(0,len(btn)/2):
+	for i in range(0,len(btn)//2):
 		markup.row(btn[2*i], btn[2*i+1])
 
 	if len(btn)%2 == 1:
@@ -68,47 +70,81 @@ def get_word_info(message):
 	BOT.send_message(ID, "Please select the word's language", reply_markup=markup)	
 	rt_data.set_state(ID, '1')
 
-@BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == '1'))
-def get_word_name(message):
+@BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == '1'), content_types=['text'])
+def get_lang(message):
 	ID = get_id(message)
-	temp_user[ID].append(message.text)
-	btn1 = get_key_button('Send image')
-	btn2 = get_key_button('Choose one from suggestions')
-	btn3 = get_key_button('Use only english translation')
+	known_languages = rt_data.get_user_languages(ID)
+	if not (message.text in known_languages):
+		BOT.reply_to(message, "Please choose from keyboard")
+		return
+
+	markup = telebot.types.ReplyKeyboardRemove()
+
+	BOT.send_message(ID, "Send word to add (in {})".format(message.text), reply_markup=markup)
+	rt_data.temp_user[ID] = []
+	rt_data.temp_user[ID].append(message.text)
+	rt_data.set_state(ID, '2')
+
+@BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == '2'), content_types=['text'])
+def get_word_foreign(message):
+	ID = get_id(message)
+	word = message.text
+	word = word.strip()
+
+	rt_data.temp_user[ID].append(word)
+
+	BOT.send_message(ID, "Send english translation")
+	rt_data.set_state(ID, '3')
+
+
+@BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == '3'), content_types=['text'])
+def get_word_translation(message):
+	ID = get_id(message)
+	word = message.text
+	word = word.strip()
+	rt_data.temp_user[ID].append(word)
+	btn1 = create_key_button('Send image')
+	btn2 = create_key_button('Choose one from suggestions')
+	btn3 = create_key_button('Use only english translation')
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	markup.row(btn1,btn2)
 	markup.row(btn3)
 	BOT.send_message(ID, "Choose one way to link images to word: ", reply_markup=markup)
-	rt_data.set_state(ID, '2')
+	rt_data.set_state(ID, '4')
 
-@BOT.message_handler(func= lambda message: (rt_data.get_state(get_id(message)) == '2') and message.text == "Send image")
+@BOT.message_handler(func= lambda message: (rt_data.get_state(get_id(message)) == '4') and message.text == "Send image")
 def get_word_receive_image(message):
 	ID = get_id(message)
 	markup = telebot.types.ReplyKeyboardRemove()
 	BOT.send_message(ID,"Send an image:",reply_markup=markup)
-	rt_data.set_state(ID, '3')
+	rt_data.set_state(ID, '5')
 
-@BOT.message_handler(func= lambda message: rt_data.get_state(get_id(message)) == '3', content_type=['photo'])
+@BOT.message_handler(func= lambda message: rt_data.get_state(get_id(message)) == '5', content_types=['photo'])
 def get_word_ImagesFromUser1(message):
 	ID = get_id(message)
-	contador_user[ID] = 0
-	btn1 = get_key_button('Done')
+	rt_data.contador_user[ID] = 0
+	btn1 = create_key_button('Done')
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	markup.row(btn1)
-	rt_data.set_state(ID, '4')
-	save_image(message,"{}/{}/img{}".format(ID,temp_user[ID][0],contador_user[ID]))
 
-@BOT.message_handler(func= lambda message: rt_data.get_state(get_id(message)) == '4', content_type=['photo', 'text'])
+	BOT.send_message(ID, "Keep sending images or click on the 'Done' button", reply_markup=markup)
+
+	rt_data.set_state(ID, '6')
+	path = utils.save_image(message,"{}/{}/".format(ID, rt_data.temp_user[ID][0]), "img{}".format(rt_data.contador_user[ID]), BOT)
+	rt_data.temp_user[ID].append(path)
+
+@BOT.message_handler(func= lambda message: rt_data.get_state(get_id(message)) == '6', content_types=['photo', 'text'])
 def get_word_ImagesFromUser2(message):
-	contador_user[ID] += 1
 	ID = get_id(message)
+	rt_data.contador_user[ID] += 1
 	if message.text == "Done":
-		add_word(ID)
+		rt_data.add_word(ID)
 		rt_data.set_state(ID, '0')
 		markup = telebot.types.ReplyKeyboardRemove()
 		BOT.send_message(ID,"Successfully done!",reply_markup=markup)
 	else:
-		save_image(message,"{}/{}/img{}".format(ID,temp_user[ID][0],contador_user[ID]))
+		path = utils.save_image(message,"{}/{}/".format(ID, rt_data.temp_user[ID][0]), "img{}".format(rt_data.contador_user[ID]), BOT)
+		rt_data.temp_user[ID].append(path)
 
 @BOT.message_handler(func= lambda message: (rt_data.get_state(get_id(message)) == '2') and message.text == "Choose one from suggestions")
 def get_word_google_images(message):

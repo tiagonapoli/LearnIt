@@ -25,28 +25,28 @@ class Database:
 		self.cursor.close()
 
 	def add_user(self, ID):
-		self.cursor.execute("SELECT id from users WHERE id={}".format(ID))
+		self.cursor.execute("SELECT id from users WHERE id={};".format(ID))
 		rows = self.cursor.fetchall()
 		for row in rows:
 			if row[0] == ID:
-				return "Welcome to LingoBot!"
+				return "Welcome back to LingoBot!"
 
 		self.cursor.execute("INSERT INTO users VALUES ({}, 0);".format(ID))
 		self.conn.commit()
-		return "Welcome back to LingoBot!"
+		return "Welcome to LingoBot!"
 
-	def add_language(ID, language):
-		self.cursor.execute("SELECT language_name FROM languages WHERE language_name={};".format(language))
+	def add_language(self, ID, language):
+		self.cursor.execute("SELECT language_name FROM languages WHERE user_id={} AND language_name='{}';".format(ID, language))
 		rows = self.cursor.fetchall()
 		for row in rows:
 			if row[0] == language:
-				return "{} is already added".format(language)
+				return "'{}' is already added".format(language)
 
 		self.cursor.execute("INSERT INTO languages VALUES ({}, '{}');".format(ID, language))
 		self.conn.commit()
-		return "{} added successfully to your languages".format(language)
+		return "'{}' added successfully to your languages".format(language)
 
-	def erase_language(ID, language):
+	def erase_language(self, ID, language):
 		self.cursor.execute("SELECT language_name FROM languages WHERE language_name={};".format(language))
 		rows = self.cursor.fetchall()
 		if(len(rows) == 0):
@@ -56,22 +56,22 @@ class Database:
 		self.conn.commit()
 		return "{} removed successfully".format()
 
-	def add_word(ID):
+	def add_word(self, ID, lst):
 		#temp_user -> idioma outro_idioma ingles path1 path2 path3 ... final da lista
-		language = temp_user[ID][0]
-		foreign_word = temp_user[ID][1]
-		english_word = temp_user[ID][2]
+		language = lst[0]
+		foreign_word = lst[1]
+		english_word = lst[2]
 
 		self.cursor.execute("INSERT INTO words VALUES ({}, '{}', '{}', '{}')".format(ID, language, foreign_word, english_word))
 
-		for i in range(3, len(temp_user[ID])):
-			image_path = temp_user[ID][i]
+		for i in range(3, len(lst)):
+			image_path = lst[i]
 			cursor.execute("INSERT INTO images VALUES ({}, '{}', '{}', DEFAULT, '{}');".format(ID, language, foreign_word, image_path))
 
 		self.conn.commit()
 		return "Word and images added successfully!"
 
-	def erase_word(ID, language, foreign_word):
+	def erase_word(self, ID, language, foreign_word):
 		self.cursor.execute("SELECT FROM words WHERE id = {} AND language = '{}' AND foreign_word = '{}';".format(ID, language, foreign_word))
 		rows = self.cursos.fetchall
 		
@@ -83,7 +83,7 @@ class Database:
 		self.conn.commit()
 		return "Word erased successfully!"
 
-	def get_known_users():
+	def get_known_users(self):
 		known = set()
 		self.cursor.execute("SELECT id FROM users;")
 		rows = self.cursor.fetchall()
@@ -92,7 +92,7 @@ class Database:
 
 		return known
 
-	def get_user_languages(ID):
+	def get_user_languages(self, ID):
 		languages = []
 		self.cursor.execute("SELECT language_name FROM languages WHERE user_id={};".format(ID))
 		rows = self.cursor.fetchall()

@@ -1,3 +1,5 @@
+from db_api import Database
+
 class RuntimeData: 
 	loop = None
 	temp_user = None
@@ -10,10 +12,10 @@ class RuntimeData:
 		self.db = Database()
 		self.loop = {}
 		self.temp_user = {}
-		self.knownUsers = db.get_known_users()
+		self.knownUsers = self.db.get_known_users()
 		self.userState = {}
-		for user in knownUsers:
-		self.userState[user] = '0'
+		for user in self.knownUsers:
+			self.userState[user] = '0'
 		self.contador_user = {}
 
 	def add_user(self,ID):
@@ -23,17 +25,19 @@ class RuntimeData:
 		return m
 	
 	def add_word(self,ID):
-		try:
-			return self.db.add_word(ID,temp_user[ID])
-		except:
-			print("There is no temp_user data for {}.".format(ID))
-			return 'Error'
+		#try:
+		lista = self.temp_user[ID]
+		print("lista[{}] = ".format(ID) + str(lista))
+		return self.db.add_word(ID,lista)
+		# except:
+		# 	print("There is no temp_user data for {}.".format(ID))
+		# 	return 'Error'
 	
 	def get_user_languages(self, ID):
-		return self.get_user_languages(ID)
+		return self.db.get_user_languages(ID)
 	
 	def add_language(self, ID, language):
-		self.db.add_language(ID,language)
+		return self.db.add_language(ID,language)
 
 	def erase_word(self,D, idiom, foreign_word):
 		return self.db.erase_word(ID,idiom,foreign_word)
