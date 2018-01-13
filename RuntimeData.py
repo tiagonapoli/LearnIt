@@ -29,6 +29,12 @@ class RuntimeData:
 			print("There is no temp_user data for {}.".format(ID))
 			return 'Error'
 	
+	def get_user_languages(self, ID):
+		return self.get_user_languages(ID)
+	
+	def add_language(self, ID, language):
+		self.db.add_language(ID,language)
+
 	def erase_word(self,D, idiom, foreign_word):
 		return self.db.erase_word(ID,idiom,foreign_word)
 
