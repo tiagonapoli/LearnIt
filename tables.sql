@@ -1,6 +1,7 @@
 CREATE TABLE users(
 	id int primary key,
-	messages_per_day integer
+	messages_per_day int DEFAULT 0,
+	highest_word_id int DEFAULT 0
 );
 
 CREATE TABLE languages(
@@ -15,16 +16,22 @@ CREATE TABLE words(
 	language varchar(50),
 	foreign_word varchar(50),
 	english_word varchar(50),
+	user_word_id int,
+	UNIQUE (user_id, user_word_id),
 	primary key (user_id, language, foreign_word),
 	foreign key (user_id, language) references languages(user_id, language_name) ON DELETE CASCADE
 );
 
-CREATE TABLE images(
+CREATE TABLE content(
 	user_id int,
 	language varchar(50),
 	foreign_word varchar(50),
-	image_id serial,
-	image_path varchar(50),
-	primary key (user_id, language, foreign_word, image_id),
-	foreign key (user_id, language, foreign_word) references words(user_id, language, foreign_word) ON DELETE CASCADE
+	user_word_id int,
+	type varchar(10),
+	counter int,
+	content_path varchar(50),
+	UNIQUE (user_id, user_word_id, counter),
+	primary key (user_id, language, foreign_word, counter),
+	foreign key (user_id, language, foreign_word) references words(user_id, language, foreign_word) ON DELETE CASCADE,
+	foreign key (user_id, user_word_id) references words(user_id, user_word_id) ON DELETE CASCADE
 );

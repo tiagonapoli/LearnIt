@@ -26,11 +26,10 @@ class Database:
 	def add_user(self, ID):
 		self.cursor.execute("SELECT id from users WHERE id={};".format(ID))
 		rows = self.cursor.fetchall()
-		for row in rows:
-			if row[0] == ID:
-				return "Welcome back to LingoBot!"
+		if(len(rows) > 0):
+			return "Welcome back to LingoBot!"
 
-		self.cursor.execute("INSERT INTO users VALUES ({}, 0);".format(ID))
+		self.cursor.execute("INSERT INTO users VALUES ({}, 0, 0);".format(ID))
 		self.conn.commit()
 		return "Welcome to LingoBot!"
 
@@ -60,15 +59,30 @@ class Database:
 		language = lst[0]
 		foreign_word = lst[1]
 		english_word = lst[2]
+		content_type = lst[3]
 
-		self.cursor.execute("INSERT INTO words VALUES ({}, '{}', '{}', '{}')".format(ID, language, foreign_word, english_word))
+		self.cursor.execute("SELECT foreign_word FROM words WHERE user_id={} AND language='{}' AND foreign_word='{}';".format(ID, language, foreign_word))
+		rows = self.cursor.fetchall()
+		if(len(rows) > 0):
+			return "{} is already in your words"
 
-		for i in range(3, len(lst)):
-			image_path = lst[i]
-			self.cursor.execute("INSERT INTO images VALUES ({}, '{}', '{}', DEFAULT, '{}');".format(ID, language, foreign_word, image_path))
+		self.cursor.execute("SELECT highest_word_id FROM users WHERE id={};".format(ID))
+		rows = self.cursor.fetchall()
+		user_word_id = rows[0][0] + 1
+
+		#UPDATE user's highest_word_id
+		self.cursor.execute("UPDATE users SET highest_word_id={} WHERE id={}".format(user_word_id, ID))
+
+		self.cursor.execute("INSERT INTO words VALUES ({}, '{}', '{}', '{}', {})".format(ID, language, foreign_word, english_word, user_word_id))
+
+		counter = 0
+		for i in range(4, len(lst)):
+			content_path = lst[i]
+			self.cursor.execute("INSERT INTO content VALUES ({}, '{}', '{}', {}, {}, '{}');".format(ID, language, foreign_word, user_word_id, content_type, counter, content_path))
+			counter += 1
 
 		self.conn.commit()
-		return "Word and images added successfully!"
+		return "Word and content added successfully!"
 
 	def erase_word(self, ID, language, foreign_word):
 		self.cursor.execute("SELECT FROM words WHERE id = {} AND language = '{}' AND foreign_word = '{}';".format(ID, language, foreign_word))
