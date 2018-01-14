@@ -14,6 +14,6 @@ for user in db.knowUsers:
 		cnt = 0
 		if card.get_date().date() <= today.date():
 			cnt += 1
-	for language,word,card in cards:
+	for wordID,card in cards:
 		if card.get_date().date() <= today.date():
 			systemtools.set_new_at_job_card(user, ACTIVE_MINUTES // cnt,(user,wordID)) 
