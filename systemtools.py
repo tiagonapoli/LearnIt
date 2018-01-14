@@ -1,6 +1,6 @@
 from subprocess import call
 
-def set_new_at_job_VocabQuery(chat_id,min_from_now,text):
+def set_new_at_job_card(chat_id,min_from_now,text):
 	time = "now + {} min".format(min_from_now)
 	text = text.split(' ')
 	if len(text) == 2 and len(text[1]) >= 1:
@@ -11,16 +11,14 @@ def set_new_at_job_VocabQuery(chat_id,min_from_now,text):
 	print(command)
 	call(command,shell=True)
 
-
-def test_set_at():
-	command = 'echo "echo \\\"wololo 123123\\\"" | at now + 1 min'
+def schedule_daily_setup(days_from_now):
+	command = 'echo "./daily_setup.py" | at 8:00 tomorrow'.format(days_from_now)
 	print(command)
 	call(command, shell=True)
 
-def main():
-	set_new_at_job_VocabQuery(359999978,1,"query1")
-	print("Done")
+def schedule_setup_now():
+	command = 'echo "./daily_setup.py" | at now + 1 min'.format(days_from_now)
+	print(command)
+	call(command, shell=True)
 
 
-if __name__ == "__main__":
-	main()
