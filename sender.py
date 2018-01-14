@@ -2,29 +2,32 @@
 import telebot
 import sys
 import systemtools 
+from RuntimeData import RuntimeData
 
-#USAGE: ./sender.py ID TEXTO
+#USAGE: ./sender.py IDUSER IDCARD tries
 
-arq = open("bot_token.txt", "r")
-TOKEN = (arq.read().splitlines())[0]
-arq.close()
+try:
+	arq = open("bot_token.txt", "r")
+	TOKEN = (arq.read().splitlines())[0]
+	arq.close()
+	BOT = telebot.TeleBot(TOKEN)
+	print("Bot initialized successfully!")
+except Exception as e:
+	print("Can't retrieve the bot's token")
+	print(e)
 
 
-BOT = telebot.TeleBot(TOKEN)
-ID = int(sys.argv[1])
-text = sys.argv[2].split(' ')
-vocab_number = text[0]
-tried = int(text[1])
+IDuser = int(sys.argv[1])
+IDcard = int(sys.argv[2])
+tried = int(sys.argv[3])
+rt_data = RuntimeData()
 
-print(ID)
-print(text)
-
-##### CHECK IF USERSTATE = IDLE
-if False:
+if rt_data.get_state(IDuser) == '0':
 	markup = telebot.types.ForceReply(selective = False)
 	BOT.send_message(ID, text, reply_markup=markup)
+	rt_data.set_state(ID, 'WAITING_ANS/{}'.format(IDcard))
 else:
 	tried += 1
-	systemtools.set_new_at_job_VocabQuery(ID,min(tried,10),"{} {}".format(vocab_number,tried))	
+	systemtools.set_new_at_job_card(min(tried,10),IDuser,IDcard, tried)	
 
 

@@ -5,7 +5,7 @@ class RuntimeData:
 	temp_user = None
 	knownUsers = None
 	userState = None
-	contador_user = None
+	contador = None
 	db = None
 
 	def __init__(self):
@@ -16,7 +16,7 @@ class RuntimeData:
 		self.userState = {}
 		for user in self.knownUsers:
 			self.userState[user] = '0'
-		self.contador_user = {}
+		self.contador = {}
 
 	def add_user(self,ID):
 		m = self.db.add_user(ID)
@@ -46,7 +46,22 @@ class RuntimeData:
 		try:
 			ret = self.userState[user]
 			print("id:{}  state:{}".format(user,ret))
-			return ret
+			if "WAITING_ANS" in ret:
+				return "WAITING_ANS"
+			else:
+				return ret
+		except:
+			print("User {} doesn't exist".format(user))
+			return 'Error'
+
+	def get_state_card_number(self, user):
+		try:
+			ret = self.userState[user]
+			print("id:{}  state:{}".format(user,ret))
+			if "WAITING_ANS" in ret:
+				return int(ret[12:])
+			else:
+				return None 
 		except:
 			print("User {} doesn't exist".format(user))
 			return 'Error'

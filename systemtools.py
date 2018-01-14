@@ -1,13 +1,7 @@
 from subprocess import call
 
-def set_new_at_job_card(chat_id,min_from_now,text):
-	time = "now + {} min".format(min_from_now)
-	text = text.split(' ')
-	if len(text) == 2 and len(text[1]) >= 1:
-		command = 'echo "./sender.py {} \'{} {}\'" | at {}'.format(chat_id,text[0],text[1],time)
-	else: 
-		command = 'echo "./sender.py {} \'{} 0\'" | at {}'.format(chat_id,text[0],time)
-
+def set_new_at_job_card(min_from_now,IDuser,IDcard,tried=0):
+	command = 'echo "./sender.py {} {} {}" | at now + {} min'.format(IDuser,IDcard,tried,min_from_now)
 	print(command)
 	call(command,shell=True)
 
