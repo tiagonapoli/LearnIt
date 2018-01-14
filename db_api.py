@@ -78,7 +78,7 @@ class Database:
 		counter = 0
 		for i in range(4, len(lst)):
 			content_path = lst[i]
-			self.cursor.execute("INSERT INTO content VALUES ({}, '{}', '{}', {}, {}, '{}');".format(ID, language, foreign_word, user_word_id, content_type, counter, content_path))
+			self.cursor.execute("INSERT INTO content VALUES ({}, '{}', '{}', {}, '{}', {}, '{}');".format(ID, language, foreign_word, user_word_id, content_type, counter, content_path))
 			counter += 1
 
 		self.conn.commit()
