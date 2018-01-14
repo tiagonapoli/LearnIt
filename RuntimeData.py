@@ -5,7 +5,7 @@ class RuntimeData:
 	temp_user = None
 	knownUsers = None
 	userState = None
-	contador = None
+	contador_user = None
 	db = None
 
 	def __init__(self):
@@ -14,9 +14,9 @@ class RuntimeData:
 		self.temp_user = {}
 		self.knownUsers = self.db.get_known_users()
 		self.userState = {}
+		self.contador_user = {}
 		for user in self.knownUsers:
 			self.userState[user] = '0'
-		self.contador = {}
 
 	def add_user(self,ID):
 		m = self.db.add_user(ID)
