@@ -185,6 +185,6 @@ def signal_handler(signal, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 print('Press Ctrl+C to exit gently')
-signal.pause()
 
+print("Bot Polling")
 BOT.polling()
