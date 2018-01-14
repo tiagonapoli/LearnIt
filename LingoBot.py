@@ -115,7 +115,7 @@ def get_word_translation(message):
 
 def back_to_word_options(message):
 	#Retira o tipo do content
-	rt_data.temp[ID].pop()
+	rt_data.temp_user[ID].pop()
 	ID = get_id(message)
 	btn1 = create_key_button('Send image')
 	btn2 = create_key_button('Choose one from suggestions')
@@ -130,7 +130,7 @@ def back_to_word_options(message):
 @BOT.message_handler(func= lambda message: (rt_data.get_state(get_id(message)) == '1_3') and message.text == "Send image")
 def get_word_receive_image_option(message):
 	ID = get_id(message)
-	rt_data.temp[ID].append("Image")
+	rt_data.temp_user[ID].append("Image")
 	markup = telebot.types.ReplyKeyboardRemove()
 	BOT.send_message(ID,"Send an image:",reply_markup=markup)
 	rt_data.set_state(ID, '1_3-opt1')
@@ -138,7 +138,7 @@ def get_word_receive_image_option(message):
 @BOT.message_handler(func= lambda message: (rt_data.get_state(get_id(message)) == '1_3') and message.text == "Choose one from suggestions")
 def get_word_google_images(message):
 	ID = get_id(message)
-	rt_data.temp[ID].append("Image")
+	rt_data.temp_user[ID].append("Image")
 	fetch_images(temp_user[ID][2],"tmp/{}".format(ID))
 	rt_data.loop[ID] = []
 	rt_data.loop[ID] = os.listdir("./tmp/{}".format(ID))
@@ -152,7 +152,7 @@ def get_word_google_images(message):
 	markup.row(btn1,btn2)
 	BOT.send_message(ID, "We will present you some images from google images (the query is the english translation). Please use the custom keyboard to select the images you want.", reply_markup=markup)
 	
-	photo = open('./tmp/{}/{}'.format(ID,rt_data.loop[ID][len(loop[ID])-1])
+	photo = open('./tmp/{}/{}'.format(ID,rt_data.loop[ID][len(loop[ID])-1]))
 	BOT.send_photo(ID, photo)
 
 	rt_data.set_state(ID, '1_3-opt2_0')	
@@ -161,7 +161,7 @@ def get_word_google_images(message):
 @BOT.message_handler(func= lambda message: (rt_data.get_state(get_id(message)) == '1_3') and message.text == "Use only english translation")
 def get_word_english_translation(message):
 	ID = get_id(message)
-	rt_data.temp[ID].append("Translation")
+	rt_data.temp_user[ID].append("Translation")
 	rt_data.add_word(ID)
 	rt_data.set_state(ID, '0')
 	markup = telebot.types.ReplyKeyboardRemove()
@@ -169,7 +169,7 @@ def get_word_english_translation(message):
 
 @BOT.message_handler(func= lambda message: (rt_data.get_state(get_id(message)) == '1_3') and message.text == "Send audio")
 def get_word_english_translation(message):
-	rt_data.temp[ID].append("Audio")
+	rt_data.temp_user[ID].append("Audio")
 	rt_data.add_word(ID)
 	rt_data.set_state(ID, '0')
 	markup = telebot.types.ReplyKeyboardRemove()
@@ -209,13 +209,13 @@ def get_word_google_images_loop(message):
 	ID = get_id(message)
 	
 	if message.text == "Add Image":
-		rt_data.temp[ID].append(rt_data.loop[ID].pop())
+		rt_data.temp_user[ID].append(rt_data.loop[ID].pop())
 	elif message.text == "Skip Image":
 		rt_data.loop[ID].pop()
 
 	if len(loop[ID]) == 0:
 		markup = telebot.types.ReplyKeyboardRemove()
-		if len(rt_data.temp[ID]) == 4:
+		if len(rt_data.temp_user[ID]) == 4:
 			BOT.send_message(ID, "Sorry, the suggestions weren't so good, you can change the link type now", reply_markup=markup)
 			back_to_word_options(message)
 			return 0
@@ -225,7 +225,7 @@ def get_word_google_images_loop(message):
 			markup = telebot.types.ReplyKeyboardRemove()
 			BOT.send_message(ID,"Successfully done!",reply_markup=markup)
 	else:
-		photo = open('./tmp/{}/{}'.format(ID,rt_data.loop[ID][len(loop[ID])-1])
+		photo = open('./tmp/{}/{}'.format(ID,rt_data.loop[ID][len(loop[ID])-1]))
 		BOT.send_photo(ID, photo)
 
 		
