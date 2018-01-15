@@ -46,24 +46,19 @@ class RuntimeData:
 
 	def get_state(self, user):
 		try:
-			ret = self.userState[user]
+			ret = self.db.get_state(user)
+			ret = self.mapState[ret]
 			print("id:{}  state:{}".format(user,ret))
-			if "WAITING_ANS" in ret:
-				return "WAITING_ANS"
-			else:
-				return ret
+			return ret
 		except:
 			print("User {} doesn't exist".format(user))
 			return 'Error'
 
-	def get_state_card_number(self, user):
+	def get_state2(self, user):
 		try:
-			ret = self.userState[user]
+			ret = self.db.get_state2(user)
 			print("id:{}  state:{}".format(user,ret))
-			if "WAITING_ANS" in ret:
-				return int(ret[12:])
-			else:
-				return None 
+			return ret
 		except:
 			print("User {} doesn't exist".format(user))
 			return 'Error'
