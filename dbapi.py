@@ -76,7 +76,7 @@ class Database:
 		#UPDATE user's highest_word_id
 		self.cursor.execute("UPDATE users SET highest_word_id={} WHERE id={}".format(user_word_id, ID))
 		
-		fc = FlashCardSM()
+		fc = TimeControl()
 		self.cursor.execute("INSERT INTO words VALUES ({}, '{}', '{}', '{}', {}, {}, {}, {}, '{}')".format(ID, language, foreign_word, english_word, user_word_id,
 																							fc.attempts, fc.ef, fc.interval,
 																							str(fc.next_date.year) + '-' + str(fc.next_date.month) + '-' + str(fc.next_date.day)))

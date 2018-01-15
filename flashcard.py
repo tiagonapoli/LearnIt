@@ -1,7 +1,7 @@
 import time
 import datetime
 
-class FlashCardSM:
+class TimeControl:
 	attempts = None
 	ef = None
 	interval = None
@@ -28,10 +28,8 @@ class FlashCardSM:
 			self.ef = 1.3
 
 	def get_next_date(self, quality_answer):
-		
 		self.go_next_state(quality_answer)
 		end_date = self.next_date + datetime.timedelta(days=int(self.interval))
-
 		self.next_date = end_date
 		return end_date
 	
@@ -41,8 +39,6 @@ class FlashCardSM:
 	def get_data(self):
 		return self.attempts,self.ef,self.interval,self.next_date
 
-
-
 class Word(FlashCardSM):
 	
 	userID = None
@@ -50,7 +46,9 @@ class Word(FlashCardSM):
 	foreign_word = None
 	english_word = None
 	wordID = None
-	
+	query_content_type = None
+	path = []
+
 	def __init__(self,_userID,_language,_foreign_word,_english_word,_wordID,_attempts=1, _ef=2.5,_interval=1, _next_date = datetime.datetime.now() + datetime.timedelta(days=1)):
 		self.userID = _userID
 		self.language = _language
