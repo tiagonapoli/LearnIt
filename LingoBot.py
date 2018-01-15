@@ -40,9 +40,16 @@ def cancel(message):
 @BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == 'WAITING_ANS'), content_types=['text'])
 def answer_card(message):
 	ID = get_id(message)
-	
-	#RIGTH OR WRONG
-	BOT.send_message(ID, )
+	res = message.text
+	res = res.strip()
+	word = rt_data.get_word(ID,rt_data.get_state_card_number(ID))
+	rt_data.temp[ID] = []
+	rt_data.temp[ID].append(word)
+	if res == word.foreign_word:
+		BOT.send_message(ID, "That was correct!")
+	else:
+		BOT.send_message(ID, "There was a mistake :(")
+	BOT.send_message(ID, "Answer: {}".format(word.foreign_word))
 	btn0 = create_key_button("0");
 	btn1 = create_key_button("1");
 	btn2 = create_key_button("2");
@@ -51,17 +58,19 @@ def answer_card(message):
 	btn5 = create_key_button("5");
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	markup.row(bnt0,btn1,btn2,btn3,btn4,btn5)
-	BOT.send_message(ID, , reply_markup=markup)
+	BOT.send_message(ID,"Please grade your performance to answer the card", reply_markup=markup)
 	rt_data.set_state(ID, "WAITING_POLL_ANS")
 
 
 @BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == 'WAITING_POLL_ANS'), content_types=['text'])
 def poll_difficulty(message):
 	ID = get_id(message)
+	word = rt_data.temp[ID].pop()
+	word.get_next_date(int(message.text))
+	rt_data.set_supermemo_data(word)
 	markup = telebot.types.ReplyKeyboardRemove()
-	BOT.send_message(ID, , reply_markup=markup)
-	
-
+	BOT.send_message(ID,"OK!", reply_markup=markup)
+	rt_data.set_state("0")
 
 @BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == '0'), commands = ['add_language'])
 def add_language(message):
