@@ -39,7 +39,7 @@ class RuntimeData:
 	def add_language(self, ID, language):
 		return self.db.add_language(ID,language)
 
-	def erase_word(self,D, idiom, foreign_word):
+	def erase_word(self,ID, idiom, foreign_word):
 		return self.db.erase_word(ID,idiom,foreign_word)
 
 	def get_state(self, user):
@@ -68,3 +68,8 @@ class RuntimeData:
 
 	def set_state(self, user, new_state):
 		self.userState[user] = new_state;
+
+	def get_word(self, user_id, word_id)
+		info = self.db.get_word(user_id, word_id)
+		word = Word(info[0], info[1], info[2], info[3], info[4], info[5], info[6], info[7], info[8])
+		return word

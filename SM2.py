@@ -2,10 +2,10 @@ import time
 import datetime
 
 class FlashCardSM:
-	n = None
-	ef = None
-	interval = None
-	next_date = None
+	n = None # numero de acertos
+	ef = None # easyness factor
+	interval = None # intervalo entre cada envio
+	next_date = None # proxima data de envio
 
 	def __init__(self,_n=1, _ef=2.5,_interval=1, _next_date = datetime.datetime.now() + datetime.timedelta(days=1)):
 		self.n = _n

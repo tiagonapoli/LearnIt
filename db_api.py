@@ -1,4 +1,7 @@
 import psycopg2
+import time
+import datetime
+from SM2 import FlashCardSM
 
 class Database:
 	conn = None
@@ -72,8 +75,11 @@ class Database:
 
 		#UPDATE user's highest_word_id
 		self.cursor.execute("UPDATE users SET highest_word_id={} WHERE id={}".format(user_word_id, ID))
-
-		self.cursor.execute("INSERT INTO words VALUES ({}, '{}', '{}', '{}', {})".format(ID, language, foreign_word, english_word, user_word_id))
+		
+		fc = FlashCardSM()
+		self.cursor.execute("INSERT INTO words VALUES ({}, '{}', '{}', '{}', {}, {}, {}, {}, '{}')".format(ID, language, foreign_word, english_word, user_word_id,
+																							fc.n, fc.ef, fc.interval,
+																							str(fc.next_date.year) + '-' + str(fc.next_date.month) + '-' + str(fc.next_date.day)))
 
 		counter = 0
 		for i in range(4, len(lst)):
@@ -113,3 +119,8 @@ class Database:
 			languages.append(row[0])
 
 		return languages
+
+	def get_word(self, user_id, word_id):
+		self.cursor.execute("SELECT * FROM words WHERE user_id={} AND user_word_id={}".format(user_id, user_word_id))
+		rows = self.cursor.fetchall()
+		return rows[0]
