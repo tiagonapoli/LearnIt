@@ -32,7 +32,7 @@ class Database:
 		if(len(rows) > 0):
 			return "Welcome back to LingoBot!"
 
-		self.cursor.execute("INSERT INTO users VALUES ({}, 0, 0);".format(ID))
+		self.cursor.execute("INSERT INTO users VALUES ({}, DEFAULT, DEFAULT, DEFAULT, DEFAULT);".format(ID))
 		self.conn.commit()
 		return "Welcome to LingoBot!"
 
@@ -80,6 +80,7 @@ class Database:
 		self.cursor.execute("INSERT INTO words VALUES ({}, '{}', '{}', '{}', {}, {}, {}, {}, '{}')".format(ID, language, foreign_word, english_word, user_word_id,
 																							fc.n, fc.ef, fc.interval,
 																							str(fc.next_date.year) + '-' + str(fc.next_date.month) + '-' + str(fc.next_date.day)))
+		self.conn.commit()
 
 		counter = 0
 		for i in range(4, len(lst)):
@@ -133,5 +134,13 @@ class Database:
 	def set_supermemo_data(self, word):
 		self.cursor.execute("UPDATE words SET attempts={}, easiness_factor={}, interval={}, next_date={} WHERE user_id={} AND user_word_id={};"
 			.format(word.attempts, word.ef, word.interval, word.next_date.date(), word.user_id, word.wordID))
-		rows = self.cursor.fetchall()
+		self.conn.commit()
+
+	def set_state(self, state, state2):
+		self.cursor.execute("UPDATE users SET state={}, state2={}".format(state, state2))
+		self.conn.commit()
+
+	def get_state(self, user_id):
+		self.cursor.execute("SELECT state, state2 FROM users WHERE id={}".format(user_id))
+		rows = cursor.fetchall()
 		return rows[0]

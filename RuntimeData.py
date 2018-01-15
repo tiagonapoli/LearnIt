@@ -81,3 +81,9 @@ class RuntimeData:
 	def set_supermemo_data(self, word):
 		row = self.db.set_supermemo_data(word)
 		return Word(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], datetime.combine(row[8], datetime.min.time()))
+
+	def set_state(self, state, state2):
+		self.db.set_state(state, state2)
+
+	def get_state(self, user_id):
+		return self.db.get_state(user_id)
