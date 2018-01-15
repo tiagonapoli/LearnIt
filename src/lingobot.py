@@ -1,9 +1,11 @@
 #! /usr/bin/python3
 import sys
+import os
 import telebot
-import scrapeimages
 import utils
 import signal
+import shutil
+from scrapeimages import fetch_images
 from runtimedata import RuntimeData
 from flashcard import Card 
 
@@ -42,12 +44,6 @@ from flashcard import Card
 
 """
 
-bot = None
-rt_data = None
-
-
-
-
 def signal_handler(signal, frame):
 	"""
 		Handles CTRL+C signal that exits gently the bot
@@ -56,32 +52,21 @@ def signal_handler(signal, frame):
 	print("Exiting bot...")
 	sys.exit(0)
 
+signal.signal(signal.SIGINT, signal_handler)
 
-
-
-def main():
-	"""
-		Main function that initializes bot, runtime database api and triggers bot polling
-	"""
-	signal.signal(signal.SIGINT, signal_handler)
-
-	try:
-		arq = open("../credentials/bot_token.txt", "r")
-		TOKEN = (arq.read().splitlines())[0]
-		arq.close()
-		bot = telebot.TeleBot(TOKEN)
-		print("Bot initialized successfully!")
-	except Exception as e:
-		print("Can't retrieve the bot's token")
-		print(e)
-		sys.exit(0)	
+try:
+	arq = open("../credentials/bot_token.txt", "r")
+	TOKEN = (arq.read().splitlines())[0]
+	arq.close()
+	bot = telebot.TeleBot(TOKEN)
+	print("Bot initialized successfully!")
+except Exception as e:
+	print("Can't retrieve the bot's token")
+	print(e)
+	sys.exit(0)	
 	
-	rt_data = RuntimeData()
-	
-	print("Press Ctrl+C to exit gently")
-	print("Bot Polling")
-	rt_data.reset_all_states()
-	bot.polling()
+rt_data = RuntimeData()
+rt_data.reset_all_states()
 
 
 
@@ -116,7 +101,7 @@ def setup_user(msg):
 	"""
 	user_id = get_id(msg)
 	m = rt_data.add_user(user_id)
-	bot.send_msg(user_id, m)
+	bot.send_message(user_id, m)
 
 
 
@@ -190,7 +175,7 @@ def poll_difficulty(msg):
 	rt_data.set_supermemo_data(card)
 	print(word.get_next_date())
 	markup = telebot.types.ReplyKeyboardRemove()
-	bot.send_msg(user_id,"OK!", reply_markup=markup)
+	bot.send_message(user_id,"OK!", reply_markup=markup)
 	rt_data.set_state(user_id, "0")
 
 
@@ -205,7 +190,7 @@ def add_language(msg):
 	"""
 	user_id = get_id(msg)
 	bot.send_message(user_id, "Text me the language you want to add")
-	rt_date.set_state(user_id, "2_0")
+	rt_data.set_state(user_id, "2_0")
 
 
 
@@ -222,7 +207,7 @@ def add_language_0(msg):
 	language = language.strip()
 	print(language)
 	bot.send_message(user_id, rt_data.add_language(user_id, language))
-	rt_date.set_state(user_id, "0")
+	rt_data.set_state(user_id, "0")
 
 
 
@@ -367,7 +352,9 @@ def get_word_3opt2(msg):
 	"""
 	user_id = get_id(msg)
 	rt_data.temp_user[user_id].append("Image")
-	fetch_images(temp_user[user_id][2],"../data/tmp/{}".format(user_id))
+	shutil.rmtree("../data/tmp/{}".format(user_id))
+	fetch_images(rt_data.temp_user[user_id][2],
+				"../data/tmp/{}".format(user_id))
 	rt_data.loop[user_id] = []
 	rt_data.loop[user_id] = os.listdir("../data/tmp/{}".format(user_id))
 	if len(rt_data.loop[user_id]) == 0:
@@ -382,12 +369,17 @@ def get_word_3opt2(msg):
 	markup.row(btn1,btn2)
 	bot.send_message(user_id, "We will present you some images from google images(the query is the english translation). Please use the custom keyboard to select the images you want.",
 					reply_markup=markup)
+
 	
-	photo = open('../data/tmp/{}/{}'.format(user_id,
-									rt_data.loop[user_id][len(loop[user_id])-1]))
+	
+	photo = ('../data/tmp/{}/{}'.format(user_id,
+									rt_data.loop[user_id][
+										len(rt_data.loop[user_id])-1]))
+	print(photo)
+	photo = open(photo,'rb')
 	bot.send_photo(user_id, photo)
 
-	rt_data.set_state(user_id, '1_3-opt2_0')	
+	rt_data.set_state(user_id, '1_3-opt2_1')	
 
 
 
@@ -436,7 +428,7 @@ def get_word_3opt1_0(msg):
 		Creates custom keyboard with done button and receives the first image
 	"""
 	user_id = get_id(msg)
-	rt_data.contador_user[user_id] = 0
+	rt_data.counter_user[user_id] = 0
 	btn1 = create_key_button('Done')
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	markup.row(btn1)
@@ -448,7 +440,7 @@ def get_word_3opt1_0(msg):
 	filename = rt_data.get_highest_word_id(user_id)
 	path = utils.save_image(msg,
 							"../data/{}/{}/".format(user_id, rt_data.temp_user[user_id][0]), 
-							"{}_{}".format(filename,rt_data.contador_user[user_id]), 
+							"{}_{}".format(filename,rt_data.counter_user[user_id]), 
 							bot)
 	rt_data.temp_user[user_id].append(path)
 
@@ -463,7 +455,7 @@ def get_word_3opt1_1(msg):
 		Add word: Send images sequence -> Receive Done command or more images
 	"""
 	user_id = get_id(msg)
-	rt_data.contador_user[user_id] += 1
+	rt_data.counter_user[user_id] += 1
 	if msg.text == "Done":
 		rt_data.add_word(user_id)
 		rt_data.set_state(user_id, '0')
@@ -474,7 +466,7 @@ def get_word_3opt1_1(msg):
 		filename = rt_data.get_highest_word_id(user_id)
 		path = utils.save_image(msg,
 								"../data/{}/{}/".format(user_id, rt_data.temp_user[user_id][0]), 
-								"{}_{}".format(filename,rt_data.contador_user[user_id]), 
+								"{}_{}".format(filename,rt_data.counter_user[user_id]), 
 								bot)
 		rt_data.temp_user[user_id].append(path)
 
@@ -496,7 +488,7 @@ def get_word_3opt2_1(msg):
 	elif msg.text == "Skip Image":
 		rt_data.loop[user_id].pop()
 
-	if len(loop[user_id]) == 0:
+	if len(rt_data.loop[user_id]) == 0:
 		markup = telebot.types.ReplyKeyboardRemove()
 		if len(rt_data.temp_user[user_id]) == 4:
 			bot.send_message(user_id,
@@ -510,8 +502,11 @@ def get_word_3opt2_1(msg):
 			markup = telebot.types.ReplyKeyboardRemove()
 			bot.send_message(user_id,"Successfully done!",reply_markup=markup)
 	else:
-		photo = open('../data/tmp/{}/{}'.format(user_id,
-										rt_data.loop[user_id][len(loop[user_id])-1]))
+		photo = ('../data/tmp/{}/{}'.format(user_id,
+										rt_data.loop[user_id][
+											len(rt_data.loop[user_id])-1]))
+		print(photo)
+		photo = open(photo,'rb')
 		bot.send_photo(user_id, photo)
 
 
@@ -543,8 +538,8 @@ def set_settings(msg):
 	"""
 	return 0
 
-if __name__ == '__main__':
-	main()
 
-
+print("Press Ctrl+C to exit gently")
+print("Bot Polling")
+bot.polling()
 

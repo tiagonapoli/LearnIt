@@ -1,6 +1,6 @@
-from db_api import Database
+from dbapi import Database
 from datetime import datetime
-from FlashCard import Word
+from flashcard import Card
 
 class RuntimeData: 
 	"""Class that do all the runtime data management.
@@ -30,8 +30,13 @@ class RuntimeData:
 						5 : '1_2',
 						6 : '1_3',
 						7 : '1_3-opt1',
-						8 : '1_3-opt1_0',
-						9 : '1_3-opt2_0'}
+						8 : '1_3-opt1_1',
+						9 : '1_3-opt2',
+						10: '1_3-opt2_1',
+						11: '1_3-opt3',
+						12: '1_3-opt3_1',
+						13: '2_0'
+						}
 		self.map_stateInv = {}
 		self.counter_user = {}
 		
