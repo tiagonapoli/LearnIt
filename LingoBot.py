@@ -37,6 +37,32 @@ def cancel(message):
 	ID = get_id(message)
 	rt_data.set_state(ID, '0')
 
+@BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == 'WAITING_ANS'), content_types=['text'])
+def answer_card(message):
+	ID = get_id(message)
+	
+	#RIGTH OR WRONG
+	BOT.send_message(ID, )
+	btn0 = create_key_button("0");
+	btn1 = create_key_button("1");
+	btn2 = create_key_button("2");
+	btn3 = create_key_button("3");
+	btn4 = create_key_button("4");
+	btn5 = create_key_button("5");
+	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+	markup.row(bnt0,btn1,btn2,btn3,btn4,btn5)
+	BOT.send_message(ID, , reply_markup=markup)
+	rt_data.set_state(ID, "WAITING_POLL_ANS")
+
+
+@BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == 'WAITING_POLL_ANS'), content_types=['text'])
+def poll_difficulty(message):
+	ID = get_id(message)
+	markup = telebot.types.ReplyKeyboardRemove()
+	BOT.send_message(ID, , reply_markup=markup)
+	
+
+
 @BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == '0'), commands = ['add_language'])
 def add_language(message):
 	ID = get_id(message)
