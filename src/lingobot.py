@@ -445,10 +445,10 @@ def get_word_3opt1_0(msg):
 					reply_markup=markup)
 	
 	rt_data.set_state(user_id, '1_3-opt1_1')
-	filename = rt_data.temp_user[user_id][1].replace(' ', '_')
+	filename = rt_data.get_highest_word_id(user_id)
 	path = utils.save_image(msg,
 							"../data/{}/{}/".format(user_id, rt_data.temp_user[user_id][0]), 
-							"{}{}".format(filename,	rt_data.contador_user[user_id]), 
+							"{}_{}".format(filename,rt_data.contador_user[user_id]), 
 							bot)
 	rt_data.temp_user[user_id].append(path)
 
@@ -471,10 +471,10 @@ def get_word_3opt1_1(msg):
 		bot.send_message(user_id,"Successfully done!",
 						reply_markup=markup)
 	else:
-		filename = rt_data.temp_user[user_id][1].replace(' ', '_')
+		filename = rt_data.get_highest_word_id(user_id)
 		path = utils.save_image(msg,
 								"../data/{}/{}/".format(user_id, rt_data.temp_user[user_id][0]), 
-								"{}{}".format(filename,rt_data.contador_user[user_id]), 
+								"{}_{}".format(filename,rt_data.contador_user[user_id]), 
 								bot)
 		rt_data.temp_user[user_id].append(path)
 
