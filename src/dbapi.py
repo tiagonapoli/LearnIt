@@ -291,3 +291,8 @@ class Database:
 		self.cursor.execute("SELECT state, state2 FROM users WHERE id={}".format(user_id))
 		rows = self.cursor.fetchall()
 		return rows[0]
+
+	def get_highest_word_id(self, user_id):
+		self.cursor.execute("SELECT highest_word_id FROM users WHERE id={}".format(user_id))
+		rows = self.cursor.fetchall()
+		return rows[0][0]

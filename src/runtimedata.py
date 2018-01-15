@@ -180,3 +180,6 @@ class RuntimeData:
 
 		for user in self.known_users:
 			self.set_state(user, '0')
+
+	def get_highest_word_id(self, user_id):
+		return self.db.get_highest_word_id(user_id)
