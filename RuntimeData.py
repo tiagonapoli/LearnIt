@@ -8,7 +8,7 @@ class RuntimeData:
 	knownUsers = None
 	mapState = {0 : '0',
 				1 : 'WAITING_ANS',
-				2 : 'WATING_POLL_ANS',
+				2 : 'WAITING_POLL_ANS',
 				3 : '1_0',
 				4 : '1_1',
 				5 : '1_2',
@@ -23,10 +23,10 @@ class RuntimeData:
 	def __init__(self):
 		self.db = Database()
 		self.knownUsers = self.db.get_known_users()
-		for key,val in mapState:
-			mapStateInv[val] = key
-		for user in self.knownUsers:
-			self.userState[user] = '0'
+		for key,val in self.mapState.items():
+			self.mapStateInv[val] = key
+		# for user in self.knownUsers:
+		# 	self.userState[user] = 
 
 	def add_user(self,ID):
 		m = self.db.add_user(ID)
@@ -34,13 +34,13 @@ class RuntimeData:
 		return m
 	
 	def add_word(self,ID):
-		try:
+		# try:
 			lista = self.temp_user[ID]
 			print("lista[{}] = ".format(ID) + str(lista))
 			return self.db.add_word(ID,lista)
-		except:
-		 	print("There is no temp_user data for {}.".format(ID))
-		 	return 'Error'
+		# except:
+		#  	print("There is no temp_user data for {}.".format(ID))
+		#  	return 'Error'
 	
 	def get_user_languages(self, ID):
 		return self.db.get_user_languages(ID)
@@ -52,25 +52,25 @@ class RuntimeData:
 		return self.db.erase_word(ID,idiom,foreign_word)
 
 	def get_state(self, user):
-		try:
+		# try:
 			st1,st2 = self.db.get_state(user)
 			st1 = self.mapState[st1]
 			print("id:{}  state:{}".format(user,st1))
 			return st1
-		except:
-			print("User {} doesn't exist".format(user))
-			return 'Error'
+		# except:
+		# 	print("User {} doesn't exist".format(user))
+		# 	return 'Error'
 
 	def get_state2(self, user):
-		try:
-			st1,st2 = self.db.get_state2(user)
+		# try:
+			st1,st2 = self.db.get_state(user)
 			return st2
-		except:
-			print("User {} doesn't exist".format(user))
-			return 'Error'
+		# except:
+		# 	print("User {} doesn't exist".format(user))
+		# 	return 'Error'
 
 	def set_state(self, user, new_state, new_state2=0):
-		self.db.set_state(mapStateInv[new_state], new_state2)
+		self.db.set_state(user, self.mapStateInv[new_state], new_state2)
 
 	def get_word(self, user_id, word_id):
 		info = self.db.get_word(user_id, word_id)
@@ -85,11 +85,9 @@ class RuntimeData:
 		return words
 
 	def set_supermemo_data(self, word):
-		row = self.db.set_supermemo_data(word)
-		return Word(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], datetime.combine(row[8], datetime.min.time()))
+		self.db.set_supermemo_data(word)
+		# return Word(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], datetime.combine(row[8], datetime.min.time()))
 
-	def set_state(self, state, state2):
-		self.db.set_state(state, state2)
-
-	def get_state(self, user_id):
-		return self.db.get_state(user_id)
+	def reset_all_states(self):
+		for user in self.knownUsers:
+			self.set_state(user, '0')

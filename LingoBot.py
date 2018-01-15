@@ -44,8 +44,8 @@ def answer_card(message):
 	res = message.text
 	res = res.strip()
 	word = rt_data.get_word(ID,rt_data.get_state2(ID))
-	rt_data.temp[ID] = []
-	rt_data.temp[ID].append(word)
+	rt_data.temp_user[ID] = []
+	rt_data.temp_user[ID].append(word)
 	if res == word.foreign_word:
 		BOT.send_message(ID, "That was correct!")
 	else:
@@ -58,7 +58,7 @@ def answer_card(message):
 	btn4 = create_key_button("4");
 	btn5 = create_key_button("5");
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-	markup.row(bnt0,btn1,btn2,btn3,btn4,btn5)
+	markup.row(btn0,btn1,btn2,btn3,btn4,btn5)
 
 	BOT.send_message(ID,"Please grade your performance to answer the card", reply_markup=markup)
 	rt_data.set_state(ID, "WAITING_POLL_ANS")
@@ -67,13 +67,14 @@ def answer_card(message):
 @BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == 'WAITING_POLL_ANS'), content_types=['text'])
 def poll_difficulty(message):
 	ID = get_id(message)
-	word = rt_data.temp[ID].pop()
+	word = rt_data.temp_user[ID].pop()
 	word.get_next_date(int(message.text))
 	rt_data.set_supermemo_data(word)
+	print(word.next_date)
 	markup = telebot.types.ReplyKeyboardRemove()
 	
 	BOT.send_message(ID,"OK!", reply_markup=markup)
-	rt_data.set_state("0")
+	rt_data.set_state(ID, "0")
 
 @BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == '0'), commands = ['add_language'])
 def add_language(message):
@@ -292,6 +293,7 @@ signal.signal(signal.SIGINT, signal_handler)
 print('Press Ctrl+C to exit gently')
 
 print("Bot Polling")
+rt_data.reset_all_states()
 # word = rt_data.get_word('113538563', 4)
 # print(word.foreign_word)
 # print(word.next_date)

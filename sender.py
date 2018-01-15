@@ -29,7 +29,7 @@ if rt_data.get_state(IDuser) == '0':
 	word = rt_data.get_word(IDuser,IDcard)
 	markup = telebot.types.ForceReply(selective = False)
 	BOT.send_message(IDuser,word.english_word, reply_markup=markup)
-	rt_data.set_state(IDuser, 'WAITING_ANS/{}'.format(IDcard))
+	rt_data.set_state(IDuser, 'WAITING_ANS', IDcard)
 else:
 	tried += 1
 	systemtools.set_new_at_job_card(min(tried,10),IDuser,IDcard, tried)	

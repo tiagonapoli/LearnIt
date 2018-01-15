@@ -78,7 +78,7 @@ class Database:
 		
 		fc = FlashCardSM()
 		self.cursor.execute("INSERT INTO words VALUES ({}, '{}', '{}', '{}', {}, {}, {}, {}, '{}')".format(ID, language, foreign_word, english_word, user_word_id,
-																							fc.n, fc.ef, fc.interval,
+																							fc.attempts, fc.ef, fc.interval,
 																							str(fc.next_date.year) + '-' + str(fc.next_date.month) + '-' + str(fc.next_date.day)))
 		self.conn.commit()
 
@@ -132,15 +132,15 @@ class Database:
 		return rows
 
 	def set_supermemo_data(self, word):
-		self.cursor.execute("UPDATE words SET attempts={}, easiness_factor={}, interval={}, next_date={} WHERE user_id={} AND user_word_id={};"
-			.format(word.attempts, word.ef, word.interval, word.next_date.date(), word.user_id, word.wordID))
+		self.cursor.execute("UPDATE words SET attempts={}, easiness_factor={}, interval={}, next_date='{}' WHERE user_id={} AND user_word_id={};"
+			.format(word.attempts, word.ef, word.interval, word.next_date.strftime('%Y-%m-%d'), word.userID, word.wordID))
 		self.conn.commit()
 
-	def set_state(self, state, state2):
-		self.cursor.execute("UPDATE users SET state={}, state2={}".format(state, state2))
+	def set_state(self, user_id, state, state2=0):
+		self.cursor.execute("UPDATE users SET state={}, state2={} WHERE id={}".format(state, state2, user_id))
 		self.conn.commit()
 
 	def get_state(self, user_id):
 		self.cursor.execute("SELECT state, state2 FROM users WHERE id={}".format(user_id))
-		rows = cursor.fetchall()
+		rows = self.cursor.fetchall()
 		return rows[0]
