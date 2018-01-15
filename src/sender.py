@@ -2,36 +2,67 @@
 import telebot
 import sys
 import systemtools 
-from RuntimeData import RuntimeData
-from FlashCard import Word
-#USAGE: ./sender.py IDUSER IDCARD tries
+from runtimedata import RuntimeData
+from flashcard import card
+
+"""
+	Script to send a card query through message in Telegram. If this was 
+	unsuccessful it will be rescheduled to min(10,tries) minutes from
+	now.
+
+	Usage:
+		./sender.py user_id card_id tries
+
+	Args:
+		user_id: id of the receiver of the message
+		card_id: id of the card to send
+		tries: tries unsuccessfuly done to send this card to this user
+"""
 
 try:
-	arq = open("bot_token.txt", "r")
+	arq = open("../credentials/bot_token.txt", "r")
 	TOKEN = (arq.read().splitlines())[0]
 	arq.close()
-	BOT = telebot.TeleBot(TOKEN)
+	bot = telebot.TeleBot(TOKEN)
 	print("Bot initialized successfully!")
 except Exception as e:
-	print("Can't retrieve the bot's token")
+	print("Can't retrieve the bot's token or couldn't initialize bot")
 	print(e)
+	sys.exit(0)
 
 print(sys.argv[1])
 print(sys.argv[2])
 print(sys.argv[3])
 
-IDuser = int(sys.argv[1])
-IDcard = int(sys.argv[2])
+user_id = int(sys.argv[1])
+card_id = int(sys.argv[2])
 tried = int(sys.argv[3])
 rt_data = RuntimeData()
 
-if rt_data.get_state(IDuser) == '0':
-	word = rt_data.get_word(IDuser,IDcard)
+if rt_data.get_state(user_id) == '0':
+	card = rt_data.get_word(user_id,card_id)
+	
+	bot.send_message(user_id,
+			"Review card! Answer with the respective word in {}".format(
+				card.get_language()))
+	
 	markup = telebot.types.ForceReply(selective = False)
-	BOT.send_message(IDuser,word.english_word, reply_markup=markup)
-	rt_data.set_state(IDuser, 'WAITING_ANS', IDcard)
+	question = card.get_question()
+	content = card.get_quesiton_content()
+	if content == 'Image':
+		question = open(question,'rb')
+		bot.send_photo(user_id, question, reply_markup = markup)
+		question.close()
+	elif content == 'Audio':
+		question = open(question,'rb')
+		bot.send_audio(user_id, question, reply_markup = markup)
+		question.close()
+	elif content == 'Translation':
+		bot.send_message(user_id, question, reply_markup = markup)
+	
+	rt_data.set_state(user_id, 'WAITING_ANS', card_id)
 else:
 	tried += 1
-	systemtools.set_new_at_job_card(min(tried,10),IDuser,IDcard, tried)	
+	systemtools.set_new_at_job_card(min(tried,10),user_id,card_id, tried)	
 
 
