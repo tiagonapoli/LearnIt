@@ -1,7 +1,9 @@
 CREATE TABLE users(
 	id int primary key,
 	messages_per_day int DEFAULT 0,
-	highest_word_id int DEFAULT 0
+	highest_word_id int DEFAULT 0,
+	state int DEFAULT 0,
+	state2 int DEFAULT 0
 );
 
 CREATE TABLE languages(
