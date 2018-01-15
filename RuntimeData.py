@@ -1,4 +1,6 @@
 from db_api import Database
+from datetime import datetime
+from FlashCard import Word
 
 class RuntimeData: 
 	loop = None
@@ -69,7 +71,18 @@ class RuntimeData:
 	def set_state(self, user, new_state):
 		self.userState[user] = new_state;
 
-	def get_word(self, user_id, word_id)
+	def get_word(self, user_id, word_id):
 		info = self.db.get_word(user_id, word_id)
-		word = Word(info[0], info[1], info[2], info[3], info[4], info[5], info[6], info[7], info[8])
+		word = Word(info[0], info[1], info[2], info[3], info[4], info[5], info[6], info[7], datetime.combine(info[8], datetime.min.time()))
 		return word
+
+	def get_all_words_info(self, user_id):
+		rows = self.db.get_all_words_info(user_id)
+		words = []
+		for row in rows:
+			words.append(Word(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], datetime.combine(row[8], datetime.min.time())))
+		return words
+
+	def set_supermemo_data(self, word):
+		row = self.db.set_supermemo_data(word)
+		return Word(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], datetime.combine(row[8], datetime.min.time()))

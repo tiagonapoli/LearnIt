@@ -51,13 +51,13 @@ class Word(FlashCardSM):
 	english_word = None
 	wordID = None
 	
-	def __init__(self,_userId,_language,_foreign_word,_english_word,_wordID,_attempts=1, _ef=2.5,_interval=1, _next_date = datetime.datetime.now() + datetime.timedelta(days=1)):
+	def __init__(self,_userID,_language,_foreign_word,_english_word,_wordID,_attempts=1, _ef=2.5,_interval=1, _next_date = datetime.datetime.now() + datetime.timedelta(days=1)):
 		self.userID = _userID
 		self.language = _language
 		self.foreign_word = _foreign_word
 		self.english_word = _english_word
 		self.wordID = _wordID
-		FlashCardSM.__init__(_attempts,_ef,_interval,_next_date)
+		FlashCardSM.__init__(self,_attempts,_ef,_interval,_next_date)
 	
 	
 

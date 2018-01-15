@@ -51,7 +51,7 @@ def answer_card(message):
 	btn5 = create_key_button("5");
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	markup.row(bnt0,btn1,btn2,btn3,btn4,btn5)
-	BOT.send_message(ID, , reply_markup=markup)
+	# BOT.send_message(ID, , reply_markup=markup)
 	rt_data.set_state(ID, "WAITING_POLL_ANS")
 
 
@@ -59,7 +59,7 @@ def answer_card(message):
 def poll_difficulty(message):
 	ID = get_id(message)
 	markup = telebot.types.ReplyKeyboardRemove()
-	BOT.send_message(ID, , reply_markup=markup)
+	# BOT.send_message(ID, , reply_markup=markup)
 	
 
 
@@ -269,11 +269,7 @@ def set_state(message):
 
 @BOT.message_handler(func= lambda m: (rt_data.get_state(m.chat.id) == '0'), commands = ['settings'])
 def set_settings(message):
-	return 0	
-
-
-
-
+	return 0
 
 def signal_handler(signal, frame):
 	utils.turn_off()
@@ -284,4 +280,8 @@ signal.signal(signal.SIGINT, signal_handler)
 print('Press Ctrl+C to exit gently')
 
 print("Bot Polling")
+# word = rt_data.get_word('113538563', 4)
+# print(word.foreign_word)
+# print(word.next_date)
+# words = rt_data.get_all_words_info(113538563)
 BOT.polling()

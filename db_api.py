@@ -1,7 +1,7 @@
 import psycopg2
 import time
 import datetime
-from SM2 import FlashCardSM
+from FlashCard import FlashCardSM
 
 class Database:
 	conn = None
@@ -121,6 +121,17 @@ class Database:
 		return languages
 
 	def get_word(self, user_id, word_id):
-		self.cursor.execute("SELECT * FROM words WHERE user_id={} AND user_word_id={}".format(user_id, user_word_id))
+		self.cursor.execute("SELECT * FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
+		rows = self.cursor.fetchall()
+		return rows[0]
+
+	def get_all_words_info(self, user_id):
+		self.cursor.execute("SELECT * FROM words WHERE user_id={};".format(user_id))
+		rows = self.cursor.fetchall()
+		return rows
+
+	def set_supermemo_data(self, word):
+		self.cursor.execute("UPDATE words SET attempts={}, easiness_factor={}, interval={}, next_date={} WHERE user_id={} AND user_word_id={};"
+			.format(word.attempts, word.ef, word.interval, word.next_date.date(), word.user_id, word.wordID))
 		rows = self.cursor.fetchall()
 		return rows[0]
