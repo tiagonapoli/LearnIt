@@ -5,6 +5,7 @@ import scrape_images
 import utils
 import signal
 from RuntimeData import RuntimeData
+from FlashCard import Word 
 
 try:
 	arq = open("bot_token.txt", "r")
@@ -42,7 +43,7 @@ def answer_card(message):
 	ID = get_id(message)
 	res = message.text
 	res = res.strip()
-	word = rt_data.get_word(ID,rt_data.get_state_card_number(ID))
+	word = rt_data.get_word(ID,rt_data.get_state2(ID))
 	rt_data.temp[ID] = []
 	rt_data.temp[ID].append(word)
 	if res == word.foreign_word:

@@ -3,37 +3,44 @@ from datetime import datetime
 from FlashCard import Word
 
 class RuntimeData: 
-	loop = None
-	temp_user = None
+	loop = {}
+	temp_user = {}
 	knownUsers = None
-	userState = None
-	contador_user = None
+	mapState = {0 : '0',
+				1 : 'WAITING_ANS',
+				2 : 'WATING_POLL_ANS',
+				3 : '1_0',
+				4 : '1_1',
+				5 : '1_2',
+				6 : '1_3',
+				7 : '1_3-opt1',
+				8 : '1_3-opt1_0',
+				9 : '1_3-opt2_0'}
+	mapStateInv = {}
+	contador_user = {}
 	db = None
 
 	def __init__(self):
 		self.db = Database()
-		self.loop = {}
-		self.temp_user = {}
 		self.knownUsers = self.db.get_known_users()
-		self.userState = {}
-		self.contador_user = {}
+		for key,val in mapState:
+			mapStateInv[val] = key
 		for user in self.knownUsers:
 			self.userState[user] = '0'
 
 	def add_user(self,ID):
 		m = self.db.add_user(ID)
 		self.knownUsers.add(ID)
-		self.set_state(ID,'0')
 		return m
 	
 	def add_word(self,ID):
-		#try:
-		lista = self.temp_user[ID]
-		print("lista[{}] = ".format(ID) + str(lista))
-		return self.db.add_word(ID,lista)
-		# except:
-		# 	print("There is no temp_user data for {}.".format(ID))
-		# 	return 'Error'
+		try:
+			lista = self.temp_user[ID]
+			print("lista[{}] = ".format(ID) + str(lista))
+			return self.db.add_word(ID,lista)
+		except:
+		 	print("There is no temp_user data for {}.".format(ID))
+		 	return 'Error'
 	
 	def get_user_languages(self, ID):
 		return self.db.get_user_languages(ID)
@@ -46,25 +53,24 @@ class RuntimeData:
 
 	def get_state(self, user):
 		try:
-			ret = self.db.get_state(user)
-			ret = self.mapState[ret]
-			print("id:{}  state:{}".format(user,ret))
-			return ret
+			st1,st2 = self.db.get_state(user)
+			st1 = self.mapState[st1]
+			print("id:{}  state:{}".format(user,st1))
+			return st1
 		except:
 			print("User {} doesn't exist".format(user))
 			return 'Error'
 
 	def get_state2(self, user):
 		try:
-			ret = self.db.get_state2(user)
-			print("id:{}  state:{}".format(user,ret))
-			return ret
+			st1,st2 = self.db.get_state2(user)
+			return st2
 		except:
 			print("User {} doesn't exist".format(user))
 			return 'Error'
 
-	def set_state(self, user, new_state):
-		self.userState[user] = new_state;
+	def set_state(self, user, new_state, new_state2=0):
+		self.db.set_state(mapStateInv[new_state], new_state2)
 
 	def get_word(self, user_id, word_id):
 		info = self.db.get_word(user_id, word_id)
