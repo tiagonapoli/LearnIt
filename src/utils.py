@@ -1,6 +1,16 @@
 import os
+import telebot
 
 def save_image(image_msg, path, image_name, bot):
+	"""
+		Saves image received from user on Telegram
+	
+		Args:
+			image_msg: message object that carries an image
+			path: path to save the archive
+			image_name: savename of the file
+			bot: Telebot object
+	"""
 	f = image_msg.photo[-1].file_id
 	arq = bot.get_file(f)
 	downloaded_file = bot.download_file(arq.file_path)
@@ -17,5 +27,20 @@ def save_image(image_msg, path, image_name, bot):
 		new_file.write(downloaded_file)
 	return path + image_name + "." + tipo
 
+def save_audio(audio_msg, path, audio_name, bot):
+	"""
+		Saves audio received from user on Telegram
+	
+		Args:
+			audio_msg: message object that carries an audio
+			path: path to save the archive
+			audio_name: savename of the file
+			bot: Telebot object
+	"""
+	pass	
+
 def turn_off():
-	return 0
+	"""
+		Safely turns of LingoBot. Makes a backup of the data (future)
+	"""
+	pass
