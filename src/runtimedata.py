@@ -35,7 +35,8 @@ class RuntimeData:
 						10: '1_3-opt2_1',
 						11: '1_3-opt3',
 						12: '1_3-opt3_1',
-						13: '2_0'
+						13: '2_0',
+						14: 'LOCKED'
 						}
 		self.map_stateInv = {}
 		self.counter_user = {}
@@ -188,3 +189,8 @@ class RuntimeData:
 
 	def get_highest_word_id(self, user_id):
 		return self.db.get_highest_word_id(user_id)
+
+	def not_locked(self, user_id):
+		if self.get_state(user_id) == 'LOCKED':
+			return False
+		return True
