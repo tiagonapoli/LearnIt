@@ -34,7 +34,6 @@ opener = urllib.request.build_opener()
 opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
 urllib.request.install_opener(opener)
 
-
 def geturl(link,local):
 	try:
 		urllib.request.urlretrieve(link,local)
@@ -46,22 +45,9 @@ def geturl(link,local):
 		return 0
 
 def get_image_type(name):
-	aux = []
-	for i in range(len(name)-1,-1,-1):
-		if name[i] == '.':
-			break
-		aux.append(name[i])
-	aux = aux[::-1]
-	res = []
-	if '?' in aux:
-		pos = aux.index('?')
-		res = aux[:pos:]
-	else:
-		res = aux
-	res = ''.join(res)
 	return res
 
-def fetch_images(query, directory, num_requests=1, start_idx=0):
+def fetch_images(query, directory, num_images=5):
 	'''
     Fetches images from Google search and stores them as {###}.jpg.
 
@@ -69,53 +55,69 @@ def fetch_images(query, directory, num_requests=1, start_idx=0):
         query (str): The query to search for on Google.
         directory (str): The location to store images.
     Args (optional):
-        num_requests (int): How many calls to Google CSE should be made (with
-            10 images grabbed per request).
-        start_idx (int): The starting index to search from. Images will be
-            named accordingly.
 	'''
 
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 	service = build('customsearch', 'v1', developerKey=DEV_KEY)
-	count = start_idx
-	num_results = 5 # I believe this is the max number of results allowed
+	num_results = 10 # I believe this is the max number of results allowed
 	
-	for i in range(0, num_requests): # Make n number of requests, saving 10
+	try:
 		res = service.cse().list(
-            q = query,
-            cx = CSE_ID,
-            searchType = 'image',
-            num = num_results,
-            start = i*num_results+1,
-		).execute()
-
-		for item in res['items']:
-			print(item['link'])
-			url = item['link']
-			filename = '{}/{}{:03d}.{}'.format(directory,query.replace(' ','_'),count, get_image_type(url))
-			count += geturl(url,filename)
+						q = query,
+						cx = CSE_ID,
+						searchType = 'image',
+						num = num_results,
+						start = 1,
+						).execute()
+	except Exception as e:
+		print("Error ocurred with google api")
+		print(e)
+		return 0
+	
+	count = 0;
+	limit_size_bytes = 307200
+	for item in res['items']:
+	
+		print(item['link'])
+		url = item['link']
 		
-		return count
+		try:
+			site = urllib.request.urlopen(url)
+		except Exception as e:
+			print("Urlopen failed :(")
+			print(e);
+			continue
+
+		info = site.info()
+		content_type = info.get_content_maintype()
+		extension = info.get_content_subtype()
+		
+		if (content_type != "image") or (not ('Content-Length' in info.keys())):
+			continue
+
+		size = int(info['Content-Length'])
+		filename = '{}/{}{:03d}.{}'.format(directory,query.replace(' ','_'),count,extension)
+		print("size = {}".format(size))
+		
+		if size >= limit_size_bytes:
+			continue
+
+		count += geturl(url,filename)
+		print()
+		if count >= num_images:
+			break
+		
+	return count
+
 
 
 
 if __name__ == '__main__':
 	''' Scrapes images for 6 different queries. '''
-	d = urllib.request.urlopen("http://e360.yale.edu/assets/site/Trees_JeroenVanNieuwenhoveFlickr.jpg")
-	#IDEAS: USE CONTENT-TYPE TO GET IMAGE TYPE!!!
-	#CHECK CONTENT LENGTH - MAXIMUM
-	print (d.info())
-	'''
-    base_directory = 'images'
-    num_requests = 1
-
-    if len(sys.argv) > 1: # 1st arg - where images are saved
-        base_directory = sys.argv[1]
-    if len(sys.argv) > 2: # 2nd arg - how many requests to make per query
-        num_requests = int(sys.argv[2])
-
-    queries = [
+	
+	base_directory = 'images'
+	queries = [
         'buildings',
         'cars',
         'faces',
@@ -124,8 +126,6 @@ if __name__ == '__main__':
         'trees',
     ]
 
-    for query in queries:
-        directory = '{}/{}'.format(base_directory, query)
-        fetch_images(query, directory, num_requests=num_requests)
-	'''
-	
+	for query in queries:
+		directory = '{}/{}'.format(base_directory, query)
+		fetch_images(query, directory)

@@ -112,6 +112,8 @@ def cancel(msg):
 		Cancels any ongoing events for the user.
 	"""
 	user_id = get_id(msg)
+	markup = telebot.types.ReplyKeyboardRemove()
+	bot.send_message(user_id, "canceled...", reply_markup=markup)
 	rt_data.set_state(user_id, '0')
 
 
@@ -352,11 +354,20 @@ def get_word_3opt2(msg):
 	"""
 	user_id = get_id(msg)
 	rt_data.temp_user[user_id].append("Image")
-	shutil.rmtree("../data/tmp/{}".format(user_id))
-	fetch_images(rt_data.temp_user[user_id][2],
-				"../data/tmp/{}".format(user_id))
+	
+	bot.send_message(user_id, "This may take a few seconds...")
+
+	path = "../data/tmp/{}".format(user_id)
+	if not os.path.exists(path):
+		os.makedirs(path)
+	else:
+		shutil.rmtree(path)
+		os.makedirs(path)	
+
+	fetch_images(rt_data.temp_user[user_id][2],path)
 	rt_data.loop[user_id] = []
-	rt_data.loop[user_id] = os.listdir("../data/tmp/{}".format(user_id))
+	rt_data.loop[user_id] = os.listdir(path)
+
 	if len(rt_data.loop[user_id]) == 0:
 		bot.send_message(user_id, 
 						"Sorry, something wrong happened, we couldn't find images")
