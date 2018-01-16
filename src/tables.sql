@@ -40,8 +40,8 @@ CREATE TABLE content(
 	type varchar(10),
 	counter int,
 	content_path varchar(50),
-	UNIQUE (user_id, user_word_id, counter),
 	
+	UNIQUE (user_id, user_word_id, counter),
 	primary key (user_id, language, foreign_word, counter),
 	foreign key (user_id, language, foreign_word) references words(user_id, language, foreign_word) ON DELETE CASCADE,
 	foreign key (user_id, user_word_id) references words(user_id, user_word_id) ON DELETE CASCADE

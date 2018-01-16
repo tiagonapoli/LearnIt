@@ -68,9 +68,9 @@ class Card(TimeControl):
 	"""
 	
 	def __init__(self, user_id, language, foreign_word, english_word, 
-			card_id, query_content_type, path = [],
-			attempts = 1, ef = 2.5, interval = 1,
-			next_date = datetime.datetime.now() + datetime.timedelta(days=1)):
+			card_id, attempts = 1, ef = 2.5, interval = 1,
+			next_date = datetime.datetime.now() + datetime.timedelta(days=1),
+			query_content_type, path = []):
 		self.user_id = user_id
 		self.language = language
 		self.foreign_word = foreign_word

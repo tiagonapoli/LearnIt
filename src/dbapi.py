@@ -265,6 +265,14 @@ class Database:
 		rows = self.cursor.fetchall()
 		return rows
 
+	def get_content_type_and_paths(self, user_id, word_id):
+		"""Gets all the content associated with a word"""
+		self.cursor.execute("SELECT type, content_path FROM content WHERE user_id={} AND user_word_id={}"
+			.format(user_id, word_id))
+		rows = self.cursor.fetchall()
+		return rows
+
+
 	def set_supermemo_data(self, word):
 		"""Updates on the database the information about the supermemo algorithm that are contained in a word.
 

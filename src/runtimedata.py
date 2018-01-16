@@ -143,8 +143,8 @@ class RuntimeData:
 		"""
 		self.db.set_state(user_id, self.map_stateInv[new_state], new_state2)
 
-	def get_word(self, user_id, word_id):
-		"""Gets the Word instance corresponding to some word
+	def get_word_info(self, user_id, word_id):
+		"""Gets the Card instance corresponding to some word
 	
 		Args:
 			user_id: An integer representing the user's id.
@@ -153,8 +153,15 @@ class RuntimeData:
 		Returns:
 			A Word instace identified by the user_id and the word_id.
 		"""
-		info = self.db.get_word(user_id, word_id)
-		word = Word(info[0], info[1], info[2], info[3], info[4], info[5], info[6], info[7], datetime.combine(info[8], datetime.min.time()))
+		word_info = self.db.get_word(user_id, word_id)
+		content_info = self.db.get_content_type_and_paths(user_id, word_id)
+		card_type = content_info[0][0]
+		paths = []
+		for content_type,content_path in content_info:
+			paths.append(content_path)
+
+		word = Card(info[0], info[1], info[2], info[3], info[4], info[5], info[6], info[7], datetime.combine(info[8], datetime.min.time()),
+			card_type, paths)
 		return word
 
 	def get_all_words_info(self, user_id):
