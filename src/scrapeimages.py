@@ -25,7 +25,7 @@ import socket
 
 #URL RETRIEVE TIMEOUT
 socket.setdefaulttimeout(1)
-arq = open("google_credentials.txt", "r")
+arq = open("../credentials/google_credentials.txt", "r")
 DEV_KEY,CSE_ID = arq.read().split(' ')
 CSE_ID = CSE_ID.replace('\n','')
 arq.close()

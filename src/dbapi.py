@@ -2,7 +2,7 @@ import psycopg2
 import os
 import time
 import datetime
-from FlashCard import FlashCardSM
+from flashcard import TimeControl
 
 class Database:
 	"""Class that controls the database operations.
@@ -16,7 +16,7 @@ class Database:
 
 	def __init__(self):
 		try:
-			arq = open("connect_str.txt", "r")
+			arq = open("../credentials/connect_str.txt", "r")
 			connect_str = arq.read()
 			arq.close()
 			print(connect_str)
