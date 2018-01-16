@@ -1,4 +1,5 @@
 import psycopg2
+import os
 import time
 import datetime
 from FlashCard import FlashCardSM
@@ -150,26 +151,32 @@ class Database:
 		self.conn.commit()
 		return "Word and content added successfully!"
 
-	def erase_word(self, user_id, language, foreign_word):
+	def erase_word(self, user_id, word_id):
 		"""Erases a word from the database.
 
 		Args:
 			user_id: An integer representing the user's id.
-			language: A string containing the language name.
-			foreign word: A string containing the word in the foreign lenguage.
+			word_id: An integer representing the word's id between all the user's words.
 
 		Returns:
 			A string containing a message to the user. This string can be:
 			- "Word erased successfully!", if the operation succeeds.
-			- "Invalid english word or foreign word", if the operation fails.
+			- "Invalid word", if the operation fails.
 		"""
-		self.cursor.execute("SELECT FROM words WHERE id = {} AND language = '{}' AND foreign_word = '{}';".format(ID, language, foreign_word))
-		rows = self.cursor.fetchall
+		self.cursor.execute("SELECT * FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
+		rows = self.cursor.fetchall()
 		
 		if len(rows) == 0:
-			return "Invalid english word or foreign word"
+			return "Invalid word"
 
-		self.cursor.execute("DELETE FROM words WHERE id = {} AND language = '{}' AND foreign_word = '{}';".format(ID, language, foreign_word))
+		# erasing content of the word
+		self.cursor.execute("SELECT content_path FROM content WHERE user_id={} user_word_id={};".format(user_id, word_id))
+		rows = self.cursor.fetchall()
+		for row in rows:
+			os.remove(row[0])
+
+		# erasing the word from the database
+		self.cursor.execute("DELETE FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
 
 		self.conn.commit()
 		return "Word erased successfully!"

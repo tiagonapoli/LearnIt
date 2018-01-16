@@ -96,8 +96,8 @@ class RuntimeData:
 		""" 
 		return self.db.add_language(user_id,language)
 
-	def erase_word(self,ID, idiom, foreign_word):
-		return self.db.erase_word(user_id,idiom,foreign_word)
+	def erase_word(self,user_id, word_id):
+		return self.db.erase_word(user_id, word_id)
 
 	def get_state(self, user_id):
 		"""Gets the primary state of the user.
