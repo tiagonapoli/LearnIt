@@ -6,7 +6,8 @@ import utils
 import signal
 import shutil
 import systemtools
-from scrapeimages import fetch_images
+import time
+from scrapeimages import FetchImages
 from runtimedata import RuntimeData
 from flashcard import Card 
 
@@ -398,7 +399,8 @@ def get_word_3opt2(msg):
 		shutil.rmtree(path)
 		os.makedirs(path)	
 
-	fetch_images(rtd.temp_user[user_id][2],path)
+	fetch_obj = FetchImages()
+	fetch_obj.fetch_images(rtd.temp_user[user_id][2],path)
 	rtd.loop[user_id] = []
 	rtd.loop[user_id] = os.listdir(path)
 
@@ -629,4 +631,5 @@ while True:
 	except Exception as e:
 		print("An error ocurred with bot.polling")
 		print(e)
+		time.sleep(5)	
 
