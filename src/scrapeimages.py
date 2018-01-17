@@ -76,7 +76,7 @@ def fetch_images(query, directory, num_images=5):
 		return 0
 	
 	count = 0;
-	limit_size_bytes = 307200
+	limit_size_bytes = 256000
 	for item in res['items']:
 	
 		print(item['link'])
@@ -103,7 +103,7 @@ def fetch_images(query, directory, num_images=5):
 		filename = '{}/{}{:03d}.{}'.format(directory,query.replace(' ','_'),count,extension)
 		print("size = {}".format(size))
 		
-		if size >= limit_size_bytes:
+		if size > limit_size_bytes:
 			continue
 
 		count += geturl(url,filename)
