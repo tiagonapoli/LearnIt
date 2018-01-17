@@ -4,7 +4,7 @@ After answering a question, you will be asked to grade your performance, and bas
 
 The bot is still in development and is not guaranteed that it will be online all the time.
 # Commands
-/start: Starts the bot. 
-/add_language: Adds a new language you are interested in learning. 
-/add_word: Adds a new word in some foreign language that you added before and an english translation and some related images. You can send the images from your device or use the suggested images that the bot will get from Google Images. 
+/start: Starts the bot. <br />
+/add_language: Adds a new language you are interested in learning. <br />
+/add_word: Adds a new word in some foreign language that you added before and an english translation and some related images. You can send the images from your device or use the suggested images that the bot will get from Google Images. <br />
 /cancel: Cancels any operation. 
