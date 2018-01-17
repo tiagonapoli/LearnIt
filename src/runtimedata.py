@@ -178,7 +178,15 @@ class RuntimeData:
 		rows = self.db.get_all_words_info(user_id)
 		words = []
 		for row in rows:
-			words.append(Card(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], datetime.combine(row[8], datetime.min.time())))
+			word_id = row[4]
+			content_info = self.db.get_content_type_and_paths(user_id, word_id)
+			card_type = content_info[0][0]
+			paths = []
+			for content_type,content_path in content_info:
+				paths.append(content_path)
+
+			words.append(Card(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], datetime.combine(row[8], datetime.min.time())),
+				card_type, paths)
 		return words
 
 	def set_supermemo_data(self, word_id):
