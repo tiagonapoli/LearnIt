@@ -20,7 +20,7 @@ def schedule_daily_setup():
 		Creates a new 'at' job to execute daily setup tomorrow, 8 AM.
 	"""
 
-	command = 'echo "./daily_setup.py" | at 8:00 tomorrow'
+	command = 'echo "./dailysetup.py" | at 8:00 tomorrow'
 	print(command)
 	call(command, shell=True)
 
@@ -29,7 +29,7 @@ def schedule_setup_now():
 		Creates a new 'at' job to execute daily setup 1 minute from now.
 	"""
 	
-	command = 'echo "./daily_setup.py" | at now + 1 min'
+	command = 'echo "./dailysetup.py" | at now + 3 min'
 	print(command)
 	call(command, shell=True)
 

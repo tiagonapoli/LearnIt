@@ -3,7 +3,7 @@ import telebot
 import sys
 import systemtools 
 from runtimedata import RuntimeData
-from flashcard import card
+from flashcard import Card
 
 """
 	Script to send a card query through message in Telegram. If this was 
@@ -31,7 +31,7 @@ except Exception as e:
 	sys.exit(0)
 
 print(sys.argv[1])
-print(sys.argv[2])
+print("card id = " + sys.argv[2])
 print(sys.argv[3])
 
 user_id = int(sys.argv[1])
@@ -40,7 +40,8 @@ tried = int(sys.argv[3])
 rt_data = RuntimeData()
 
 if rt_data.get_state(user_id) == '0':
-	card = rt_data.get_word(user_id,card_id)
+	rt_data.set_state(user_id, 'LOCKED')
+	card = rt_data.get_word_info(user_id,card_id)
 	
 	bot.send_message(user_id,
 			"Review card! Answer with the respective word in {}".format(
@@ -48,7 +49,7 @@ if rt_data.get_state(user_id) == '0':
 	
 	markup = telebot.types.ForceReply(selective = False)
 	question = card.get_question()
-	content = card.get_quesiton_content()
+	content = card.get_question_content()
 	if content == 'Image':
 		question = open(question,'rb')
 		bot.send_photo(user_id, question, reply_markup = markup)

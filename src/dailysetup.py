@@ -16,7 +16,7 @@ ACTIVE_MINUTES = 60
 db = RuntimeData()
 today = datetime.datetime.now()
 
-for user_id in db.get_known_users():
+for user_id in db.known_users:
 	cards = db.get_all_words_info(user_id)
 	for card in cards:
 		cnt = 0

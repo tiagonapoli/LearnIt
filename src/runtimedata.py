@@ -141,6 +141,7 @@ class RuntimeData:
 			new_state: An integer representing the new primary state of the user.
 			new_state2: An integer representing the new secondary state of the user.
 		"""
+		print("{} NEW STATE {} {}".format(user_id, new_state, new_state2))
 		self.db.set_state(user_id, self.map_stateInv[new_state], new_state2)
 
 	def get_word_info(self, user_id, word_id):
@@ -153,7 +154,7 @@ class RuntimeData:
 		Returns:
 			A Word instace identified by the user_id and the word_id.
 		"""
-		word_info = self.db.get_word(user_id, word_id)
+		info = self.db.get_word(user_id, word_id)
 		content_info = self.db.get_content_type_and_paths(user_id, word_id)
 		card_type = content_info[0][0]
 		paths = []
@@ -177,7 +178,7 @@ class RuntimeData:
 		rows = self.db.get_all_words_info(user_id)
 		words = []
 		for row in rows:
-			words.append(Word(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], datetime.combine(row[8], datetime.min.time())))
+			words.append(Card(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], datetime.combine(row[8], datetime.min.time())))
 		return words
 
 	def set_supermemo_data(self, word_id):

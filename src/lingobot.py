@@ -5,9 +5,17 @@ import telebot
 import utils
 import signal
 import shutil
+import systemtools
 from scrapeimages import fetch_images
 from runtimedata import RuntimeData
 from flashcard import Card 
+
+'''
+#Get trash messages....
+@bot.message_handler(func = lambda msg: True)
+def debug(msg):
+	print("wololo")
+'''
 
 """
 	Bot message handlers source file
@@ -67,7 +75,8 @@ except Exception as e:
 	
 rtd = RuntimeData()
 rtd.reset_all_states()
-
+systemtools.schedule_setup_now()
+systemtools.schedule_daily_setup()
 
 
 
@@ -90,15 +99,6 @@ def create_key_button(text):
 			text: Text of the button
 	"""
 	return telebot.types.KeyboardButton(text)
-
-
-
-'''
-Get trash messages....
-@bot.message_handler(func = lambda msg: True)
-def debug(msg):
-	print("wololo")
-'''
 
 
 
@@ -141,12 +141,13 @@ def answer_card(msg):
 	"""
 
 	user_id = get_id(msg)
+	card_id = rtd.get_state2(user_id)
 	rtd.set_state(user_id, 'LOCKED')
-	res = msg.text.strip()
-	card = rtd.get_word(user_id,rtd.get_state2(user_id))
+	res = msg.text.strip().lower()
+	card = rtd.get_word_info(user_id,card_id)
 	rtd.temp_user[user_id] = []
 	rtd.temp_user[user_id].append(card)
-	if res == card.get_ans():
+	if res == card.get_ans().lower():
 		bot.send_message(user_id, "That was correct!")
 	else:
 		bot.send_message(user_id, "There was a mistake :(")
@@ -177,20 +178,22 @@ def poll_difficulty(msg):
 	
 	user_id = get_id(msg)
 	rtd.set_state(user_id, 'LOCKED')
-	card = rtd.temp_user[user_id].pop()
+	card = rtd.temp_user[user_id][0]
 	try:
 		grade = int(msg.text)
 	except:
 		bot.send_message(user_id, "Please use the custom keyboard")
+		rtd.set_state(user_id, 'WAITING_POLL_ANS')
 		return
 	
 	if not (grade <= 5 and grade >= 0):
 		bot.send_message(user_id, "Please use the custom keyboard")
+		rtd.set_state(user_id, 'WAITING_POLL_ANS')
 		return
 	
 	card.calc_next_date(grade)
 	rtd.set_supermemo_data(card)
-	print(word.get_next_date())
+	print(card.get_next_date())
 	markup = telebot.types.ReplyKeyboardRemove()
 	bot.send_message(user_id,"OK!", reply_markup=markup)
 	rtd.set_state(user_id, "0")
@@ -411,11 +414,14 @@ def get_word_3opt2(msg):
 	photo = ('../data/tmp/{}/{}'.format(user_id,
 									rtd.loop[user_id][
 										len(rtd.loop[user_id])-1]))
-	print(photo)
-	photo = open(photo,'rb')
-	bot.send_photo(user_id, photo)
-
-	rtd.set_state(user_id, '1_3-opt2_1')	
+	try:	
+		photo = open(photo,'rb')
+		bot.send_photo(user_id, photo)
+	except Exception as e:
+		bot.send_message(user_id, "An error ocurred with this image, sorry")
+		print("Error to open or sendo photo")
+		print(e)
+	rtd.set_state(user_id, '1_3-opt2_1')
 
 
 
@@ -569,15 +575,20 @@ def get_word_3opt2_1(msg):
 										rtd.loop[user_id][
 											len(rtd.loop[user_id])-1]))
 		print(photo)
-		photo = open(photo,'rb')
-		bot.send_photo(user_id, photo)
+		try:	
+			photo = open(photo,'rb')
+			bot.send_photo(user_id, photo)
+		except Exception as e:
+			bot.send_message(user_id, "An error ocurred with this image, sorry")
+			print("Error to open or sendo photo")
+			print(e)
 		rtd.set_state(user_id, '1_3-opt2_1')
 
 
 
 
-@bot.message_handler(func = lambda msg:
-				rtd.not_locked(get_id(msg)), commands = ['set_state'])
+
+@bot.message_handler(commands = ['set_state'])
 def set_state(msg):
 	"""
 		Used for debug only. Set user state

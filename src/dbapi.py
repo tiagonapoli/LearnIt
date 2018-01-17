@@ -283,7 +283,7 @@ class Database:
 			.format(word.attempts, word.ef, word.interval, word.next_date.strftime('%Y-%m-%d'), word.user_id, word.word_id))
 		self.conn.commit()
 
-	def set_state(self, user_id, state, state2=0):
+	def set_state(self, user_id, state, state2):
 		"""Updates on the database the state information about the user
 			
 		Args:

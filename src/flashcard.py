@@ -47,7 +47,7 @@ class TimeControl(object):
 		self.next_date = end_date
 	
 	def get_next_date(self):
-		return next_date
+		return self.next_date
 
 	def get_data(self):
 		return self.attempts,self.ef,self.interval,self.next_date
@@ -68,9 +68,9 @@ class Card(TimeControl):
 	"""
 	
 	def __init__(self, user_id, language, foreign_word, english_word, 
-			card_id, attempts = 1, ef = 2.5, interval = 1,
+			word_id, attempts = 1, ef = 2.5, interval = 1,
 			next_date = datetime.datetime.now() + datetime.timedelta(days=1),
-			query_content_type, path = []):
+			query_content_type = '', path = []):
 		self.user_id = user_id
 		self.language = language
 		self.foreign_word = foreign_word
@@ -92,21 +92,25 @@ class Card(TimeControl):
 			is that. Returns english translation if the question
 			is the english translation
 		"""
-		if query_content_type == 'Translation':
+		if self.query_content_type == 'Translation':
 			return english_word
-		elif query_content_type == 'Image' or query_content_type == 'Audio':
-			rand = randint(0,len(path)-1)
-			return path[rand]
+		elif self.query_content_type == 'Image' or self.query_content_type == 'Audio':
+			rand = randint(0,len(self.path)-1)
+			return self.path[rand]
 
 	def get_user(self):
-		return user_id
+		return self.user_id
 	
 	def get_card_id(self):
-		return card_id
+		return self.card_id
 
 	def get_ans(self):
-		return foreign_word
+		return self.foreign_word
 	
+	def get_language(self):
+		return self.language
+
+
 def main():
 	return 0
 
