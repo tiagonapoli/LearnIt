@@ -52,7 +52,7 @@ class Database:
 
 		self.cursor.execute("INSERT INTO users VALUES ({}, DEFAULT, DEFAULT, DEFAULT, DEFAULT);".format(user_id))
 		self.conn.commit()
-		return "Welcome to LingoBot!\n" + "Use the command \add_language to add the languages you are interested in learning and then use the command \add_word to add words you are interested in memorizing\n"
+		return "Welcome to LingoBot!\n" + "Use the command \\add_language to add the languages you are interested in learning and then use the command \\add_word to add words you are interested in memorizing.\n"
 
 	def add_language(self, user_id, language):
 		"""Adds a new language to the database.

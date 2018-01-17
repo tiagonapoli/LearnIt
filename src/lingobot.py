@@ -10,12 +10,6 @@ from scrapeimages import fetch_images
 from runtimedata import RuntimeData
 from flashcard import Card 
 
-'''
-#Get trash messages....
-@bot.message_handler(func = lambda msg: True)
-def debug(msg):
-	print("wololo")
-'''
 
 """
 	Bot message handlers source file
@@ -77,6 +71,14 @@ rtd = RuntimeData()
 rtd.reset_all_states()
 systemtools.schedule_daily_setup()
 
+
+
+'''
+#Get trash messages....
+@bot.message_handler(func = lambda msg: True)
+def debug(msg):
+	print("wololo")
+'''
 
 
 def get_id(msg):
@@ -248,6 +250,11 @@ def get_word(msg):
 	for language in known_languages:
 		btn.append(create_key_button(language))
 	
+	if len(btn) == 0:
+		bot.send_message(user_id, "Please, add a language first.")
+		rtd.set_state(user_id, '0')
+		return 	
+
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 
 	for i in range(0,len(btn)//2):
@@ -320,11 +327,11 @@ def get_word_2(msg):
 	rtd.temp_user[user_id].append(word)
 	btn1 = create_key_button('Send image')
 	btn2 = create_key_button('Choose one from suggestions')
-	btn3 = create_key_button('Send audio')
-	btn4 = create_key_button('Use only english translation')
+#	btn3 = create_key_button('Send audio')
+#	btn4 = create_key_button('Use only english translation')
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	markup.row(btn1,btn2)
-	markup.row(btn3,btn4)
+#	markup.row(btn3,btn4)
 	bot.send_message(user_id, "Choose one way to relate to the word: ",
 					reply_markup=markup)
 	rtd.set_state(user_id, '1_3')
@@ -341,11 +348,11 @@ def back_to_word_options(msg):
 	rtd.temp_user[user_id].pop()
 	btn1 = create_key_button('Send image')
 	btn2 = create_key_button('Choose one from suggestions')
-	btn3 = create_key_button('Send audio')
-	btn4 = create_key_button('Use only english translation')
+#	btn3 = create_key_button('Send audio')
+#	btn4 = create_key_button('Use only english translation')
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	markup.row(btn1,btn2)
-	markup.row(btn3,btn4)
+#	markup.row(btn3,btn4)
 	bot.send_message(user_id, "Choose one way to relate to the word: ",
 					reply_markup=markup)
 	rtd.set_state(user_id, '1_3')
@@ -398,7 +405,7 @@ def get_word_3opt2(msg):
 	if len(rtd.loop[user_id]) == 0:
 		bot.send_message(user_id, 
 						"Sorry, something wrong happened, we couldn't find images")
-		back_to_word_options()
+		back_to_word_options(msg)
 		return
 
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -478,9 +485,6 @@ def get_word_3opt1_0(msg):
 	btn1 = create_key_button('Done')
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	markup.row(btn1)
-
-	bot.send_message(user_id, "Keep sending images or click on the 'Done' button",
-					reply_markup=markup)
 	
 	filename = rtd.get_highest_word_id(user_id)
 	path = utils.save_image(msg,
@@ -491,6 +495,8 @@ def get_word_3opt1_0(msg):
 	print(path)
 	rtd.temp_user[user_id].append(path)
 	rtd.counter_user[user_id] += 1
+	bot.send_message(user_id, "Keep sending images or click on the 'Done' button",
+					reply_markup=markup)
 	rtd.set_state(user_id, '1_3-opt1_1')
 
 
@@ -615,7 +621,12 @@ def set_settings(msg):
 	return 0
 
 
-print("Press Ctrl+C to exit gently")
-print("Bot Polling")
-bot.polling()
+while True:
+	try:
+		print("Press Ctrl+C to exit gently")
+		print("Bot Polling!!!")
+		bot.polling(none_stop=True)
+	except Exception as e:
+		print("An error ocurred with bot.polling")
+		print(e)
 
