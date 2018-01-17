@@ -75,7 +75,6 @@ except Exception as e:
 	
 rtd = RuntimeData()
 rtd.reset_all_states()
-systemtools.schedule_setup_now()
 systemtools.schedule_daily_setup()
 
 

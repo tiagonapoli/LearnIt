@@ -185,8 +185,8 @@ class RuntimeData:
 			for content_type,content_path in content_info:
 				paths.append(content_path)
 
-			words.append(Card(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], datetime.combine(row[8], datetime.min.time())),
-				card_type, paths)
+			words.append(Card(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], datetime.combine(row[8], datetime.min.time()),
+				card_type, paths))
 		return words
 
 	def set_supermemo_data(self, word_id):

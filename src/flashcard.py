@@ -112,7 +112,8 @@ class Card(TimeControl):
 
 
 def main():
-	return 0
+	x = Card(12,"meme", "wololo", "wolo", 1)
+	print(x.get_next_date())
 
 if __name__ == '__main__':
 	main()

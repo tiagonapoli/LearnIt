@@ -12,19 +12,23 @@ from flashcard import Card
 
 """
 
-ACTIVE_MINUTES = 60
+systemtools.schedule_daily_setup()
+ACTIVE_MINUTES = 840
 db = RuntimeData()
 today = datetime.datetime.now()
+print("Today: " + today.strftime('%m/%d/%Y'))
 
 for user_id in db.known_users:
 	cards = db.get_all_words_info(user_id)
+	cnt = 0
 	for card in cards:
-		cnt = 0
-		if card.get_date().date() <= today.date():
+		if card.get_next_date().date() <= today.date():
 			cnt += 1
-	time_acumulated = 5
+	time_accumulated = 0
 	for card in cards:
-		if card.get_date().date() <= today.date():
+		if card.get_next_date().date() <= today.date():
+		
+			print(time_accumulated + (ACTIVE_MINUTES // cnt))
 			systemtools.set_new_at_job_card(time_accumulated + 
-					ACTIVE_MINUTES // cnt, user_id, card.wordID)
-			time_accumulated += ACTIVE_MINUTES // cnt
+					(ACTIVE_MINUTES // cnt), user_id, card.word_id)
+			time_accumulated += (ACTIVE_MINUTES // cnt)

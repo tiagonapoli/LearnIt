@@ -92,8 +92,11 @@ def fetch_images(query, directory, num_images=5):
 		info = site.info()
 		content_type = info.get_content_maintype()
 		extension = info.get_content_subtype()
-		
+
 		if (content_type != "image") or (not ('Content-Length' in info.keys())):
+			continue
+
+		if (extension != "jpg") and (extension != "jpeg"):
 			continue
 
 		size = int(info['Content-Length'])
