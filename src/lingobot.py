@@ -405,7 +405,7 @@ def get_word_3opt2(msg):
 	if len(rtd.loop[user_id]) == 0:
 		bot.send_message(user_id, 
 						"Sorry, something wrong happened, we couldn't find images")
-		back_to_word_options()
+		back_to_word_options(msg)
 		return
 
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -621,7 +621,12 @@ def set_settings(msg):
 	return 0
 
 
-print("Press Ctrl+C to exit gently")
-print("Bot Polling")
-bot.polling()
+while True:
+	try:
+		print("Press Ctrl+C to exit gently")
+		print("Bot Polling!!!")
+		bot.polling(none_stop=True)
+	except Exception as e:
+		print("An error ocurred with bot.polling")
+		print(e)
 

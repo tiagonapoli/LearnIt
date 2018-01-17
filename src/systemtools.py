@@ -1,4 +1,5 @@
 from subprocess import call
+import datetime
 
 def set_new_at_job_card(min_from_now,user_id,card_id,tried=0):
 	"""
@@ -19,8 +20,14 @@ def schedule_daily_setup():
 	"""
 		Creates a new 'at' job to execute daily setup tomorrow, 8 AM.
 	"""
+	
+	day = "tomorrow"
+	now = datetime.datetime.now()
+	
+	if now.hour < 8:
+		day = ""
 
-	command = 'echo "./dailysetup.py" | at 8:00 tomorrow'
+	command = 'echo "./dailysetup.py" | at 8:01 ' + day
 	print(command)
 	call(command, shell=True)
 
