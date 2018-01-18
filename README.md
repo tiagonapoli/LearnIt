@@ -8,3 +8,10 @@ The bot is still in development and is not guaranteed that it will be online all
 /add_language: Adds a new language you are interested in learning. <br />
 /add_word: Adds a new word in some foreign language that you added before and an english translation and some related images. You can send the images from your device or use the suggested images that the bot will get from Google Images. <br />
 /cancel: Cancels any operation. 
+
+# Some examples
+![Alt text](https://i.imgur.com/hcpAI2p.jpg)
+![Alt text](https://i.imgur.com/H2oM9fZ.jpg)
+![Alt text](https://i.imgur.com/R73OWaw.jpg)
+![Alt text](https://i.imgur.com/n2qtBHU.jpg)
+![Alt text](https://i.imgur.com/ENjkplc.jpg)
