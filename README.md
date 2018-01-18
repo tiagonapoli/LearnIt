@@ -10,8 +10,9 @@ The bot is still in development and is not guaranteed that it will be online all
 /cancel: Cancels any operation. 
 
 # Some examples
-![Alt text](https://i.imgur.com/hcpAI2p.jpg)
-![Alt text](https://i.imgur.com/H2oM9fZ.jpg)
-![Alt text](https://i.imgur.com/R73OWaw.jpg)
-![Alt text](https://i.imgur.com/n2qtBHU.jpg)
-![Alt text](https://i.imgur.com/ENjkplc.jpg)
+![Alt text](https://i.imgur.com/DAP2dhi.jpg)
+![Alt text](https://i.imgur.com/9g17dk3.jpg)
+![Alt text](https://i.imgur.com/dq02LL8.jpg)
+![Alt text](https://i.imgur.com/hVjsXp1.jpg)
+![Alt text](https://i.imgur.com/Mdd2cl2.jpg)
+![Alt text](https://i.imgur.com/IzahCZu.jpg)
