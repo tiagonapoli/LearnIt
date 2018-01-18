@@ -52,39 +52,57 @@ class TimeControl(object):
 	def get_data(self):
 		return self.attempts,self.ef,self.interval,self.next_date
 
-class Card(TimeControl):
+
+class WordInfo(object):
 	
-	"""Class that represents a flashcard. 
+	def __init__ (self, user_id, word_id, language, topic, foreign_word):
+		self.user_id = user_id
+		self.word_id = word_id
+		self.language = language
+		self.topic = topic
+		self.foreign_word = foreign_word
+
+	def get_word_id(self):
+		return self.word_id
+
+	def get_user(self):
+		return self.user_id
+
+	def get_word(self):
+		return self.foreign_word
+	
+	def get_language(self):
+		return self.language
+
+
+class Card(TimeControl, Word):
+	
+	"""
+	Class that represents a flashcard. 
 	In LingoBot each card is an word or phrase to learn (for now).
 
 	Atribbutes:
 		user_id: User ID
-		language: Language of the word or phrase
-		foreign_word: ...
-		english_word: Translation of the word
 		card_id: Card ID (on database)
-		query_content_type: Type of the message that will be sent to refer the card
-		path: List of paths to archives data will be used by the card
+		content_type: Type of the message that will be sent to refer the card
 	"""
 	
-	def __init__(self, user_id, language, foreign_word, english_word, 
-			word_id, attempts = 1, ef = 2.5, interval = 1,
-			next_date = datetime.datetime.now() + datetime.timedelta(days=1),
-			query_content_type = '', path = []):
-		self.user_id = user_id
-		self.language = language
-		self.foreign_word = foreign_word
-		self.english_word = english_word
-		self.word_id = word_id
-		self.query_content_type = query_content_type
-		self.path = path
+	def __init__(self,
+			user_id, word_id, language, foreign_word,
+			card_id, content_type, archives = [], 
+			attempts = 1, ef = 2.5, interval = 1,
+			next_date = datetime.datetime.now() + datetime.timedelta(days=1)):
+		self.card_id = card_id
+		self.content_type = content_type
+		self.archives = archives
+		WordInfo.__init__(self, user_id, word_id, language, foreign_word)
 		TimeControl.__init__(self,attempts,ef,interval,next_date)
 	
-	def get_question_content(self):
-		return self.query_content_type
+	def get_content(self):
+		return self.content_type
 
-	def get_paths(self):
-		return path
+	def get_archives(self):
+		return archives
 
 	def get_question(self):
 		"""
@@ -92,23 +110,45 @@ class Card(TimeControl):
 			is that. Returns english translation if the question
 			is the english translation
 		"""
-		if self.query_content_type == 'Translation':
-			return english_word
-		elif self.query_content_type == 'Image' or self.query_content_type == 'Audio':
-			rand = randint(0,len(self.path)-1)
-			return self.path[rand]
+		rand = randint(0,len(self.path)-1)
+		return self.path[rand]
 
-	def get_user(self):
-		return self.user_id
-	
 	def get_card_id(self):
 		return self.card_id
 
-	def get_ans(self):
-		return self.foreign_word
+
+class Word(WordInfo):
 	
-	def get_language(self):
-		return self.language
+	"""
+	Class that represents a flashcard. 
+	In LingoBot each card is an word or phrase to learn (for now).
+
+	Atribbutes:
+		user_id: User ID
+		language: Language of the word or phrase
+		foreign_word: ...
+		word_id: Card ID (on database)
+		cards: ...
+	"""
+
+	def __init__(self, 
+			user_id = None, word_id = None,  language = None, foreign_word = None, 
+			cards = {'images': None,
+					 'audio': None,
+					 'translation': None}):
+		WordInfo.__init__(user_id, word_id, language, foreign_word)
+		self.cards = cards
+	
+	def set_card(self, card):
+		card.word_id = self.word_id
+		card.user_id = self.user_id
+		cards[card.get_content()] = card
+
+	def del_card_type(self, card_type):
+		pass	
+
+	
+	
 
 
 def main():
