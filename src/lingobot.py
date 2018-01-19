@@ -7,73 +7,15 @@ import signal
 import shutil
 import systemtools
 import time
-from scrapeimages import FetchImages
+import flags
 from runtimedata import RuntimeData
 from flashcard import Card 
 
 
 """
 	Bot message handlers source file
-
-
-	State Machine Map:
-
-	0 (idle):
-		WAITING_ANS
-		1_0
-		2_0
-	
-	Where:
-		
-		WAITING_ANS -> WAITING_POLL_ANS -> 0
-
-		2_0 (add new language sequence) -> 0
-
-		1_0 (add word sequence) -> 1_1 -> 1_2 -> 1_3:
-			1_3-opt1 (Send message) 
-			1_3-opt2 (Choose one from suggestion)
-			1_3-opt3 (Send audio)
-		
-			Where:	
-				1_3-opt1 (Send Message) -> 1_3-opt1_1:
-					1_3-opt1_1 (loop)
-					0 (end loop)
-
-				1_3-opt2 (Choose one from suggestions):
-					1_3-opt2 (loop)
-					0 (end loop)
-
-				1_3-opt3 (Send audio) -> 1_3-opt3_1 -> 0
-
 """
-previous_state{
-	
 
-
-
-}
-
-next_state = {	'0':   {'card_query': 'WAITING_ANS'
-						'add_word': '1_0'
-						'add_language': '2_0'}
-				'WAITING_ANS': 'WAITING_POLL_ANS',
-				'WAITING_POLL_ANS': '0'
-				'1_0': '1_1',
-				'1_1': '1_2',
-				'1_2': {'send_image': '1_2-opt1'
-						'send_audio': '1_2-opt2'
-						'send_translation':	 '1_2-opt3'}
-				'1_2-opt1': ''
-				'1_2-opt2':
-				'1_2-opt3':		
-				'2_0': '0'
-
-				
-				
-
-
-
-}
 
 def signal_handler(signal, frame):
 	"""
@@ -99,16 +41,6 @@ except Exception as e:
 rtd = RuntimeData()
 rtd.reset_all_states()
 systemtools.schedule_daily_setup()
-
-
-
-
-#Get trash messages....
-# @bot.message_handler(func = lambda msg: True)
-# def debug(msg):
-# 	print("wololo")
-
-
 
 def get_id(msg):
 	"""
@@ -324,9 +256,32 @@ def get_word_0(msg):
 
 
 
-
 @bot.message_handler(func = lambda msg:
 				rtd.get_state(get_id(msg)) == '1_2', 
+				content_types=['text'])
+def get_word_1(msg):
+	"""
+		Add word: Get topic
+	"""
+	user_id = get_id(msg)
+	rtd.set_state(user_id, 'LOCKED')
+	word = msg.text.strip()
+	rtd.temp_user[user_id].foreign_word = word
+	btn1 = create_key_button('Send image')
+	btn2 = create_key_button('Send audio')
+	btn3 = create_key_button('Send translation')
+	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+	markup.row(btn1,btn2)
+	markup.row(btn3)
+	bot.send_message(user_id, "Choose one way to relate to the word: ",
+					reply_markup=markup)	
+	rtd.set_state(user_id, next_state['1_2'])
+
+
+
+
+@bot.message_handler(func = lambda msg:
+				rtd.get_state(get_id(msg)) == '1_3', 
 				content_types=['text'])
 def get_word_1(msg):
 	"""
@@ -344,7 +299,7 @@ def get_word_1(msg):
 	markup.row(btn3)
 	bot.send_message(user_id, "Choose one way to relate to the word: ",
 					reply_markup=markup)	
-	rtd.set_state(user_id, next_state['1_2'])
+	rtd.set_state(user_id, next_state['1_3'])
 
 
 def back_to_word_options(msg):
@@ -362,79 +317,6 @@ def back_to_word_options(msg):
 	bot.send_message(user_id, "Choose one way to relate to the word: ",
 					reply_markup=markup)
 	rtd.set_state(user_id, next_state['1_2'])
-
-
-
-
-@bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == '1_2' and 
-				msg.text == "Send image")
-def get_word_3opt1(msg):
-	"""
-		Add word: User just chose to Send Images -> Receive images sequence
-	"""
-	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
-	rtd.temp_user[user_id].append("Image")
-	markup = telebot.types.ReplyKeyboardRemove()
-	bot.send_message(user_id,"Send an image:",
-					reply_markup=markup)
-	rtd.set_state(user_id, '1_3-opt1')
-
-
-
-
-@bot.message_handler(func = lambda msg: 
-				rtd.get_state(get_id(msg)) == '1_3' and 
-				msg.text == "Choose one from suggestions")
-def get_word_3opt2(msg):
-	"""
-		Add word: User just chose select image from suggestions
-	"""
-	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
-	rtd.temp_user[user_id].append("Image")
-	
-	bot.send_message(user_id, "This may take a few seconds...")
-
-	path = "../data/tmp/{}".format(user_id)
-	if not os.path.exists(path):
-		os.makedirs(path)
-	else:
-		shutil.rmtree(path)
-		os.makedirs(path)	
-
-	fetch_obj = FetchImages()
-	fetch_obj.fetch_images(rtd.temp_user[user_id][2],path)
-	rtd.loop[user_id] = []
-	rtd.loop[user_id] = os.listdir(path)
-
-	if len(rtd.loop[user_id]) == 0:
-		bot.send_message(user_id, 
-						"Sorry, something wrong happened, we couldn't find images")
-		back_to_word_options(msg)
-		return
-
-	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-	btn1 = create_key_button('Add Image')
-	btn2 = create_key_button('Skip Image')
-	markup.row(btn1,btn2)
-	bot.send_message(user_id, "We will present you some images from google images(the query is the english translation). Please use the custom keyboard to select the images you want.",
-					reply_markup=markup)
-
-	
-	
-	photo = ('../data/tmp/{}/{}'.format(user_id,
-									rtd.loop[user_id][
-										len(rtd.loop[user_id])-1]))
-	try:	
-		photo = open(photo,'rb')
-		bot.send_photo(user_id, photo)
-	except Exception as e:
-		bot.send_message(user_id, "An error ocurred with this image, sorry")
-		print("Error to open or sendo photo")
-		print(e)
-	rtd.set_state(user_id, '1_3-opt2_1')
 
 
 
@@ -477,11 +359,27 @@ def get_word_3opt4(msg):
 
 
 
+@bot.message_handler(func = lambda msg:
+				rtd.get_state(get_id(msg)) == '1_2' and 
+				msg.text == "Send image")
+def get_word_3opt1(msg):
+	"""
+		Add word: User just chose to Send Images -> Receive images sequence
+	"""
+	user_id = get_id(msg)
+	rtd.set_state(user_id, 'LOCKED')
+	rtd.temp_user[user_id].append("Image")
+	markup = telebot.types.ReplyKeyboardRemove()
+	bot.send_message(user_id,"Send an image:",
+					reply_markup=markup)
+	rtd.set_state(user_id, '1_3-opt1') # TODO: next_state['1_2']
+
+
 
 @bot.message_handler(func = lambda msg:
 				rtd.get_state(get_id(msg)) == '1_3-opt1', 
 				content_types=['photo'])
-def get_word_3opt1_0(msg):
+def get_word_3opt1_1(msg):
 	"""
 		Add word: Send images sequence -> Receiving images
 		Creates custom keyboard with done button and receives the first image
