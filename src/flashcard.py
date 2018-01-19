@@ -74,47 +74,10 @@ class WordInfo(object):
 	def get_language(self):
 		return self.language
 
+	def get_topic(self):
+		return self.topic
 
-class Card(TimeControl, Word):
-	
-	"""
-	Class that represents a flashcard. 
-	In LingoBot each card is an word or phrase to learn (for now).
 
-	Atribbutes:
-		user_id: User ID
-		card_id: Card ID (on database)
-		content_type: Type of the message that will be sent to refer the card
-	"""
-	
-	def __init__(self,
-			user_id, word_id, language, foreign_word,
-			card_id, content_type, archives = [], 
-			attempts = 1, ef = 2.5, interval = 1,
-			next_date = datetime.datetime.now() + datetime.timedelta(days=1)):
-		self.card_id = card_id
-		self.content_type = content_type
-		self.archives = archives
-		WordInfo.__init__(self, user_id, word_id, language, foreign_word)
-		TimeControl.__init__(self,attempts,ef,interval,next_date)
-	
-	def get_content(self):
-		return self.content_type
-
-	def get_archives(self):
-		return archives
-
-	def get_question(self):
-		"""
-			Returns path to the image or audio if the question
-			is that. Returns english translation if the question
-			is the english translation
-		"""
-		rand = randint(0,len(self.path)-1)
-		return self.path[rand]
-
-	def get_card_id(self):
-		return self.card_id
 
 
 class Word(WordInfo):
@@ -131,30 +94,104 @@ class Word(WordInfo):
 		cards: ...
 	"""
 
-	def __init__(self, 
-			user_id = None, word_id = None,  language = None, foreign_word = None, 
-			cards = {'images': None,
-					 'audio': None,
-					 'translation': None}):
-		WordInfo.__init__(user_id, word_id, language, foreign_word)
-		self.cards = cards
+	def __init__(self, user_id = None, word_id = None,  language = None, topic = None, foreign_word = None):
+		self.cards = {}
+		WordInfo.__init__(self, user_id, word_id, language, topic, foreign_word)
 	
 	def set_card(self, card):
-		card.word_id = self.word_id
-		card.user_id = self.user_id
-		cards[card.get_content()] = card
+		self.cards[card.get_type()] = card
 
 	def del_card_type(self, card_type):
-		pass	
+		if self.cards.has_key(card_type):
+			del self.cards[card_type]
 
+	def get_cards(self):
+		ret = []
+		for content_type, card in self.cards.items():
+			ret.append(card)
+		return ret
+
+	def __str__(self):
+		str = "           --Word--\nUser ID: {}\nWord ID: {}\nLanguage: {}\nTopic: {}\nWord: {}\n".format(self.user_id, self.word_id, self.language, 
+												 self.topic, self.foreign_word)
+		for content_type, card in self.cards.items():
+			str += card.__str__()
+		return str
+
+
+
+class Card(TimeControl, WordInfo):
 	
+	"""
+	Class that represents a flashcard. 
+	In LingoBot each card is an word or phrase to learn (for now).
+
+	Atribbutes:
+		user_id: User ID
+		card_id: Card ID (on database)
+		content_type: Type of the message that will be sent to refer the card
+	"""
 	
+	def __init__(self,
+				user_id, word_id, language, topic, foreign_word,
+				card_id, content_type, 
+				attempts = 1, ef = 2.5, interval = 1,
+				next_date = datetime.datetime.now() + datetime.timedelta(days=1)):
+		self.card_id = card_id
+		self.content_type = content_type
+		self.archives = []
+		WordInfo.__init__(self, user_id, word_id, language, topic, foreign_word)
+		TimeControl.__init__(self,attempts,ef,interval,next_date)
+	
+	def __str__(self):
+		str = "           --Card--\n" + "Word ID: {}\nCard ID: {}\nWord: {}\nContent Type: {}\n Archives:\n".format(self.word_id, self.card_id, self.foreign_word, self.content_type)
+		for archive in self.archives:
+			str += archive + "\n"
+		str += "\n"
+		return str
+
+	def get_type(self):
+		return self.content_type
+
+	def get_archives(self):
+		return self.archives
+
+	def add_archive(self, archive):
+		self.archives.append(archive)
+
+	def get_question(self):
+		"""
+			Returns path to the image or audio if the question
+			is that. Returns english translation if the question
+			is the english translation
+		"""
+		rand = randint(0,len(self.path)-1)
+		return self.path[rand]
+
+	def get_card_id(self):
+		return self.card_id
 
 
-def main():
-	x = Card(12,"meme", "wololo", "wolo", 1)
-	print(x.get_next_date())
 
 if __name__ == '__main__':
-	main()
+		
 
+	word = Word(42,1,"Portuges", "Miscelania", "Camargao")
+	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 1, 'image') 
+	card.add_archive('../data/ibagem.jpg')
+	card.add_archive('./data/image.png')
+	word.set_card(card)
+	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 1, 'image') 
+	card.add_archive('AAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+	word.set_card(card)
+	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 1, 'audio') 
+	card.add_archive('BBBBBBBBBBBBBBBBB')
+	word.set_card(card)
+	print(word)
+
+
+	word = Word(42,2,"ingels", "wololo", "tiagao")
+	card = Card(42,2,"ingels", "wololo", "tiago", 1, 'image') 
+	card.add_archive('CCCCCCCCCCCCCCCCCC')
+	word.set_card(card)
+	print(word)

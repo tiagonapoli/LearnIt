@@ -2,7 +2,8 @@ import psycopg2
 import os
 import time
 import datetime
-from flashcard import TimeControl
+from flashcard import Word
+from flashcard import Card
 
 class Database:
 	"""Class that controls the database operations.
@@ -29,9 +30,53 @@ class Database:
 			print("Uh oh, can't connect. Invalid dbname, user or password?")
 			print(e)
 
+
+
+
 	def __del__(self):
 		self.conn.close()
 		self.cursor.close()
+
+
+
+
+	def get_state(self, user_id):
+		"""Gets the current state information about the user
+
+		Args:
+			user_id: An integer representing the user's id.
+
+		Returns:
+			A tuple containing two integers, the primary and secondary states of the user.
+		"""
+		self.cursor.execute("SELECT state, state2 FROM users WHERE id={}".format(user_id))
+		row = self.cursor.fetchall()
+		if len(row) == 0:
+			return "User doesn't exist"
+		return row[0]
+
+
+
+
+	def get_highest_word_id(self, user_id):
+		self.cursor.execute("SELECT highest_word_id FROM users WHERE id={}".format(user_id))
+		row = self.cursor.fetchall()
+		if len(row) == 0:
+			return "User doesn't exist"
+		return row[0][0]
+
+
+
+	def get_highest_card_id(self, user_id):
+		self.cursor.execute("SELECT highest_card_id FROM users WHERE id={}".format(user_id))
+		row = self.cursor.fetchall()
+		if len(row) == 0:
+			return "User doesn't exist"
+		return row[0][0]
+
+
+
+
 
 	def add_user(self, user_id):
 		"""Adds a new user to the database.
@@ -50,9 +95,12 @@ class Database:
 		if(len(rows) > 0):
 			return "Welcome back to LingoBot!"
 
-		self.cursor.execute("INSERT INTO users VALUES ({}, DEFAULT, DEFAULT, DEFAULT, DEFAULT);".format(user_id))
+		self.cursor.execute("INSERT INTO users VALUES ({}, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT);".format(user_id))
 		self.conn.commit()
 		return "Welcome to LingoBot!\n" + "Use the command /add_language to add the languages you are interested in learning and then use the command /add_word to add words you are interested in memorizing.\n"
+
+
+
 
 	def add_language(self, user_id, language):
 		"""Adds a new language to the database.
@@ -77,6 +125,9 @@ class Database:
 		self.conn.commit()
 		return "'{}' added successfully to your languages".format(language)
 
+
+
+
 	def erase_language(self, user_id, language):
 		"""Erases a language from the database.
 		
@@ -90,16 +141,120 @@ class Database:
 			- "'{}' is not in your languages", if the language is not in the database.
 			In the above examples {} means the language name.
 		"""
-		self.cursor.execute("SELECT language_name FROM languages WHERE language_name={};".format(language))
+		self.cursor.execute("SELECT language_name FROM languages WHERE user_id={} AND language_name='{}';".format(user_id, language))
 		rows = self.cursor.fetchall()
 		if(len(rows) == 0):
 			return "'{}' is not in your languages".format(language)
 
-		self.cursor.execute("DELETE FROM languages WHERE user_id={} AND language_name={};".format(user_id, language))
-		self.conn.commit()
-		return "'{}' removed successfully".format()
+		self.cursor.execute("SELECT user_card_id FROM cards WHERE user_id={} AND language='{}';".format(user_id, language))
+		rows = self.cursor.fetchall()
 
-	def add_word(self, user_id, lst):
+		for card_id in rows:
+			self.cursor.execute("SELECT type, content_path FROM archives WHERE user_id={} AND user_card_id={};".format(user_id, card_id[0]))
+			archives = self.cursor.fetchall()
+			for archive in archives:
+				if archive[0] != 'translation' and os.path.exists(archive[1]):
+					try:
+						print("Erased file {}".format(archive[1]))
+						os.remove(archive[1])
+					except Exception as e:
+						print("ERROR in erase_language")
+						print(e)
+
+		self.cursor.execute("DELETE FROM languages WHERE user_id={} AND language_name='{}';".format(user_id, language))
+		self.conn.commit()
+		return "'{}' removed successfully".format(language)
+	
+
+
+
+	def erase_archive(self, user_id, user_card_id, counter):
+		self.cursor.execute("SELECT type,content_path FROM content WHERE user_id={} AND user_word_id={} AND counter={}"
+						.format(user_id, word_id, counter))
+		rows = self.cursor.fetchall()
+		if len(rows) == 0:
+			print("ERROR in erase_archive, dbapi")
+			print("Archive {}, {}, {} is not in yout archives".format(user_id, user_card_id, counter))
+			return "Archive {}, {}, {} is not in yout archives".format(user_id, user_card_id, counter); 
+
+		archives = self.cursor.fetch(all)
+		for archive in archives:
+			if archives[0] != 'translation' and os.path.exist(archives[1]):
+				try:
+					print("Erased file {}".format(archives[1]))
+					os.remove(archives[1])
+				except Exception as e:
+					print("ERROR in erase_language")
+					print(e)
+
+		self.cursor.execute("DELETE FROM content WHERE user_id={} AND user_word_id={} AND counter={}"
+						.format(user_id, word_id, counter))
+		self.conn.commit()
+		return "Archive successfuly removed"
+
+
+
+
+	def add_card(self, card):
+		
+		user_id = card.get_user()
+		word_id = card.get_word_id()
+		language = card.get_language()
+		content_type = card.get_type()
+		foreign_word = card.get_word()
+		topic = card.get_topic()
+
+		self.cursor.execute("SELECT highest_card_id FROM users WHERE id={};".format(user_id))
+		rows = self.cursor.fetchall()
+		card_id = rows[0][0] + 1
+
+		#Update user's highest_card_id
+		self.cursor.execute("UPDATE users SET highest_card_id={} WHERE id={}".format(card_id, user_id))
+
+		self.cursor.execute("INSERT INTO cards VALUES ({}, {}, '{}', '{}', '{}', {}, '{}', {}, {}, {}, '{}')"
+			.format(user_id, word_id, language, topic, foreign_word,
+					card_id, content_type,
+					card.attempts, card.ef, card.interval,
+				str(card.next_date.year) + '-' + str(card.next_date.month) + '-' + str(card.next_date.day)))
+
+		self.conn.commit()
+
+		counter = 0
+		for path in card.archives:
+			counter += 1
+			self.cursor.execute("INSERT INTO archives VALUES ({}, {}, {}, '{}', '{}')"
+									.format(user_id, card_id, counter, content_type, path))
+
+		self.conn.commit()
+
+
+
+
+	def erase_card(self, user_id, user_card_id):
+		self.cursor.execute("SELECT * FROM cards WHERE user_id={} AND user_card_id={}"
+						.format(user_id, user_card_id))
+		if len(rows) == 0:
+			print("Error in erase_card, dbapi")
+			print("Card {}, {} doesn't exist".format(user_id, user_card_id))
+			return "Card {}, {} doesn't exist".format(user_id, user_card_id)
+
+		# erasing archives of the card
+		self.cursor.execute("SELECT content_path FROM archives WHERE user_id={} user_card_id={};".format(user_id, user_card_id))
+		rows = self.cursor.fetchall()
+		for row in rows:
+			try:
+				os.remove(row[0])
+			except Exception as e:
+				print(e)
+
+		self.cursor.execute("DELETE FROM cards WHERE user_id={} AND user_card_id={}"
+						.format(user_id, user_card_id))
+		self.conn.commit()
+		return "Card successfuly removed"
+
+
+
+	def add_word(self, word):
 		"""Adds a new word to the database.
 		
 		Args:
@@ -113,43 +268,40 @@ class Database:
 			- "{} is already in your words".
 			In the above example, {} means the word which is beeing added.
 		"""
-		
-		language = lst[0]
-		foreign_word = lst[1]
-		english_word = lst[2]
-		content_type = lst[3]
+		user_id = word.get_user()
+		language = word.get_language()
+		foreign_word = word.get_word()
+		topic = word.get_topic()
+		cards = word.cards 
 
 		self.cursor.execute("SELECT foreign_word FROM words WHERE user_id={} AND language='{}' AND foreign_word='{}';"
 			.format(user_id, language, foreign_word))
 		rows = self.cursor.fetchall()
 		if(len(rows) > 0):
-			return "{} is already in your words"
+			return "{} is already in your words".format(word.get_word())
 
 		self.cursor.execute("SELECT highest_word_id FROM users WHERE id={};".format(user_id))
 		rows = self.cursor.fetchall()
-		user_word_id = rows[0][0] + 1
+		word_id = rows[0][0] + 1
 
 		#Update user's highest_word_id
-		self.cursor.execute("UPDATE users SET highest_word_id={} WHERE id={}".format(user_word_id, user_id))
+		self.cursor.execute("UPDATE users SET highest_word_id={} WHERE id={}".format(word_id, user_id))
 		
-		fc = TimeControl()
-		self.cursor.execute("INSERT INTO words VALUES ({}, '{}', '{}', '{}', {}, {}, {}, {}, '{}')"
-			.format(user_id, language, foreign_word, english_word, user_word_id,
-				fc.attempts, fc.ef, fc.interval,
-				str(fc.next_date.year) + '-' + str(fc.next_date.month) + '-' + str(fc.next_date.day)))
-		
-		self.conn.commit()
+		self.cursor.execute("INSERT INTO words VALUES ({}, {}, '{}', '{}', '{}')"
+			.format(user_id, word_id, language, topic, foreign_word))
 
-		counter = 0
-		# From the fourth element on we have the paths to the contents
-		for i in range(4, len(lst)):
-			content_path = lst[i]
-			self.cursor.execute("INSERT INTO content VALUES ({}, '{}', '{}', {}, '{}', {}, '{}');"
-				.format(user_id, language, foreign_word, user_word_id, content_type, counter, content_path))
-			counter += 1
 
 		self.conn.commit()
+		
+		for ctype, card in word.cards.items():
+			if card == None:
+				continue
+			self.add_card(card)
+
 		return "Word and content added successfully!"
+
+
+
 
 	def erase_word(self, user_id, word_id):
 		"""Erases a word from the database.
@@ -169,17 +321,21 @@ class Database:
 		if len(rows) == 0:
 			return "Invalid word"
 
-		# erasing content of the word
-		self.cursor.execute("SELECT content_path FROM content WHERE user_id={} user_word_id={};".format(user_id, word_id))
+		self.cursor.execute("SELECT user_card_id FROM cards WHERE user_id={} user_word_id={};".format(user_id, word_id))
 		rows = self.cursor.fetchall()
+
+		#erasing cards
 		for row in rows:
-			os.remove(row[0])
+			erase_card(user_id, row[0])
 
 		# erasing the word from the database
 		self.cursor.execute("DELETE FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
 
 		self.conn.commit()
 		return "Word erased successfully!"
+
+
+
 
 	def get_known_users(self):
 		"""Gets all the columns of all users in the database
@@ -199,6 +355,9 @@ class Database:
 			known.add(row[0])
 
 		return known
+
+
+
 
 	def get_user_languages(self, user_id):
 		"""Gets all the languages that the user added
@@ -220,6 +379,9 @@ class Database:
 
 		return languages
 
+
+
+
 	def get_word(self, user_id, word_id):
 		"""Gets all the information about the select word of the user.
 		
@@ -240,8 +402,31 @@ class Database:
 			- A string representing the date of the next send of the word, in the form yyyy-mm-dd.
 		"""
 		self.cursor.execute("SELECT * FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
-		rows = self.cursor.fetchall()
-		return rows[0]
+		general_info = self.cursor.fetchall()
+		self.cursor.execute("SELECT * FROM cards WHERE user_id={} and user_word_id={};".format(user_id, word_id))
+		cards_info = self.cursor.fetchall()
+
+		word = Word(general_info[0], general_info[1], general_info[2], general_info[3])
+
+
+		for card_info in cards_info:
+			card = Card(card_info[0], card_info[1], card_info[2], card_info[3],
+						card_info[4], card_info[5], 
+						card_info[6], card_info[7], card_info[8], card_info[9])
+
+			card_id = card.card_info[4]
+			self.cursor.execute("SELECT * FROM content WHERE user_id={} and user_card_id={};".format(user_id, card_id))
+			paths = self.cursor.fetchall()
+			
+			for archive in paths:
+				card.add_archive(archive)
+
+			word.set_card(card)
+
+		return word
+
+
+
 
 	def get_all_words_info(self, user_id):
 		"""Gets all the information about all the words of the user
@@ -262,8 +447,35 @@ class Database:
 			- A string representing the date of the next send of the word, in the form yyyy-mm-dd.
 		"""
 		self.cursor.execute("SELECT * FROM words WHERE user_id={};".format(user_id))
-		rows = self.cursor.fetchall()
-		return rows
+		row = self.cursor.fetchall()
+		
+		words = {}
+		for word in row:
+			words[word[1]] = Word(word[0], word[1], word[2], word[3], word[4])
+
+		self.cursor.execute("SELECT * FROM cards WHERE user_id={};".format(user_id))
+		row = self.cursor.fetchall()
+
+		cards = {}
+		for card in row:
+			cards[card[5]] = Card(card[0], card[1], card[2], card[3], card[4], card[5], card[6], card[7], card[8], card[9], card[10])
+
+		self.cursor.execute("SELECT * FROM archives WHERE user_id={};".format(user_id))
+		row = self.cursor.fetchall()
+
+		for archive in row:
+			cards[archive[1]].add_archive(archive[4])
+
+		for card_id, card in cards.items():
+			words[card.get_word_id()].set_card(card)
+
+		ret = []
+		for word_id, word in words.items():
+			ret.append(word)
+
+		return ret
+
+		
 
 	def get_content_type_and_paths(self, user_id, word_id):
 		"""Gets all the content associated with a word"""
@@ -273,15 +485,20 @@ class Database:
 		return rows
 
 
+
+
 	def set_supermemo_data(self, word):
 		"""Updates on the database the information about the supermemo algorithm that are contained in a word.
 
 		Args:
 			word: A Word instance.
 		"""
-		self.cursor.execute("UPDATE words SET attempts={}, easiness_factor={}, interval={}, next_date='{}' WHERE user_id={} AND user_word_id={};"
+		self.cursor.execute("UPDATE cards SET attempts={}, easiness_factor={}, interval={}, next_date='{}' WHERE user_id={} AND user_card_id={};"
 			.format(word.attempts, word.ef, word.interval, word.next_date.strftime('%Y-%m-%d'), word.user_id, word.word_id))
 		self.conn.commit()
+
+
+
 
 	def set_state(self, user_id, state, state2):
 		"""Updates on the database the state information about the user
@@ -294,20 +511,54 @@ class Database:
 		self.cursor.execute("UPDATE users SET state={}, state2={} WHERE id={}".format(state, state2, user_id))
 		self.conn.commit()
 
-	def get_state(self, user_id):
-		"""Gets the current state information about the user
 
-		Args:
-			user_id: An integer representing the user's id.
 
-		Returns:
-			A tuple containing two integers, the primary and secondary states of the user.
-		"""
-		self.cursor.execute("SELECT state, state2 FROM users WHERE id={}".format(user_id))
-		rows = self.cursor.fetchall()
-		return rows[0]
 
-	def get_highest_word_id(self, user_id):
-		self.cursor.execute("SELECT highest_word_id FROM users WHERE id={}".format(user_id))
-		rows = self.cursor.fetchall()
-		return rows[0][0]
+if __name__ == '__main__':
+	
+	test = Database()
+
+	print(test.add_user(42))
+	print(test.add_language(42,"Portuges"))
+	print(test.add_language(42,"ingels"))
+	word = Word(42,1,"Portuges", "Miscelania", "Camargao")
+	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 1, 'image')
+	file = open('../data/ibagem.jpg', 'w')
+	file.write('olar')
+	file.close()
+
+	file = open('../data/image.png', 'w')
+	file.write('olar2')
+	file.close()
+
+	card.add_archive('../data/ibagem.jpg')
+	card.add_archive('./data/image.png')
+	word.set_card(card)
+	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 1, 'image') 
+	card.add_archive('AAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+	word.set_card(card)
+	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 1, 'audio') 
+	card.add_archive('BBBBBBBBBBBBBBBBB')
+	word.set_card(card)
+	
+	print(test.add_word(word))
+
+	word = Word(42,2,"ingels", "wololo", "tiagao")
+	card = Card(42,2,"ingels", "wololo", "tiago", 1, 'image') 
+	card.add_archive('CCCCCCCCCCCCCCCCCC')
+	word.set_card(card)
+
+	print(test.add_word(word))
+
+	print("\nLISTA\n")
+	
+
+	words = test.get_all_words_info(42)
+	for word in words:
+		print(word)
+
+	test.erase_language(42, 'Portuges')
+
+	words = test.get_all_words_info(42)
+	for word in words:
+		print(word)
