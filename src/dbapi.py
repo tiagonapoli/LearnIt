@@ -153,6 +153,7 @@ class Database:
 			self.cursor.execute("SELECT type, content_path FROM archives WHERE user_id={} AND user_card_id={};".format(user_id, card_id[0]))
 			archives = self.cursor.fetchall()
 			for archive in archives:
+				print(archive[0] + " " + archive[1])
 				if archive[0] != 'translation' and os.path.exists(archive[1]):
 					try:
 						print("Erased file {}".format(archive[1]))
@@ -168,27 +169,26 @@ class Database:
 
 
 
-	def erase_archive(self, user_id, user_card_id, counter):
-		self.cursor.execute("SELECT type,content_path FROM content WHERE user_id={} AND user_word_id={} AND counter={}"
-						.format(user_id, word_id, counter))
-		rows = self.cursor.fetchall()
-		if len(rows) == 0:
+	def erase_archive(self, user_id, card_id, counter):
+		self.cursor.execute("SELECT type,content_path FROM archives WHERE user_id={} AND user_card_id={} AND counter={}"
+						.format(user_id, card_id, counter))
+		archives = self.cursor.fetchall()
+		if len(archives) == 0:
 			print("ERROR in erase_archive, dbapi")
-			print("Archive {}, {}, {} is not in yout archives".format(user_id, user_card_id, counter))
-			return "Archive {}, {}, {} is not in yout archives".format(user_id, user_card_id, counter); 
+			print("Archive {}, {}, {} is not in yout archives".format(user_id, card_id, counter))
+			return "Archive {}, {}, {} is not in yout archives".format(user_id, card_id, counter); 
 
-		archives = self.cursor.fetch(all)
 		for archive in archives:
-			if archives[0] != 'translation' and os.path.exist(archives[1]):
+			if archive[0] != 'translation' and os.path.exists(archive[1]):
 				try:
-					print("Erased file {}".format(archives[1]))
-					os.remove(archives[1])
+					os.remove(archive[1])
+					print("Erased file {}".format(archive[1]))
 				except Exception as e:
-					print("ERROR in erase_language")
+					print("ERROR in erase_language - Archive {}".format(archive[1]))
 					print(e)
 
-		self.cursor.execute("DELETE FROM content WHERE user_id={} AND user_word_id={} AND counter={}"
-						.format(user_id, word_id, counter))
+		self.cursor.execute("DELETE FROM archives WHERE user_id={} AND user_card_id={} AND counter={}"
+						.format(user_id, card_id, counter))
 		self.conn.commit()
 		return "Archive successfuly removed"
 
@@ -233,13 +233,14 @@ class Database:
 	def erase_card(self, user_id, user_card_id):
 		self.cursor.execute("SELECT * FROM cards WHERE user_id={} AND user_card_id={}"
 						.format(user_id, user_card_id))
+		rows = self.cursor.fetchall()
 		if len(rows) == 0:
 			print("Error in erase_card, dbapi")
 			print("Card {}, {} doesn't exist".format(user_id, user_card_id))
 			return "Card {}, {} doesn't exist".format(user_id, user_card_id)
 
 		# erasing archives of the card
-		self.cursor.execute("SELECT content_path FROM archives WHERE user_id={} user_card_id={};".format(user_id, user_card_id))
+		self.cursor.execute("SELECT content_path FROM archives WHERE user_id={} AND user_card_id={};".format(user_id, user_card_id))
 		rows = self.cursor.fetchall()
 		for row in rows:
 			try:
@@ -321,12 +322,12 @@ class Database:
 		if len(rows) == 0:
 			return "Invalid word"
 
-		self.cursor.execute("SELECT user_card_id FROM cards WHERE user_id={} user_word_id={};".format(user_id, word_id))
+		self.cursor.execute("SELECT user_card_id FROM cards WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
 		rows = self.cursor.fetchall()
 
 		#erasing cards
-		for row in rows:
-			erase_card(user_id, row[0])
+		for card in rows:
+			self.erase_card(user_id, card[0])
 
 		# erasing the word from the database
 		self.cursor.execute("DELETE FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
@@ -348,11 +349,11 @@ class Database:
 			- An integer representing the current secondary state of the user.
 		"""
 
-		known = set()
+		known = []
 		self.cursor.execute("SELECT id FROM users;")
 		rows = self.cursor.fetchall()
 		for row in rows:
-			known.add(row[0])
+			known.append(row[0])
 
 		return known
 
@@ -406,20 +407,21 @@ class Database:
 		self.cursor.execute("SELECT * FROM cards WHERE user_id={} and user_word_id={};".format(user_id, word_id))
 		cards_info = self.cursor.fetchall()
 
-		word = Word(general_info[0], general_info[1], general_info[2], general_info[3])
+		general_info = general_info[0]
+		word = Word(general_info[0], general_info[1], general_info[2], general_info[3], general_info[4])
 
 
 		for card_info in cards_info:
-			card = Card(card_info[0], card_info[1], card_info[2], card_info[3],
-						card_info[4], card_info[5], 
-						card_info[6], card_info[7], card_info[8], card_info[9])
+			card = Card(card_info[0], card_info[1], card_info[2], card_info[3], card_info[4],
+						card_info[5], card_info[6], 
+						card_info[7], card_info[8], card_info[9], card_info[10])
 
-			card_id = card.card_info[4]
-			self.cursor.execute("SELECT * FROM content WHERE user_id={} and user_card_id={};".format(user_id, card_id))
+			card_id = card_info[5]
+			self.cursor.execute("SELECT content_path FROM archives WHERE user_id={} and user_card_id={};".format(user_id, card_id))
 			paths = self.cursor.fetchall()
 			
 			for archive in paths:
-				card.add_archive(archive)
+				card.add_archive(archive[0])
 
 			word.set_card(card)
 
@@ -475,26 +477,17 @@ class Database:
 
 		return ret
 
-		
-
-	def get_content_type_and_paths(self, user_id, word_id):
-		"""Gets all the content associated with a word"""
-		self.cursor.execute("SELECT type, content_path FROM content WHERE user_id={} AND user_word_id={}"
-			.format(user_id, word_id))
-		rows = self.cursor.fetchall()
-		return rows
 
 
 
-
-	def set_supermemo_data(self, word):
+	def set_supermemo_data(self, card):
 		"""Updates on the database the information about the supermemo algorithm that are contained in a word.
 
 		Args:
 			word: A Word instance.
 		"""
 		self.cursor.execute("UPDATE cards SET attempts={}, easiness_factor={}, interval={}, next_date='{}' WHERE user_id={} AND user_card_id={};"
-			.format(word.attempts, word.ef, word.interval, word.next_date.strftime('%Y-%m-%d'), word.user_id, word.word_id))
+			.format(card.attempts, card.ef, card.interval, card.next_date.strftime('%Y-%m-%d'), card.get_user(), card.get_word_id()))
 		self.conn.commit()
 
 
@@ -518,11 +511,7 @@ if __name__ == '__main__':
 	
 	test = Database()
 
-	print(test.add_user(42))
-	print(test.add_language(42,"Portuges"))
-	print(test.add_language(42,"ingels"))
-	word = Word(42,1,"Portuges", "Miscelania", "Camargao")
-	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 1, 'image')
+	#create files to debug
 	file = open('../data/ibagem.jpg', 'w')
 	file.write('olar')
 	file.close()
@@ -531,34 +520,91 @@ if __name__ == '__main__':
 	file.write('olar2')
 	file.close()
 
-	card.add_archive('../data/ibagem.jpg')
-	card.add_archive('./data/image.png')
-	word.set_card(card)
-	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 1, 'image') 
-	card.add_archive('AAAAAAAAAAAAAAAAAAAAAAAAAAAA')
-	word.set_card(card)
-	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 1, 'audio') 
-	card.add_archive('BBBBBBBBBBBBBBBBB')
-	word.set_card(card)
+	file = open('../data/ingreis.txt', 'w')
+	file.write('olar3')
+	file.close()
+
+	file = open('../data/talao.txt', 'w')
+	file.write('olar4')
+	file.close()
+	#Add user and languages
+	print(test.add_user(42))
+	print(test.add_user(84))
+
+	#highest card/word id
+	print("-----------------Highest Card/Word ID-----------------")
+	print(test.get_highest_card_id(42))
+	print(test.get_highest_word_id(84))
+
+	#Get known users
+	print("-----------------Get known Users-----------------")
+	print(str(test.get_known_users()) + "\n\n")
+
+	print(test.add_language(42,"Portuges"))
+	print(test.add_language(42,"ingels"))
 	
+	#Get user languages
+	print("-----------------Get user languages-----------------")
+	print(str(test.get_user_languages(42)) + "\n\n")
+
+	#Add words
+	print("-----------------Add words-----------------")
+	#word1
+	word = Word(42,1,"Portuges", "Miscelania", "Camargao")
+	card = Card(42,1,"Portuges", "Miscelania", "Camargao", None, 'image') 
+	card.add_archive('../data/ibagem.jpg')
+	word.set_card(card)
+	card = Card(42,1,"Portuges", "Miscelania", "Camargao", None, 'audio') 
+	card.add_archive('../data/image.png')
+	card.add_archive('so pode sobrar euuu')
+	word.set_card(card)
 	print(test.add_word(word))
 
+	#word2
 	word = Word(42,2,"ingels", "wololo", "tiagao")
 	card = Card(42,2,"ingels", "wololo", "tiago", 1, 'image') 
-	card.add_archive('CCCCCCCCCCCCCCCCCC')
+	card.add_archive('../data/ingreis.txt')
 	word.set_card(card)
-
 	print(test.add_word(word))
 
-	print("\nLISTA\n")
-	
+	#word3
+	word = Word(42,3,"Portuges", "Miscelania", "thalao")
+	card = Card(42,3,"Portuges", "Miscelania", "thalao", 1, 'image') 
+	card.add_archive('../data/talao.txt')
+	word.set_card(card)
+	print(test.add_word(word))
+
+	#get_all_words_info
+	print("\n-----------------LISTA-----------------\n")
+	words = test.get_all_words_info(42)
+	for word in words:
+		print(word)
+
+	#erase_card Portuges
+	print("-----------------Delete card-----------------\n\n")
+	print(test.erase_card(42,1))
+
+	#erase_language Ingels
+	print("-----------------Delete language Ingels-----------------\n\n")
+	print(test.erase_language(42, 'ingels'))
 
 	words = test.get_all_words_info(42)
 	for word in words:
 		print(word)
 
-	test.erase_language(42, 'Portuges')
+	#erase_word thalao
+	print("-----------------Delete word thalao-----------------\n\n")
+	print(test.erase_word(42, 3))
 
 	words = test.get_all_words_info(42)
 	for word in words:
 		print(word)
+
+	#erase_archive 
+	print("-----------------Erase archive-----------------\n\n")
+	print(test.erase_archive(42,2,1))
+
+	#get_word
+	print("-----------------Get word test-----------------\n\n")
+	print(test.get_word(42,1))
+

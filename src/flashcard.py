@@ -168,7 +168,7 @@ class Card(TimeControl, WordInfo):
 		rand = randint(0,len(self.path)-1)
 		return self.path[rand]
 
-	def get_card_id(self):
+	def get1_card_id(self):
 		return self.card_id
 
 
