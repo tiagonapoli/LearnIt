@@ -47,15 +47,15 @@ from flashcard import Card
 
 """
 
-def signal_handler(signal, frame):
-	"""
-		Handles CTRL+C signal that exits gently the bot
-	"""
-	utils.turn_off()
-	print("Exiting bot...")
-	sys.exit(0)
+# def signal_handler(signal, frame):
+# 	"""
+# 		Handles CTRL+C signal that exits gently the bot
+# 	"""
+# 	utils.turn_off()
+# 	print("Exiting bot...")
+# 	sys.exit(0)
 
-signal.signal(signal.SIGINT, signal_handler)
+# signal.signal(signal.SIGINT, signal_handler)
 
 try:
 	arq = open("../credentials/bot_token.txt", "r")
@@ -74,12 +74,12 @@ systemtools.schedule_daily_setup()
 
 
 
-'''
+
 #Get trash messages....
-@bot.message_handler(func = lambda msg: True)
-def debug(msg):
-	print("wololo")
-'''
+# @bot.message_handler(func = lambda msg: True)
+# def debug(msg):
+# 	print("wololo")
+
 
 
 def get_id(msg):
