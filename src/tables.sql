@@ -46,7 +46,7 @@ CREATE TABLE cards(
 	topic varchar(50),
 	foreign_word varchar(50),
 	user_card_id int,
-	type varchar(10),
+	type varchar(20),
 	
 	attempts int,
 	easiness_factor double precision DEFAULT 2.5,
@@ -63,7 +63,7 @@ CREATE TABLE archives(
 	user_id int,
 	user_card_id int,
 	counter int,
-	type varchar(10),
+	type varchar(20),
 	content_path varchar(50),
 
 	primary key (user_id, user_card_id, counter),

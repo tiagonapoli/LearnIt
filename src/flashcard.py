@@ -161,12 +161,13 @@ class Card(TimeControl, WordInfo):
 		self.archives.append(archive)
 
 	def erase_all_archives_local(self):
-		for archive in self.archives:
-			try:
-				os.remove(archive)
-				print("Erased {}.".format(archive))
-			except Exception as e:
-				print(e)
+		if self.content_type != 'translation' and self.content_type != 'default':
+			for archive in self.archives:
+				try:
+					os.remove(archive)
+					print("Erased {}.".format(archive))
+				except Exception as e:
+					print(e)
 		self.archives = []
 
 	def get_question(self):
