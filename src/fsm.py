@@ -2,6 +2,7 @@
 
 
 '''States'''
+LOCKED = 999
 IDLE = 0   
 WAITING_ANS = 1
 ADD_WORD = 2
@@ -17,19 +18,20 @@ SEND_AUDIO = 11
 SEND_AUDIO_LOOP = 12
 SEND_TRANSLATION = 13
 SEND_TRANSLATION_LOOP = 14
+RELATE_MENU = 15
 
 
 '''FSM'''
-previous_state {I
+previous_state = {
 		IDLE: IDLE,
 		WAITING_ANS: IDLE,
 		WAITING_POLL_ANS: IDLE,
 		ADD_WORD: IDLE,
 		(ADD_WORD, GET_LANGUAGE): ADD_WORD,
 		(ADD_WORD, GET_TOPIC): (ADD_WORD, GET_LANGUAGE),
-		(ADD_WORD, GET_WORD) : (ADD_WORD, GET_TOPIC),
-		(ADD_WORD, SEND_IMAGE) : (ADD_WORD, GET_WORD),
-		(ADD_WORD, SEND_IMAGE_LOOP: (ADD_WORD, SEND_IMAGE),
+		(ADD_WORD, GET_WORD): (ADD_WORD, GET_TOPIC),
+		(ADD_WORD, SEND_IMAGE): (ADD_WORD, GET_WORD),
+		(ADD_WORD, SEND_IMAGE_LOOP): (ADD_WORD, SEND_IMAGE),
 		(ADD_WORD, SEND_AUDIO): (ADD_WORD, GET_WORD), 
 		(ADD_WORD, SEND_AUDIO_LOOP): (ADD_WORD, SEND_AUDIO),
 		(ADD_WORD, SEND_TRANSLATION): (ADD_WORD, GET_WORD),	  
@@ -38,24 +40,26 @@ previous_state {I
 }
 next_state = {	
 		IDLE:   {'card_query': WAITING_ANS,
-	      			   'add_word': ADD_WORD,
-	      			   'add_language': ADD_LANGUAGE}
+	      		 'add_word': (ADD_WORD, GET_LANGUAGE),
+	      		 'add_language': ADD_LANGUAGE},
 		WAITING_ANS: WAITING_POLL_ANS,
-		WAITING_POLL_ANS: IDLE,
-		ADD_WORD: (ADD_WORD, GET_LANGUAGE),
-		(ADD_WORD, GET_LANGUAGE): (ADD_WORD, GET_TOPIC),
+		WAITING_POLL_ANS: {'done': WAITING_POLL_ANS,
+						   'error': IDLE},
+		(ADD_WORD, GET_LANGUAGE): {'done': (ADD_WORD, GET_TOPIC),
+								   'error': (ADD_WORD, GET_LANGUAGE)},
 		(ADD_WORD, GET_TOPIC): (ADD_WORD, GET_WORD),
-		(ADD_WORD, GET_WORD) : {'send_image': (ADD_WORD, SEND_IMAGE),
-				  						    'send_audio': (ADD_WORD, SEND_AUDIO),
-				  						    'send_translation': (ADD_WORD, SEND_TRANSLATION)},
-		(ADD_WORD, SEND_IMAGE) : (ADD_WORD, SEND_IMAGE_LOOP), # vai mandar imagem
-		(ADD_WORD, SEND_IMAGE_LOOP): {'Done': IDLE,
- 	   			   						     'else': (ADD_WORD, SEND_IMAGE_LOOP)},
-		(ADD_WORD, SEND_AUDIO): (ADD_WORD, SEND_AUDIO_LOOP),  # vai mandar audio
-		(ADD_WORD, SEND_AUDIO_LOOP): {'Done': IDLE,
-					   							  'else': (ADD_WORD, SEND_AUDIO_LOOP)},
-		(ADD_WORD, SEND_TRANSLATION): (ADD_WORD, SEND_TRANSLATION_LOOP),	  # vai mandar translation
-		(ADD_WORD, SEND_TRANSLATION_LOOP): {'Done': IDLE,
-					   		      					    'else': (ADD_WORD, SEND_TRANSLATION_LOOP)},
+		(ADD_WORD, GET_WORD): (ADD_WORD, RELATE_MENU),
+		(ADD_WORD, RELATE_MENU): {'send_image': (ADD_WORD, SEND_IMAGE),
+				  				  'send_audio': (ADD_WORD, SEND_AUDIO),
+				  				  'send_translation': (ADD_WORD, SEND_TRANSLATION),
+				  				  'done': IDLE},
+		(ADD_WORD, SEND_IMAGE): (ADD_WORD, SEND_IMAGE_LOOP),
+		(ADD_WORD, SEND_IMAGE_LOOP): {'else': (ADD_WORD, SEND_IMAGE_LOOP)},
+		(ADD_WORD, SEND_AUDIO): (ADD_WORD, SEND_AUDIO_LOOP), 
+		(ADD_WORD, SEND_AUDIO_LOOP): {'done': IDLE,
+					   				  'else': (ADD_WORD, SEND_AUDIO_LOOP)},
+		(ADD_WORD, SEND_TRANSLATION): (ADD_WORD, SEND_TRANSLATION_LOOP),	
+		(ADD_WORD, SEND_TRANSLATION_LOOP): {'done': IDLE,
+					   		    		    'else': (ADD_WORD, SEND_TRANSLATION_LOOP)},
 		ADD_LANGUAGE: IDLE
 }

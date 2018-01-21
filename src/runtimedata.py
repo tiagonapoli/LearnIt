@@ -1,6 +1,102 @@
 from dbapi import Database
 from datetime import datetime
-from flashcard import Card
+from flashcard import Word,Card
+import fsm
+import abc
+
+'''
+	Database Interface
+'''
+
+class DatabaseInterface(abc.ABC):
+
+	@abc.abstractmethod
+	def get_state(self, user_id):
+		pass
+
+	@abc.abstractmethod
+	def set_state(self, user_id, state1, state2, state3):
+		pass
+
+	@abc.abstractmethod
+	def get_highest_word_id(self, user_id):
+		pass
+
+	@abc.abstractmethod
+	def get_highest_card_id(self, user_id):
+		pass
+
+	@abc.abstractmethod
+	def add_user(self, user_id):
+		pass
+
+	@abc.abstractmethod
+	def get_known_users(self):
+		pass
+
+	@abc.abstractmethod
+	def get_user_languages(self, user_id):
+		pass
+
+	@abc.abstractmethod
+	def add_language(self, user_id, language):
+		pass
+
+	@abc.abstractmethod
+	def erase_language(self, user_id, language):
+		pass
+
+	@abc.abstractmethod
+	def erase_archive(self, user_id, card_id, counter):
+		pass
+
+	@abc.abstractmethod
+	def add_card(self, card):
+		pass
+
+	@abc.abstractmethod
+	def erase_card(self, user_id, user_card_id):
+		pass
+
+	@abc.abstractmethod
+	def add_topic(self, user_id, language, topic):
+		pass
+
+	@abc.abstractmethod
+	def get_all_topics(self, user_id, language):
+		pass
+
+	@abc.abstractmethod
+	def erase_topic_empty_words(self, user_id, language, topic):
+		pass
+
+	@abc.abstractmethod
+	def add_word(self, word):
+		pass
+
+	@abc.abstractmethod
+	def erase_word(self, user_id, word_id):
+		pass
+
+	@abc.abstractmethod
+	def get_word(self, user_id, word_id):
+		pass
+
+	@abc.abstractmethod
+	def get_all_words_info(self, user_id):
+		pass
+
+	@abc.abstractmethod
+	def get_words_on_topic(self, user_id, language, topic):
+		pass
+
+	@abc.abstractmethod
+	def set_supermemo_data(self, card):
+		pass
+
+
+
+
 
 class RuntimeData: 
 	"""Class that do all the runtime data management.
@@ -22,27 +118,49 @@ class RuntimeData:
 		self.known_users = self.db.get_known_users()
 		self.loop = {}
 		self.temp_user = {}
-		self.map_state = {0 : '0',
-						1 : 'WAITING_ANS',
-						2 : 'WAITING_POLL_ANS',
-						3 : '1_0',
-						4 : '1_1',
-						5 : '1_2',
-						6 : '1_3',
-						7 : '1_3-opt1',
-						8 : '1_3-opt1_1',
-						9 : '1_3-opt2',
-						10: '1_3-opt2_1',
-						11: '1_3-opt3',
-						12: '1_3-opt3_1',
-						13: '2_0',
-						14: 'LOCKED'
-						}
-		self.map_stateInv = {}
 		self.counter_user = {}
 		
-		for key,val in self.map_state.items():
-			self.map_stateInv[val] = key
+	def get_state(self, user_id):
+		"""Gets the primary state of the user.
+
+		Args:
+			user_id: An integer representing the user's id.
+
+		Returns:
+			An integer representing the primary state of the user.
+		"""
+
+		st = self.db.get_state(user_id)
+		ret = (st[0],)
+		for i in range(1,3):
+			if(st[i] == -1):
+				break
+			ret = ret + (st[i],)
+
+		if len(ret) == 1:
+			ret = ret[0]
+
+		print("id:{}  state:{}".format(user_id,ret))
+		return ret
+
+	
+	def set_state(self, user_id, state):
+		"""Updates the primary and secondary state of some user
+			
+		Args:
+			user_id: An integer representing the user's id.
+			new_state: An integer representing the new primary state of the user.
+			new_state2: An integer representing the new secondary state of the user.
+		"""
+
+		if type(state) != tuple:
+			state = (state, -1, -1)
+		else:
+			while len(state) < 3:
+				state = state + (-1,)
+
+		print("{} NEW STATE {} {} {}".format(user_id, state[0], state[1], state[2]))
+		self.db.set_state(user_id, state[0], state[1], state[2])
 
 	def add_user(self,user_id):
 		"""Register a new user.
@@ -58,7 +176,7 @@ class RuntimeData:
 		self.known_users.add(user_id)
 		return self.db.add_user(user_id)
 	
-	def add_word(self,user_id):
+	def add_word(self, word):
 		"""Adds a new word to the user's words.
 	
 		Args:
@@ -70,22 +188,12 @@ class RuntimeData:
 			- "{} is already in your words".
 			In the above example, {} means the word which is beeing added.
 		"""
-		lista = self.temp_user[user_id]
-		print("lista[{}] = ".format(user_id) + str(lista))
-		return self.db.add_word(user_id,lista)
+		print("---Word to add user {}---".format(word.user_id))
+		print(word)
+		return self.db.add_word(word)
 	
-	def get_user_languages(self, user_id):
-		"""Gets all the languages added by the user.
-		
-		Args:
-			user_id: An integer representing the user's id.
-
-		Returns:
-			A list of tuples with the following information abot the languages added by the user:
-			- An integer representing the user's id.
-			- A string containing the name of the language.
-		"""
-		return self.db.get_user_languages(user_id)
+	def erase_word(self,user_id, word_id):
+		return self.db.erase_word(user_id, word_id)
 	
 	def add_language(self, user_id, language):
 		"""Register a new language to the user.
@@ -102,49 +210,21 @@ class RuntimeData:
 		""" 
 		return self.db.add_language(user_id,language)
 
-	def erase_word(self,user_id, word_id):
-		return self.db.erase_word(user_id, word_id)
-
-	def get_state(self, user_id):
-		"""Gets the primary state of the user.
-
-		Args:
-			user_id: An integer representing the user's id.
-
-		Returns:
-			An integer representing the primary state of the user.
-		"""
-
-		st1,st2 = self.db.get_state(user_id)
-		st1 = self.map_state[st1]
-		print("id:{}  state:{}".format(user_id,st1))
-		return st1
-
-	def get_state2(self, user_id):
-		"""Gets the secondary state of the user
+	def get_user_languages(self, user_id):
+		"""Gets all the languages added by the user.
 		
 		Args:
 			user_id: An integer representing the user's id.
 
 		Returns:
-			An integer representing the secondary state of the user.
+			A list of tuples with the following information abot the languages added by the user:
+			- An integer representing the user's id.
+			- A string containing the name of the language.
 		"""
+		return self.db.get_user_languages(user_id)
+	
 
-		st1,st2 = self.db.get_state(user_id)
-		return st2
-
-	def set_state(self, user_id, new_state, new_state2=0):
-		"""Updates the primary and secondary state of some user
-			
-		Args:
-			user_id: An integer representing the user's id.
-			new_state: An integer representing the new primary state of the user.
-			new_state2: An integer representing the new secondary state of the user.
-		"""
-		print("{} NEW STATE {} {}".format(user_id, new_state, new_state2))
-		self.db.set_state(user_id, self.map_stateInv[new_state], new_state2)
-
-	def get_word_info(self, user_id, word_id):
+	def get_word(self, user_id, word_id):
 		"""Gets the Card instance corresponding to some word
 	
 		Args:
@@ -154,18 +234,9 @@ class RuntimeData:
 		Returns:
 			A Word instace identified by the user_id and the word_id.
 		"""
-		info = self.db.get_word(user_id, word_id)
-		content_info = self.db.get_content_type_and_paths(user_id, word_id)
-		card_type = content_info[0][0]
-		paths = []
-		for content_type,content_path in content_info:
-			paths.append(content_path)
+		return self.db.get_word(user_id, word_id)
 
-		word = Card(info[0], info[1], info[2], info[3], info[4], info[5], info[6], info[7], datetime.combine(info[8], datetime.min.time()),
-			card_type, paths)
-		return word
-
-	def get_all_words_info(self, user_id):
+	def get_all_words(self, user_id):
 		"""Gets all the information about all the words of a user.
 
 		Args:
@@ -174,39 +245,30 @@ class RuntimeData:
 		Returns:
 			A list of Word instances.
 		""" 
+		return self.db.get_all_words(user_id)
 
-		rows = self.db.get_all_words_info(user_id)
-		words = []
-		for row in rows:
-			word_id = row[4]
-			content_info = self.db.get_content_type_and_paths(user_id, word_id)
-			card_type = content_info[0][0]
-			paths = []
-			for content_type,content_path in content_info:
-				paths.append(content_path)
-
-			words.append(Card(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], datetime.combine(row[8], datetime.min.time()),
-				card_type, paths))
-		return words
-
-	def set_supermemo_data(self, word_id):
+	def set_supermemo_data(self, user_id, card_id):
 		"""Sets the data of some word about the supermemo algorithm.
 
 		Args:
 			word_id: An integer representing the id of a word between all the user's words.
 		"""
-		self.db.set_supermemo_data(word_id)
+		self.db.set_supermemo_data(user_id, card_id)
 
 	def reset_all_states(self):
 		"""Sets the states of all users to the initial state"""
 
 		for user in self.known_users:
-			self.set_state(user, '0')
+			self.set_state(user, fsm.IDLE)
 
 	def get_highest_word_id(self, user_id):
 		return self.db.get_highest_word_id(user_id)
 
+	def get_highest_card_id(self, user_id):
+		return self.db.get_highest_card_id(user_id)
+
+	def get_all_topics(self, user_id, language):
+		return self.db.get_all_topics(user_id,language)
+
 	def not_locked(self, user_id):
-		if self.get_state(user_id) == 'LOCKED':
-			return False
-		return True
+		return self.get_state(user_id) != fsm.LOCKED

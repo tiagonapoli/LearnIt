@@ -1,15 +1,13 @@
 #! /usr/bin/python3
 import sys
-import os
 import telebot
 import utils
 import signal
-import shutil
 import systemtools
 import time
-import flags
+import fsm
 from runtimedata import RuntimeData
-from flashcard import Card 
+from flashcard import Card, Word 
 
 
 """
@@ -62,7 +60,7 @@ def create_key_button(text):
 	"""
 	return telebot.types.KeyboardButton(text)
 
-
+#=====================SETUP USER=====================
 
 @bot.message_handler(commands = ['start'])
 def setup_user(msg):
@@ -74,10 +72,10 @@ def setup_user(msg):
 		return
 	m = rtd.add_user(user_id)
 	bot.send_message(user_id, m)
-	rtd.set_state(user_id, '0')
+	rtd.set_state(user_id, fsm.IDLE)
 	
 
-
+#=====================CANCEL=====================
 
 
 @bot.message_handler(func = lambda msg: rtd.not_locked(get_id(msg)) , commands = ['cancel'])
@@ -86,16 +84,17 @@ def cancel(msg):
 		Cancels any ongoing events for the user.
 	"""
 	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
+	rtd.set_state(user_id, fsm.LOCKED)
 	markup = telebot.types.ReplyKeyboardRemove()
 	bot.send_message(user_id, "canceled...", reply_markup=markup)
-	rtd.set_state(user_id, '0')
+	rtd.set_state(user_id, fsm.IDLE)
 
 
+#=====================ANSWER CARD=====================
 
 
 @bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == 'WAITING_ANS', 
+				rtd.get_state(get_id(msg)) == fsm.WAITING_ANS, 
 				content_types = ['text'])
 def answer_card(msg):
 	"""
@@ -104,7 +103,7 @@ def answer_card(msg):
 
 	user_id = get_id(msg)
 	card_id = rtd.get_state2(user_id)
-	rtd.set_state(user_id, 'LOCKED')
+	rtd.set_state(user_id, fsm.LOCKED)
 	res = msg.text.strip().lower()
 	card = rtd.get_word_info(user_id,card_id)
 	rtd.temp_user[user_id] = []
@@ -125,13 +124,13 @@ def answer_card(msg):
 
 	bot.send_message(user_id,"Please grade your performance to answer the card",
 					reply_markup=markup)
-	rtd.set_state(user_id, next_state['WAITING_ANS'])
+	rtd.set_state(user_id, fsm.next_state[fsm.WAITING_ANS])
 
 
 
 
 @bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == 'WAITING_POLL_ANS',
+				rtd.get_state(get_id(msg)) == fsm.WAITING_POLL_ANS,
 				content_types=['text'])
 def poll_difficulty(msg):
 	"""
@@ -139,18 +138,18 @@ def poll_difficulty(msg):
 	"""
 	
 	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
+	rtd.set_state(user_id, fsm.LOCKED)
 	card = rtd.temp_user[user_id][0]
 	try:
 		grade = int(msg.text)
 	except:
 		bot.send_message(user_id, "Please use the custom keyboard")
-		rtd.set_state(user_id, 'WAITING_POLL_ANS')
+		rtd.set_state(user_id, fsm.next_state[fsm.WAITING_POLL_ANS]['error'])
 		return
 	
 	if not (grade <= 5 and grade >= 0):
 		bot.send_message(user_id, "Please use the custom keyboard")
-		rtd.set_state(user_id, 'WAITING_POLL_ANS')
+		rtd.set_state(user_id, fsm.next_state[fsm.WAITING_POLL_ANS]['error'])
 		return
 	
 	card.calc_next_date(grade)
@@ -158,53 +157,54 @@ def poll_difficulty(msg):
 	print(card.get_next_date())
 	markup = telebot.types.ReplyKeyboardRemove()
 	bot.send_message(user_id,"OK!", reply_markup=markup)
-	rtd.set_state(user_id, next_state['WAITING_POLL_ANS'])
+	rtd.set_state(user_id, fsm.next_state[fsm.WAITING_POLL_ANS]['done'])
 
 
+#=====================ADD LANGUAGE=====================
 
 
 @bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == '0', 
+				rtd.get_state(get_id(msg)) == fsm.IDLE, 
 				commands = ['add_language'])
 def add_language(msg):
 	""" 
 		Add language sequence
 	"""
 	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
+	rtd.set_state(user_id, fsm.LOCKED)
 	bot.send_message(user_id, "Text me the language you want to add")
-	rtd.set_state(user_id, next_state['0']['add_language'])
+	rtd.set_state(user_id, fsm.next_state[fsm.IDLE]['add_language'])
 
 
 
 
 @bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == '2', 
+				rtd.get_state(get_id(msg)) == fsm.ADD_LANGUAGE, 
 				content_types = ['text'])
 def add_language_0(msg):
 	"""
 		Get language text - Add language
 	"""
 	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
+	rtd.set_state(user_id, fsm.LOCKED)
 	language = msg.text
 	language = language.strip()
 	print(language)
 	bot.send_message(user_id, rtd.add_language(user_id, language))
-	rtd.set_state(user_id, next_state['2'])
+	rtd.set_state(user_id, fsm.next_state[fsm.ADD_LANGUAGE])
 
-
+#=====================ADD WORD=====================
 
 
 @bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == '0', 
+				rtd.get_state(get_id(msg)) == fsm.IDLE, 
 				commands = ['add_word'])
 def get_word(msg):
 	"""
 		Add word: Get word sequence
 	"""
 	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
+	rtd.set_state(user_id, fsm.LOCKED)
 	known_languages = rtd.get_user_languages(user_id)
 	
 	btn = []
@@ -213,7 +213,7 @@ def get_word(msg):
 	
 	if len(btn) == 0:
 		bot.send_message(user_id, "Please, add a language first.")
-		rtd.set_state(user_id, '0')
+		rtd.set_state(user_id, fsm.IDLE)
 		return 	
 
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -226,71 +226,87 @@ def get_word(msg):
 
 	bot.send_message(user_id, "Please select the word's language", 
 					reply_markup=markup)	
-	rtd.set_state(user_id, next_state['0']['add_word'])
+	rtd.set_state(user_id, fsm.next_state[fsm.IDLE]['add_word'])
 
 
 
 
 @bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == '1_1',
+				rtd.get_state(get_id(msg)) == (fsm.ADD_WORD, fsm.GET_LANGUAGE),
 				content_types=['text'])
 def get_word_0(msg):
 	"""
 		Add word: Get word's language
 	"""
 	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
+	rtd.set_state(user_id, fsm.LOCKED)
 	known_languages = rtd.get_user_languages(user_id)
 	language = msg.text.strip()
 	if not (language in known_languages):
 		bot.reply_to(msg, "Please choose from keyboard")
-		rtd.set_state(user_id, '1_1')
+		rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.GET_LANGUAGE)]['error'])
 		return
 
+
+
 	markup = telebot.types.ReplyKeyboardRemove()
-	bot.send_message(user_id, "Send word to add (in {})".format(language),
+	bot.send_message(user_id, "Send the word's topic, either a new topic or select from existing".format(language),
 					reply_markup=markup)
-	rtd.temp_user[user_id] = Word()
-	rtd.temp_user[user_id].language = language
-	rtd.set_state(user_id, next_state['1_1'])
+	topics = rtd.get_all_topics(user_id, language)
+
+	if len(topics) > 0:
+		str = "Topics registered:\n"
+		for topic in topics:
+			str += "/" + topic.replace(' ', '_') + '\n'
+		bot.send_message(user_id, str)
+	else: 
+		bot.send_message(user_id, "There are no topics registered in this language yet.")
+	rtd.temp_user[user_id] = []
+	rtd.temp_user[user_id].append(Word(user_id, rtd.get_highest_word_id(user_id) + 1))
+	rtd.temp_user[user_id][0].language = language
+	rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.GET_LANGUAGE)]['done'])
 
 
 
 @bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == '1_2', 
+				rtd.get_state(get_id(msg)) == (fsm.ADD_WORD, fsm.GET_TOPIC), 
 				content_types=['text'])
 def get_word_1(msg):
 	"""
 		Add word: Get topic
 	"""
+	
 	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
-	word = msg.text.strip()
-	rtd.temp_user[user_id].foreign_word = word
-	btn1 = create_key_button('Send image')
-	btn2 = create_key_button('Send audio')
-	btn3 = create_key_button('Send translation')
-	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-	markup.row(btn1,btn2)
-	markup.row(btn3)
-	bot.send_message(user_id, "Choose one way to relate to the word: ",
-					reply_markup=markup)	
-	rtd.set_state(user_id, next_state['1_2'])
+	rtd.set_state(user_id, fsm.LOCKED)
+	language = rtd.temp_user[user_id][0].get_language()
+	topic = msg.text.strip()
+	topic = topic.replace('_', ' ')
+	topic = topic.replace('/', '')
+
+	rtd.temp_user[user_id][0].topic = topic
+	bot.send_message(user_id, "Send word to add (in {})".format(language))
+	rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.GET_TOPIC)])
 
 
 
 
 @bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == '1_3', 
+				rtd.get_state(get_id(msg)) == (fsm.ADD_WORD, fsm.GET_WORD), 
 				content_types=['text'])
 def get_word_1(msg):
 	"""
 		Add word: Get foreign word
 	"""
 	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
+	rtd.set_state(user_id, fsm.LOCKED)
+
 	word = msg.text.strip()
-	rtd.temp_user[user_id].foreign_word = word
+	rtd.temp_user[user_id][0].foreign_word = word
+	word = rtd.temp_user[user_id][0]
+	card_default = Card(word.user_id, word.word_id, word.language, word.topic, word.foreign_word, rtd.get_highest_card_id(user_id) + 1, 'default')
+	card_default.add_archive(card_default.foreign_word)
+	rtd.temp_user[user_id][0].set_card(card_default)
+
 	btn1 = create_key_button('Send image')
 	btn2 = create_key_button('Send audio')
 	btn3 = create_key_button('Send translation')
@@ -299,85 +315,180 @@ def get_word_1(msg):
 	markup.row(btn3)
 	bot.send_message(user_id, "Choose one way to relate to the word: ",
 					reply_markup=markup)	
-	rtd.set_state(user_id, next_state['1_3'])
+	rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)])
 
 
-def back_to_word_options(msg):
+def back_to_relate_menu(msg):
 	"""
 		Add word: Back to menu with choices to relate to the word
 	"""
 	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
+	rtd.set_state(user_id, fsm.LOCKED)
 	btn1 = create_key_button('Send image')
 	btn2 = create_key_button('Send audio')
-	btn3 = create_key_button('Use only english translation')
+	btn3 = create_key_button('Send translation')
+	btn4 = create_key_button('Done')
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	markup.row(btn1,btn2)
-	markup.row(btn3)
-	bot.send_message(user_id, "Choose one way to relate to the word: ",
+	markup.row(btn3,btn4)
+	bot.send_message(user_id, "Choose another way to relate to the word (if a way already filled is chosen, the data will be overwritten): ",
 					reply_markup=markup)
-	rtd.set_state(user_id, next_state['1_2'])
+	rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)])
 
+
+@bot.message_handler(func = lambda msg:
+				rtd.get_state(get_id(msg)) == (fsm.ADD_WORD, fsm.RELATE_MENU) and 
+				msg.text == "Done")
+def relate_menu_done(msg):
+	"""
+		Add word: User just chose to send audio
+	"""
+	user_id = get_id(msg)
+	rtd.set_state(user_id, fsm.LOCKED)
+	word = rtd.temp_user[user_id][0]
+	rtd.add_word(word)
+	markup = telebot.types.ReplyKeyboardRemove()
+	bot.send_message(user_id,"Successfully done!",
+					reply_markup=markup)
+	rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)]['done'])
 
 
 
 @bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == '1_3' and 
+				rtd.get_state(get_id(msg)) == (fsm.ADD_WORD, fsm.RELATE_MENU) and 
 				msg.text == "Send audio")
 def get_word_3opt3(msg):
 	"""
 		Add word: User just chose to send audio
 	"""
-	rtd.set_state(user_id, 'LOCKED')
+	rtd.set_state(user_id, fsm.LOCKED)
 	rtd.temp_user[user_id].append("Audio")
-	rtd.add_word(user_id)
-	rtd.set_state(user_id, '0')
+	rtd.add_word(word)
+	rtd.set_state(user_id, fsm.IDLE)
 	markup = telebot.types.ReplyKeyboardRemove()
 	bot.send_message(user_id,"Successfully done!",
 					reply_markup=markup)
 	
-	rtd.set_state(user_id, '0')
+	rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)]['send_audio'])
 
-
-
-@bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == '1_3' and 
-				msg.text == "Use only english translation")
-def get_word_3opt4(msg):
+@bot.message_handler(func = lambda msg: rtd.get_state(get_id(msg)) == (fsm.ADD_WORD, fsm.SEND_AUDIO))
+def get_word_3opt3(msg):
 	"""
-		Add word: User just chose to Send Images -> Receive images sequence
+		ADD_WORD, SEND_AUDIO
 	"""
-	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
-	rtd.temp_user[user_id].append("Translation")
-	rtd.add_word(user_id)
-	rtd.set_state(user_id, '0')
+	rtd.set_state(user_id, fsm.LOCKED)
+	rtd.temp_user[user_id].append("Audio")
+	rtd.add_word(user_id, word)
+	rtd.set_state(user_id, fsm.IDLE)
 	markup = telebot.types.ReplyKeyboardRemove()
 	bot.send_message(user_id,"Successfully done!",
 					reply_markup=markup)
-	rtd.set_state(user_id, '0')
+	
+	rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.SEND_AUDIO)])
+
+@bot.message_handler(func = lambda msg:	rtd.get_state(get_id(msg)) == (fsm.ADD_WORD, fsm.SEND_AUDIO_LOOP))
+def get_word_3opt3(msg):
+	"""
+		ADD_WORD, SEND_AUDIO_LOOP
+	"""
+	rtd.set_state(user_id, fsm.LOCKED)
+	rtd.temp_user[user_id].append("Audio")
+	rtd.add_word(user_id, word)
+	rtd.set_state(user_id, fsm.IDLE)
+	markup = telebot.types.ReplyKeyboardRemove()
+	bot.send_message(user_id,"Successfully done!",
+					reply_markup=markup)
+	
+	rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.SEND_AUDIO_LOOP)]['done'])
+
+
+@bot.message_handler(func = lambda msg:
+				rtd.get_state(get_id(msg)) == (fsm.ADD_WORD, fsm.RELATE_MENU) and 
+				msg.text == "Send translation")
+def get_word_3opt4(msg):
+	"""
+		ADD_WORD, RELATE_MENU, 'send_translation'
+	"""
+	user_id = get_id(msg)
+	rtd.set_state(user_id, fsm.LOCKED)
+	rtd.temp_user[user_id].append("Translation")
+	rtd.add_word(user_id)
+	rtd.set_state(user_id, fsm.IDLE)
+	markup = telebot.types.ReplyKeyboardRemove()
+	bot.send_message(user_id,"Successfully done!",
+					reply_markup=markup)
+	rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)]['send_translation'])
+
 
 
 
 @bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == '1_2' and 
+				rtd.get_state(get_id(msg)) == (fsm.ADD_WORD, fsm.SEND_TRANSLATION))
+def get_word_3opt4(msg):
+	"""
+		ADD_WORD, RELATE_MENU, 'send_translation'
+	"""
+	user_id = get_id(msg)
+	rtd.set_state(user_id, fsm.LOCKED)
+	rtd.temp_user[user_id].append("Translation")
+	rtd.add_word(user_id, word)
+	rtd.set_state(user_id, fsm.IDLE)
+	markup = telebot.types.ReplyKeyboardRemove()
+	bot.send_message(user_id,"Successfully done!",
+					reply_markup=markup)
+	rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.SEND_TRANSLATION)])
+
+
+
+@bot.message_handler(func = lambda msg:
+				rtd.get_state(get_id(msg)) == (fsm.ADD_WORD, fsm.SEND_TRANSLATION_LOOP))
+def get_word_3opt4(msg):
+	"""
+		ADD_WORD, SEND_TRANSLATION_LOOP
+	"""
+	user_id = get_id(msg)
+	rtd.set_state(user_id, fsm.LOCKED)
+	rtd.temp_user[user_id].append("Translation")
+	rtd.add_word(user_id, word)
+	rtd.set_state(user_id, fsm.IDLE)
+	markup = telebot.types.ReplyKeyboardRemove()
+	bot.send_message(user_id,"Successfully done!",
+					reply_markup=markup)
+	rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.SEND_TRANSLATION_LOOP)]['done'])
+
+
+
+@bot.message_handler(func = lambda msg:
+				rtd.get_state(get_id(msg)) == (fsm.ADD_WORD, fsm.RELATE_MENU) and 
 				msg.text == "Send image")
 def get_word_3opt1(msg):
 	"""
 		Add word: User just chose to Send Images -> Receive images sequence
 	"""
 	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
-	rtd.temp_user[user_id].append("Image")
+	rtd.set_state(user_id, fsm.LOCKED)
+	word = rtd.temp_user[user_id][0]
+	if 'image' in word.cards.keys():
+		card_id = word.cards['image'].card_id
+		word.cards['image'].erase_all_archives_local()
+	else:
+		card_id = rtd.get_highest_card_id(user_id) + 1 + len(word.cards)
+	
+	card = Card(word.user_id, word.word_id, word.language, word.topic, word.foreign_word,
+				card_id, 'image')
+	if(len(rtd.temp_user[user_id]) == 1):
+		rtd.temp_user[user_id].append(card)
+	else:
+		rtd.temp_user[user_id][1] = card
 	markup = telebot.types.ReplyKeyboardRemove()
-	bot.send_message(user_id,"Send an image:",
+	bot.send_message(user_id,"Send an image (Suggestion, use @pic 'query' or @bing 'query' to find an image):",
 					reply_markup=markup)
-	rtd.set_state(user_id, '1_3-opt1') # TODO: next_state['1_2']
+	rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)]['send_image'])
 
 
 
 @bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == '1_3-opt1', 
+				rtd.get_state(get_id(msg)) == (fsm.ADD_WORD, fsm.SEND_IMAGE), 
 				content_types=['photo'])
 def get_word_3opt1_1(msg):
 	"""
@@ -385,118 +496,59 @@ def get_word_3opt1_1(msg):
 		Creates custom keyboard with done button and receives the first image
 	"""
 	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
+	rtd.set_state(user_id, fsm.LOCKED)
 	rtd.counter_user[user_id] = 0
 	btn1 = create_key_button('Done')
 	markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 	markup.row(btn1)
 	
-	filename = rtd.get_highest_word_id(user_id)
+	filename = rtd.temp_user[user_id][1].card_id
 	path = utils.save_image(msg,
-							"../data/{}/{}/".format(user_id, rtd.temp_user[user_id][0]), 
+							"../data/{}/{}/".format(user_id, rtd.temp_user[user_id][0].get_word_id()), 
 							"{}_{}".format(filename,rtd.counter_user[user_id]), 
 							bot)
 	
 	print(path)
-	rtd.temp_user[user_id].append(path)
+	rtd.temp_user[user_id][1].add_archive(path)
 	rtd.counter_user[user_id] += 1
 	bot.send_message(user_id, "Keep sending images or click on the 'Done' button",
 					reply_markup=markup)
-	rtd.set_state(user_id, '1_3-opt1_1')
+	rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.SEND_IMAGE)])
 
 
 
 
 @bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == '1_3-opt1_1', 
+				rtd.get_state(get_id(msg)) == (fsm.ADD_WORD, fsm.SEND_IMAGE_LOOP), 
 				content_types=['photo', 'text'])
 def get_word_3opt1_1(msg):
 	"""
 		Add word: Send images sequence -> Receive Done command or more images
 	"""
 	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
+	rtd.set_state(user_id, fsm.LOCKED)
 	if msg.text == "Done":
-		rtd.add_word(user_id)
+		card = rtd.temp_user[user_id].pop()
+		rtd.temp_user[user_id][0].set_card(card)
 		markup = telebot.types.ReplyKeyboardRemove()
-		print(str(rtd.temp_user[user_id]))
-		bot.send_message(user_id,"Successfully done!",
-						reply_markup=markup)
-		rtd.set_state(user_id, '0')
+		print(str(rtd.temp_user[user_id][0]))
+		back_to_relate_menu(msg)
+		return
 	else:
-		filename = rtd.get_highest_word_id(user_id)
+		filename = rtd.temp_user[user_id][1].card_id
 		path = utils.save_image(msg,
-								"../data/{}/{}/".format(user_id, rtd.temp_user[user_id][0]), 
+								"../data/{}/{}/".format(user_id, rtd.temp_user[user_id][0].get_word_id()), 
 								"{}_{}".format(filename,rtd.counter_user[user_id]), 
 								bot)
 
 		print(path)
-		rtd.temp_user[user_id].append(path)
+		rtd.temp_user[user_id][1].add_archive(path)
 		rtd.counter_user[user_id] += 1
 		bot.send_message(user_id, 'Keep sending messages or press Done button')
-		rtd.set_state(user_id, '1_3-opt1_1')
+		rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.SEND_IMAGE_LOOP)]['else'])
 
 
-@bot.message_handler(func = lambda msg:
-				rtd.get_state(get_id(msg)) == '1_3-opt2_1',
-				content_types=['text'])
-def get_word_3opt2_1(msg):
-	"""
-		Add word: Choose images from suggestion sequence -> loops through
-		all images in tmp file for that word. User choose which will be added
-	"""
-	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
-	
-	if msg.text == "Add Image":
-		rtd.temp_user[user_id].append(rtd.loop[user_id].pop())
-	elif msg.text == "Skip Image":
-		rtd.loop[user_id].pop()
-
-	if len(rtd.loop[user_id]) == 0:
-		markup = telebot.types.ReplyKeyboardRemove()
-		if len(rtd.temp_user[user_id]) == 4:
-			bot.send_message(user_id,
-							"Sorry, the suggestions weren't so good, you can change the link type now", 
-							reply_markup=markup)
-			back_to_word_options(msg)
-			return 0
-		else:
-			old_dir = "../data/tmp/{}/".format(user_id)
-			new_dir = "../data/{}/{}/".format(user_id, rtd.temp_user[user_id][0])
-			if not os.path.exists(new_dir):
-				os.makedirs(new_dir)
-			highest_word_id = rtd.get_highest_word_id(user_id)
-			cnt = 0
-			for i in range(4, len(rtd.temp_user[user_id])):
-				old_filename = rtd.temp_user[user_id][i]
-				extension = utils.get_file_extension(old_filename)
-				new_filename = "{}_{}{}".format(highest_word_id,cnt, extension)
-				rtd.temp_user[user_id][i] = new_dir + new_filename
-				shutil.move(old_dir + old_filename, new_dir + new_filename)
-				cnt += 1
-		
-			rtd.add_word(user_id)
-			markup = telebot.types.ReplyKeyboardRemove()
-			bot.send_message(user_id,"Successfully done!",reply_markup=markup)
-			rtd.set_state(user_id, '0')
-	else:
-		photo = ('../data/tmp/{}/{}'.format(user_id,
-										rtd.loop[user_id][
-											len(rtd.loop[user_id])-1]))
-		print(photo)
-		try:	
-			photo = open(photo,'rb')
-			bot.send_photo(user_id, photo)
-		except Exception as e:
-			bot.send_message(user_id, "An error ocurred with this image, sorry")
-			print("Error to open or sendo photo")
-			print(e)
-		rtd.set_state(user_id, '1_3-opt2_1')
-
-
-
-
+#=====================SET STATE=====================
 
 @bot.message_handler(commands = ['set_state'])
 def set_state(msg):
@@ -504,7 +556,7 @@ def set_state(msg):
 		Used for debug only. Set user state
 	"""
 	user_id = get_id(msg)
-	rtd.set_state(user_id, 'LOCKED')
+	rtd.set_state(user_id, fsm.LOCKED)
 	number = msg.text[11:]
 	if len(number) == 0:
 		bot.sent_message(user_id, "don't forget the new state")
@@ -513,11 +565,11 @@ def set_state(msg):
 	print("id:{} state:{}".format(user_id, rtd.get_state(user_id)))
 	rtd.set_state(user_id, str(int(number)))
 
-
+#=====================SETTINGS=====================
 
 
 @bot.message_handler(func = lambda msg: 
-			rtd.get_state(get_id(msg)) == '0', 
+			rtd.get_state(get_id(msg)) == fsm.IDLE, 
 			commands = ['settings'])
 def set_settings(msg):
 	"""
@@ -526,13 +578,16 @@ def set_settings(msg):
 	return 0
 
 
-while True:
-	try:
-		print("Press Ctrl+C to exit gently")
-		print("Bot Polling!!!")
-		bot.polling(none_stop=True)
-	except Exception as e:
-		print("An error ocurred with bot.polling")
-		print(e)
-		time.sleep(5)	
+
+
+
+#while True:
+#	try:
+print("Press Ctrl+C to exit gently")
+print("Bot Polling!!!")
+bot.polling(none_stop=True)
+#	except Exception as e:
+#		print("An error ocurred with bot.polling")
+#		print(e)
+#		time.sleep(5)	
 

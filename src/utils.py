@@ -21,7 +21,6 @@ def save_image(image_msg, path, image_name, bot):
 		downloaded_file = bot.download_file(arq.file_path)
 		tipo = []
 		for c in arq.file_path[::-1]:
-			print(c)
 			if c == '.' :
 				break
 			tipo.append(c)

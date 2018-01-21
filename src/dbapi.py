@@ -2,10 +2,111 @@ import psycopg2
 import os
 import time
 import datetime
+import abc
 from flashcard import Word
 from flashcard import Card
 
-class Database:
+
+'''
+	Database Interface
+'''
+
+class DatabaseInterface(abc.ABC):
+
+	@abc.abstractmethod
+	def get_state(self, user_id):
+		pass
+
+	@abc.abstractmethod
+	def set_state(self, user_id, state1, state2, state3):
+		pass
+
+	@abc.abstractmethod
+	def get_highest_word_id(self, user_id):
+		pass
+
+	@abc.abstractmethod
+	def get_highest_card_id(self, user_id):
+		pass
+
+	@abc.abstractmethod
+	def add_user(self, user_id):
+		pass
+
+	@abc.abstractmethod
+	def get_known_users(self):
+		pass
+
+	@abc.abstractmethod
+	def get_user_languages(self, user_id):
+		pass
+
+	@abc.abstractmethod
+	def add_language(self, user_id, language):
+		pass
+
+	@abc.abstractmethod
+	def erase_language(self, user_id, language):
+		pass
+
+	@abc.abstractmethod
+	def erase_archive(self, user_id, card_id, counter):
+		pass
+
+	@abc.abstractmethod
+	def add_card(self, card):
+		pass
+
+	@abc.abstractmethod
+	def erase_card(self, user_id, user_card_id):
+		pass
+
+	@abc.abstractmethod
+	def add_topic(self, user_id, language, topic):
+		pass
+
+	@abc.abstractmethod
+	def get_all_topics(self, user_id, language):
+		pass
+
+	@abc.abstractmethod
+	def erase_topic_empty_words(self, user_id, language, topic):
+		pass
+
+	@abc.abstractmethod
+	def add_word(self, word):
+		pass
+
+	@abc.abstractmethod
+	def erase_word(self, user_id, word_id):
+		pass
+
+	@abc.abstractmethod
+	def get_word(self, user_id, word_id):
+		pass
+
+	@abc.abstractmethod
+	def get_all_words(self, user_id):
+		pass
+
+	@abc.abstractmethod
+	def get_words_on_topic(self, user_id, language, topic):
+		pass
+
+	@abc.abstractmethod
+	def set_supermemo_data(self, card):
+		pass
+
+
+
+
+
+'''
+	Database Implementation
+'''
+
+
+class Database(DatabaseInterface):
 	"""Class that controls the database operations.
 
 	Uses Postgres as object-relational database management system
@@ -49,11 +150,11 @@ class Database:
 		Returns:
 			A tuple containing two integers, the primary and secondary states of the user.
 		"""
-		self.cursor.execute("SELECT state, state2 FROM users WHERE id={}".format(user_id))
+		self.cursor.execute("SELECT state1, state2, state3 FROM users WHERE id={}".format(user_id))
 		row = self.cursor.fetchall()
 		if len(row) == 0:
 			return "User doesn't exist"
-		return row[0]
+		return (row[0][0], row[0][1], row[0][2])
 
 
 
@@ -199,14 +300,11 @@ class Database:
 		
 		user_id = card.get_user()
 		word_id = card.get_word_id()
+		card_id = card.get_card_id()
 		language = card.get_language()
 		content_type = card.get_type()
 		foreign_word = card.get_word()
 		topic = card.get_topic()
-
-		self.cursor.execute("SELECT highest_card_id FROM users WHERE id={};".format(user_id))
-		rows = self.cursor.fetchall()
-		card_id = rows[0][0] + 1
 
 		#Update user's highest_card_id
 		self.cursor.execute("UPDATE users SET highest_card_id={} WHERE id={}".format(card_id, user_id))
@@ -253,6 +351,17 @@ class Database:
 		self.conn.commit()
 		return "Card successfuly removed"
 
+	def add_topic(self, user_id, language, topic):
+		self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, language, topic))
+		row = self.cursor.fetchall()
+
+		if(len(row) > 0):
+			return
+
+		self.cursor.execute("INSERT INTO topics VALUES ({}, '{}', '{}')".format(user_id, language, topic))
+		self.conn.commit()
+
+
 
 
 	def add_word(self, word):
@@ -270,6 +379,7 @@ class Database:
 			In the above example, {} means the word which is beeing added.
 		"""
 		user_id = word.get_user()
+		word_id = word.get_word_id()
 		language = word.get_language()
 		foreign_word = word.get_word()
 		topic = word.get_topic()
@@ -281,9 +391,7 @@ class Database:
 		if(len(rows) > 0):
 			return "{} is already in your words".format(word.get_word())
 
-		self.cursor.execute("SELECT highest_word_id FROM users WHERE id={};".format(user_id))
-		rows = self.cursor.fetchall()
-		word_id = rows[0][0] + 1
+		self.add_topic(user_id, language, topic)
 
 		#Update user's highest_word_id
 		self.cursor.execute("UPDATE users SET highest_word_id={} WHERE id={}".format(word_id, user_id))
@@ -299,9 +407,21 @@ class Database:
 				continue
 			self.add_card(card)
 
-		return "Word and content added successfully!"
+		return "Word '{}' and content added successfully!".format(foreign_word)
 
+	def erase_topic_empty_words(self, user_id, language, topic):
+		self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id,language,topic))
+		rows = self.cursor.fetchall()
 
+		if len(rows) == 0:
+			print("Topic {},{},{} doesn't exist.".format(user_id,language,topic))
+			return
+
+		self.cursor.execute("DELETE FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, language,topic))
+		self.conn.commit()
+		print("Topic {},{},{} erased.".format(user_id, language, topic))
+		return
+		
 
 
 	def erase_word(self, user_id, word_id):
@@ -316,11 +436,15 @@ class Database:
 			- "Word erased successfully!", if the operation succeeds.
 			- "Invalid word", if the operation fails.
 		"""
-		self.cursor.execute("SELECT * FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
+
+		self.cursor.execute("SELECT language,topic FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
 		rows = self.cursor.fetchall()
-		
+
 		if len(rows) == 0:
 			return "Invalid word"
+
+		language = rows[0][0]
+		topic = rows[0][1]
 
 		self.cursor.execute("SELECT user_card_id FROM cards WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
 		rows = self.cursor.fetchall()
@@ -331,8 +455,15 @@ class Database:
 
 		# erasing the word from the database
 		self.cursor.execute("DELETE FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
-
 		self.conn.commit()
+
+		#maybe erase topic
+		self.cursor.execute("SELECT topic FROM words WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, language, topic))
+		rows = self.cursor.fetchall()
+
+		if len(rows) == 0:
+			self.erase_topic_empty_words(user_id, language, topic)
+
 		return "Word erased successfully!"
 
 
@@ -349,11 +480,11 @@ class Database:
 			- An integer representing the current secondary state of the user.
 		"""
 
-		known = []
+		known = set()
 		self.cursor.execute("SELECT id FROM users;")
 		rows = self.cursor.fetchall()
 		for row in rows:
-			known.append(row[0])
+			known.add(row[0])
 
 		return known
 
@@ -430,7 +561,7 @@ class Database:
 
 
 
-	def get_all_words_info(self, user_id):
+	def get_all_words(self, user_id):
 		"""Gets all the information about all the words of the user
 	
 		Args:
@@ -479,6 +610,28 @@ class Database:
 
 
 
+	def get_all_topics(self, user_id, language):
+		self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}';".format(user_id, language))
+		topics = self.cursor.fetchall()
+
+		ret = []
+		for topic in topics:
+			ret.append(topic[0])
+
+		return ret;
+
+
+
+	def get_words_on_topic(self, user_id, language, topic):
+		self.cursor.execute("SELECT user_id,user_word_id FROM words WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, language, topic))
+		words = self.cursor.fetchall()
+
+		ret = []
+		for word in words:
+			ret.append(self.get_word(word[0],word[1]))
+
+		return ret
+
 
 	def set_supermemo_data(self, card):
 		"""Updates on the database the information about the supermemo algorithm that are contained in a word.
@@ -493,7 +646,7 @@ class Database:
 
 
 
-	def set_state(self, user_id, state, state2):
+	def set_state(self, user_id, state1, state2, state3):
 		"""Updates on the database the state information about the user
 			
 		Args:
@@ -501,7 +654,7 @@ class Database:
 			state: An integer representing the user's primary state.
 			state2: An integer representing the user's secondary state.
 		"""
-		self.cursor.execute("UPDATE users SET state={}, state2={} WHERE id={}".format(state, state2, user_id))
+		self.cursor.execute("UPDATE users SET state1={}, state2={}, state3={} WHERE id={}".format(state1, state2, state3, user_id))
 		self.conn.commit()
 
 
@@ -568,15 +721,31 @@ if __name__ == '__main__':
 	print(test.add_word(word))
 
 	#word3
-	word = Word(42,3,"Portuges", "Miscelania", "thalao")
-	card = Card(42,3,"Portuges", "Miscelania", "thalao", 1, 'image') 
+	word = Word(42,3,"Portuges", "MEGAS XLR", "thalao")
+	card = Card(42,3,"Portuges", "MEGAS XLR", "thalao", 1, 'image') 
 	card.add_archive('../data/talao.txt')
 	word.set_card(card)
 	print(test.add_word(word))
 
-	#get_all_words_info
+	#get_all_words
 	print("\n-----------------LISTA-----------------\n")
-	words = test.get_all_words_info(42)
+	words = test.get_all_words(42)
+	for word in words:
+		print(word)
+
+	#get_all_topics
+	print("\n-----------------GET ALL TOPICS Portuges-----------------\n")
+	print(str(test.get_all_topics(42, 'Portuges')))
+
+	#get_words_on_topic
+	print("\n-----------------GET WORDS ON TOPICS-----------------\n")
+	words = test.get_words_on_topic(42, 'Portuges', 'Miscelania')
+	print('----Miscelania----')
+	for word in words:
+		print(word)
+
+	print('\n----MEGAS XLR----')
+	words = test.get_words_on_topic(42, 'Portuges', 'MEGAS XLR')
 	for word in words:
 		print(word)
 
@@ -588,7 +757,7 @@ if __name__ == '__main__':
 	print("-----------------Delete language Ingels-----------------\n\n")
 	print(test.erase_language(42, 'ingels'))
 
-	words = test.get_all_words_info(42)
+	words = test.get_all_words(42)
 	for word in words:
 		print(word)
 
@@ -596,7 +765,7 @@ if __name__ == '__main__':
 	print("-----------------Delete word thalao-----------------\n\n")
 	print(test.erase_word(42, 3))
 
-	words = test.get_all_words_info(42)
+	words = test.get_all_words(42)
 	for word in words:
 		print(word)
 

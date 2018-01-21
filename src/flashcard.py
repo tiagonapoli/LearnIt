@@ -1,5 +1,6 @@
 import time
 import datetime
+import os
 from random import randint
 
 class TimeControl(object):
@@ -159,6 +160,15 @@ class Card(TimeControl, WordInfo):
 	def add_archive(self, archive):
 		self.archives.append(archive)
 
+	def erase_all_archives_local(self):
+		for archive in self.archives:
+			try:
+				os.remove(archive)
+				print("Erased {}.".format(archive))
+			except Exception as e:
+				print(e)
+		self.archives = []
+
 	def get_question(self):
 		"""
 			Returns path to the image or audio if the question
@@ -168,7 +178,7 @@ class Card(TimeControl, WordInfo):
 		rand = randint(0,len(self.path)-1)
 		return self.path[rand]
 
-	def get1_card_id(self):
+	def get_card_id(self):
 		return self.card_id
 
 
