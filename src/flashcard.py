@@ -176,8 +176,8 @@ class Card(TimeControl, WordInfo):
 			is that. Returns english translation if the question
 			is the english translation
 		"""
-		rand = randint(0,len(self.path)-1)
-		return self.path[rand]
+		rand = randint(0,len(self.archives)-1)
+		return self.archives[rand]
 
 	def get_card_id(self):
 		return self.card_id

@@ -19,6 +19,7 @@ SEND_AUDIO_LOOP = 12
 SEND_TRANSLATION = 13
 SEND_TRANSLATION_LOOP = 14
 RELATE_MENU = 15
+WAITING_POLL_REMEMBER = 16
 
 
 '''FSM'''
@@ -41,10 +42,13 @@ previous_state = {
 next_state = {	
 		IDLE:   {'card_query': WAITING_ANS,
 	      		 'add_word': (ADD_WORD, GET_LANGUAGE),
-	      		 'add_language': ADD_LANGUAGE},
+	      		 'add_language': ADD_LANGUAGE,
+	      		 'card_remember': WAITING_POLL_REMEMBER},
 		WAITING_ANS: WAITING_POLL_ANS,
-		WAITING_POLL_ANS: {'done': WAITING_POLL_ANS,
-						   'error': IDLE},
+		WAITING_POLL_ANS: {'done': IDLE,
+							'error': WAITING_POLL_ANS},
+   		WAITING_POLL_REMEMBER: {'error': WAITING_POLL_REMEMBER,
+   								'done': IDLE},
 		(ADD_WORD, GET_LANGUAGE): {'done': (ADD_WORD, GET_TOPIC),
 								   'error': (ADD_WORD, GET_LANGUAGE)},
 		(ADD_WORD, GET_TOPIC): (ADD_WORD, GET_WORD),

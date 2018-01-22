@@ -13,6 +13,7 @@ def set_new_at_job_card(min_from_now,user_id,card_id,tried=0):
 	"""
 	
 	command = 'echo "./sender.py {} {} {}" | at now + {} min'.format(user_id,card_id,tried,min_from_now)
+
 	print(command)
 	call(command,shell=True)
 

@@ -55,6 +55,10 @@ class DatabaseInterface(abc.ABC):
 		pass
 
 	@abc.abstractmethod
+	def get_card(self, card):
+		pass
+
+	@abc.abstractmethod
 	def erase_card(self, user_id, user_card_id):
 		pass
 
@@ -175,6 +179,11 @@ class RuntimeData:
 		"""
 		self.known_users.add(user_id)
 		return self.db.add_user(user_id)
+
+	def get_card(self, user_id, card_id):
+		return self.db.get_card(user_id, card_id)
+
+
 	
 	def add_word(self, word):
 		"""Adds a new word to the user's words.
@@ -247,13 +256,13 @@ class RuntimeData:
 		""" 
 		return self.db.get_all_words(user_id)
 
-	def set_supermemo_data(self, user_id, card_id):
+	def set_supermemo_data(self, card):
 		"""Sets the data of some word about the supermemo algorithm.
 
 		Args:
 			word_id: An integer representing the id of a word between all the user's words.
 		"""
-		self.db.set_supermemo_data(user_id, card_id)
+		self.db.set_supermemo_data(card)
 
 	def reset_all_states(self):
 		"""Sets the states of all users to the initial state"""
@@ -272,3 +281,10 @@ class RuntimeData:
 
 	def not_locked(self, user_id):
 		return self.get_state(user_id) != fsm.LOCKED
+
+	def set_card_waiting(self, user_id, card_id):
+		self.db.set_card_waiting(user_id, card_id)
+
+
+	def get_card_waiting(self, user_id):
+		return self.db.get_card_waiting(user_id)

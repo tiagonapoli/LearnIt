@@ -58,6 +58,10 @@ class DatabaseInterface(abc.ABC):
 		pass
 
 	@abc.abstractmethod
+	def get_card(self, user_id, card_id):
+		pass
+
+	@abc.abstractmethod
 	def erase_card(self, user_id, user_card_id):
 		pass
 
@@ -95,6 +99,14 @@ class DatabaseInterface(abc.ABC):
 
 	@abc.abstractmethod
 	def set_supermemo_data(self, card):
+		pass
+
+	@abc.abstractmethod
+	def set_card_waiting(self, user_id, card_id):
+		pass
+
+	@abc.abstractmethod
+	def get_card_waiting(self, user_id):
 		pass
 
 
@@ -307,7 +319,13 @@ class Database(DatabaseInterface):
 		topic = card.get_topic()
 
 		#Update user's highest_card_id
-		self.cursor.execute("UPDATE users SET highest_card_id={} WHERE id={}".format(card_id, user_id))
+		self.cursor.execute("SELECT highest_card_id FROM users WHERE id={};".format(user_id))
+		highest_card_id = self.cursor.fetchall()
+		highest_card_id = highest_card_id[0][0]
+
+		if highest_card_id < card_id:
+			self.cursor.execute("UPDATE users SET highest_card_id={} WHERE id={}".format(card_id, user_id))
+
 
 		self.cursor.execute("INSERT INTO cards VALUES ({}, {}, '{}', '{}', '{}', {}, '{}', {}, {}, {}, '{}')"
 			.format(user_id, word_id, language, topic, foreign_word,
@@ -325,8 +343,24 @@ class Database(DatabaseInterface):
 
 		self.conn.commit()
 
+	def get_card(self, user_id, user_card_id):
+		self.cursor.execute("SELECT * FROM cards WHERE user_id={} AND user_card_id={}"
+				.format(user_id, user_card_id))
+		row = self.cursor.fetchall()
 
+		if len(row) == 0:
+			print("Error in get_card")
+			print("Card {}, {} doesn't exist".format(user_id, user_card_id))		
+			return "Card {}, {} doesn't exist".format(user_id, user_card_id)
 
+		row = row[0]
+		card = Card(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10])
+
+		self.cursor.execute("SELECT content_path FROM archives WHERE user_id={} AND user_card_id={};".format(user_id, user_card_id))
+		rows = self.cursor.fetchall()
+		for row in rows:
+			card.add_archive(row[0])
+		return card
 
 	def erase_card(self, user_id, user_card_id):
 		self.cursor.execute("SELECT * FROM cards WHERE user_id={} AND user_card_id={}"
@@ -360,6 +394,7 @@ class Database(DatabaseInterface):
 
 		self.cursor.execute("INSERT INTO topics VALUES ({}, '{}', '{}')".format(user_id, language, topic))
 		self.conn.commit()
+
 
 
 
@@ -640,7 +675,7 @@ class Database(DatabaseInterface):
 			word: A Word instance.
 		"""
 		self.cursor.execute("UPDATE cards SET attempts={}, easiness_factor={}, interval={}, next_date='{}' WHERE user_id={} AND user_card_id={};"
-			.format(card.attempts, card.ef, card.interval, card.next_date.strftime('%Y-%m-%d'), card.get_user(), card.get_word_id()))
+			.format(card.attempts, card.ef, card.interval, card.next_date.strftime('%Y-%m-%d'), card.get_user(), card.card_id))
 		self.conn.commit()
 
 
@@ -657,6 +692,17 @@ class Database(DatabaseInterface):
 		self.cursor.execute("UPDATE users SET state1={}, state2={}, state3={} WHERE id={}".format(state1, state2, state3, user_id))
 		self.conn.commit()
 
+
+	def set_card_waiting(self, user_id, card_id):
+		self.cursor.execute("UPDATE users SET card_waiting={} WHERE id={};".format(card_id, user_id))
+		self.conn.commit()
+
+
+	def get_card_waiting(self, user_id):
+		self.cursor.execute("SELECT card_waiting FROM users WHERE id={};".format(user_id))
+		card = self.cursor.fetchall()
+		card = card[0][0]
+		return card
 
 
 

@@ -19,11 +19,12 @@ def signal_handler(signal, frame):
 	"""
 		Handles CTRL+C signal that exits gently the bot
 	"""
+	bot.send_message(359999978,"Bot turned off")
 	utils.turn_off()
 	print("Exiting bot...")
 	sys.exit(0)
 
-# signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
 
 try:
 	arq = open("../credentials/bot_token.txt", "r")
@@ -102,17 +103,17 @@ def answer_card(msg):
 	"""
 
 	user_id = get_id(msg)
-	card_id = rtd.get_state2(user_id)
 	rtd.set_state(user_id, fsm.LOCKED)
+	card_id = rtd.get_card_waiting(user_id)
+	card = rtd.get_card(user_id, card_id)
 	res = msg.text.strip().lower()
-	card = rtd.get_word_info(user_id,card_id)
 	rtd.temp_user[user_id] = []
 	rtd.temp_user[user_id].append(card)
-	if res == card.get_ans().lower():
+	if res == card.foreign_word.lower():
 		bot.send_message(user_id, "That was correct!")
 	else:
 		bot.send_message(user_id, "There was a mistake :(")
-	bot.send_message(user_id, "Answer: " + card.get_ans())
+	bot.send_message(user_id, "Answer: " + card.foreign_word)
 	btn0 = create_key_button("0");
 	btn1 = create_key_button("1");
 	btn2 = create_key_button("2");
@@ -159,6 +160,38 @@ def poll_difficulty(msg):
 	bot.send_message(user_id,"OK!", reply_markup=markup)
 	rtd.set_state(user_id, fsm.next_state[fsm.WAITING_POLL_ANS]['done'])
 
+#=====================REMEMBER CARD=====================
+
+@bot.message_handler(func = lambda msg:
+				rtd.get_state(get_id(msg)) == fsm.WAITING_POLL_REMEMBER,
+				content_types=['text'])
+def poll_difficulty(msg):
+	"""
+		Get user performance grade
+	"""
+	
+	user_id = get_id(msg)
+	rtd.set_state(user_id, fsm.LOCKED)
+	card_id = rtd.get_card_waiting(user_id)
+	card = rtd.get_card(user_id, card_id)
+	try:
+		grade = int(msg.text)
+	except:
+		bot.send_message(user_id, "Please use the custom keyboard")
+		rtd.set_state(user_id, fsm.next_state[fsm.WAITING_POLL_REMEMBER]['error'])
+		return
+	
+	if not (grade <= 5 and grade >= 0):
+		bot.send_message(user_id, "Please use the custom keyboard")
+		rtd.set_state(user_id, fsm.next_state[fsm.WAITING_POLL_REMEMBER]['error'])
+		return
+	
+	card.calc_next_date(grade)
+	rtd.set_supermemo_data(card)
+	print(card.get_next_date())
+	markup = telebot.types.ReplyKeyboardRemove()
+	bot.send_message(user_id,"OK!", reply_markup=markup)
+	rtd.set_state(user_id, fsm.next_state[fsm.WAITING_POLL_REMEMBER]['done'])
 
 #=====================ADD LANGUAGE=====================
 
@@ -626,6 +659,8 @@ def set_state(msg):
 		Used for debug only. Set user state
 	"""
 	user_id = get_id(msg)
+	rtd.set_state(user_id, fsm.IDLE)
+	'''
 	rtd.set_state(user_id, fsm.LOCKED)
 	number = msg.text[11:]
 	if len(number) == 0:
@@ -634,7 +669,7 @@ def set_state(msg):
 	print("new state:{}".format(int(number)))
 	print("id:{} state:{}".format(user_id, rtd.get_state(user_id)))
 	rtd.set_state(user_id, str(int(number)))
-
+	'''
 #=====================SETTINGS=====================
 
 
@@ -666,7 +701,11 @@ def set_settings(msg):
 #	try:
 print("Press Ctrl+C to exit gently")
 print("Bot Polling!!!")
-bot.polling(none_stop=True)
+try:
+	bot.polling(none_stop=True)
+except Exception as e:
+	bot.send_message(359999978,"Bot Crashed!!")
+	print(e)
 #	except Exception as e:
 #		print("An error ocurred with bot.polling")
 #		print(e)
