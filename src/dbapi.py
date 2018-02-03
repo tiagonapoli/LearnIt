@@ -109,7 +109,10 @@ class DatabaseInterface(abc.ABC):
 	def get_card_waiting(self, user_id):
 		pass
 
-
+	@abc.abstractmethod
+	def backup(self):
+		pass
+	
 
 
 
@@ -132,8 +135,12 @@ class Database(DatabaseInterface):
 		try:
 			arq = open("../credentials/connect_str.txt", "r")
 			connect_str = arq.read()
-			arq.close()
+			self.DB_NAME = connect_str.split()[0][7:]
+			self.DB_USER_NAME = connect_str.split()[1][5:]
+			print("DB_NAME: {}".format(self.DB_NAME))
+			print("DB_USER_NAME: {}".format(self.DB_USER_NAME))
 			print(connect_str)
+			arq.close()
 			# use our connection values to establish a connection
 			self.conn = psycopg2.connect(connect_str)
 			# create a psycopg2 cursor that can execute queries
@@ -141,7 +148,7 @@ class Database(DatabaseInterface):
 			print("Connected with database!")
 		except Exception as e:
 			print("Uh oh, can't connect. Invalid dbname, user or password?")
-			print(e)
+			print("Exception: {}".format(e))
 
 
 
@@ -322,7 +329,7 @@ class Database(DatabaseInterface):
 		self.cursor.execute("SELECT highest_card_id FROM users WHERE id={};".format(user_id))
 		highest_card_id = self.cursor.fetchall()
 		highest_card_id = highest_card_id[0][0]
-
+		
 		if highest_card_id < card_id:
 			self.cursor.execute("UPDATE users SET highest_card_id={} WHERE id={}".format(card_id, user_id))
 
@@ -472,7 +479,7 @@ class Database(DatabaseInterface):
 			- "Invalid word", if the operation fails.
 		"""
 
-		self.cursor.execute("SELECT language,topic FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
+		self.cursor.execute("SELECT language,topic,foreign_word FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
 		rows = self.cursor.fetchall()
 
 		if len(rows) == 0:
@@ -480,6 +487,7 @@ class Database(DatabaseInterface):
 
 		language = rows[0][0]
 		topic = rows[0][1]
+		word_text = rows[0][2]
 
 		self.cursor.execute("SELECT user_card_id FROM cards WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
 		rows = self.cursor.fetchall()
@@ -499,7 +507,7 @@ class Database(DatabaseInterface):
 		if len(rows) == 0:
 			self.erase_topic_empty_words(user_id, language, topic)
 
-		return "Word erased successfully!"
+		return "Word {} erased successfully!".format(word_text)
 
 
 
@@ -704,7 +712,18 @@ class Database(DatabaseInterface):
 		card = card[0][0]
 		return card
 
+	def backup(self):
+		os.system("psql -U {} -d {} -c \"Copy (Select * From users) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/users.csv".format(self.DB_USER_NAME, self.DB_NAME))
+	
+		os.system("psql -U {} -d {} -c \"Copy (Select * From cards) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/cards.csv".format(self.DB_USER_NAME, self.DB_NAME))
 
+		os.system("psql -U {} -d {} -c \"Copy (Select * From languages) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/languages.csv".format(self.DB_USER_NAME, self.DB_NAME))
+		
+		os.system("psql -U {} -d {} -c \"Copy (Select * From topics) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/topics.csv".format(self.DB_USER_NAME, self.DB_NAME))
+		
+		os.system("psql -U {} -d {} -c \"Copy (Select * From words) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/words.csv".format(self.DB_USER_NAME, self.DB_NAME))
+		
+		return "Backup made successfully"
 
 if __name__ == '__main__':
 	
@@ -750,10 +769,10 @@ if __name__ == '__main__':
 	print("-----------------Add words-----------------")
 	#word1
 	word = Word(42,1,"Portuges", "Miscelania", "Camargao")
-	card = Card(42,1,"Portuges", "Miscelania", "Camargao", None, 'image') 
+	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 1, 'image') 
 	card.add_archive('../data/ibagem.jpg')
 	word.set_card(card)
-	card = Card(42,1,"Portuges", "Miscelania", "Camargao", None, 'audio') 
+	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 2, 'audio') 
 	card.add_archive('../data/image.png')
 	card.add_archive('so pode sobrar euuu')
 	word.set_card(card)
@@ -761,14 +780,14 @@ if __name__ == '__main__':
 
 	#word2
 	word = Word(42,2,"ingels", "wololo", "tiagao")
-	card = Card(42,2,"ingels", "wololo", "tiago", 1, 'image') 
+	card = Card(42,2,"ingels", "wololo", "tiagao", 3, 'image') 
 	card.add_archive('../data/ingreis.txt')
 	word.set_card(card)
 	print(test.add_word(word))
 
 	#word3
 	word = Word(42,3,"Portuges", "MEGAS XLR", "thalao")
-	card = Card(42,3,"Portuges", "MEGAS XLR", "thalao", 1, 'image') 
+	card = Card(42,3,"Portuges", "MEGAS XLR", "thalao", 4, 'image') 
 	card.add_archive('../data/talao.txt')
 	word.set_card(card)
 	print(test.add_word(word))
@@ -823,3 +842,4 @@ if __name__ == '__main__':
 	print("-----------------Get word test-----------------\n\n")
 	print(test.get_word(42,1))
 
+	print(test.backup())
