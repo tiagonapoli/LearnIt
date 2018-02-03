@@ -288,3 +288,6 @@ class RuntimeData:
 
 	def get_card_waiting(self, user_id):
 		return self.db.get_card_waiting(user_id)
+	
+	def backup(self):
+		return self.db.backup()

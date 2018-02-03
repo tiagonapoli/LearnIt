@@ -713,17 +713,20 @@ class Database(DatabaseInterface):
 		return card
 
 	def backup(self):
-		os.system("psql -U {} -d {} -c \"Copy (Select * From users) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/users.csv".format(self.DB_USER_NAME, self.DB_NAME))
-	
-		os.system("psql -U {} -d {} -c \"Copy (Select * From cards) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/cards.csv".format(self.DB_USER_NAME, self.DB_NAME))
-
-		os.system("psql -U {} -d {} -c \"Copy (Select * From languages) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/languages.csv".format(self.DB_USER_NAME, self.DB_NAME))
-		
-		os.system("psql -U {} -d {} -c \"Copy (Select * From topics) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/topics.csv".format(self.DB_USER_NAME, self.DB_NAME))
-		
-		os.system("psql -U {} -d {} -c \"Copy (Select * From words) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/words.csv".format(self.DB_USER_NAME, self.DB_NAME))
-		
-		return "Backup made successfully"
+		try:
+			if not os.path.exists("../backup/"):
+				os.mkdir("../backup/")
+			if not os.path.exists("../backup/tables/"):
+				os.mkdir("../backup/tables/")
+			os.system("psql -U {} -d {} -c \"Copy (Select * From users) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/users.csv".format(self.DB_USER_NAME, self.DB_NAME))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From cards) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/cards.csv".format(self.DB_USER_NAME, self.DB_NAME))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From languages) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/languages.csv".format(self.DB_USER_NAME, self.DB_NAME))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From topics) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/topics.csv".format(self.DB_USER_NAME, self.DB_NAME))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From words) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/words.csv".format(self.DB_USER_NAME, self.DB_NAME))
+			return "Backup made successfully"
+		except Exception as e:
+			print(e);
+			return "Backup failed"
 
 if __name__ == '__main__':
 	

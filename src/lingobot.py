@@ -20,7 +20,7 @@ def signal_handler(signal, frame):
 		Handles CTRL+C signal that exits gently the bot
 	"""
 	bot.send_message(359999978,"Bot turned off")
-	utils.turn_off()
+	utils.turn_off(rtd)
 	print("Exiting bot...")
 	sys.exit(0)
 

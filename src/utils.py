@@ -90,9 +90,20 @@ def save_voice(voice_msg, path, voice_name, bot):
 		print(e)
 		return None	
 
+def backup_data():
+	try:
+		if not os.path.exists("../backup/"):
+			os.mkdir("../backup/")
+		os.system("cp -r ../data/ ../backup/data")
+		return "Data backup was successfull"
+	except Exception as e:
+		print(e);
+		return "Data backup failed"
 
-def turn_off():
+def turn_off(db):
 	"""
 		Safely turns of LingoBot. Makes a backup of the data (future)
 	"""
+	print(backup_data())
+	print(db.backup())
 	pass
