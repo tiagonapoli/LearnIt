@@ -706,6 +706,8 @@ try:
 except Exception as e:
 	bot.send_message(359999978,"Bot Crashed!!")
 	print(e)
+	utils.turn_off(rtd)
+	print("Exiting bot...")
 #	except Exception as e:
 #		print("An error ocurred with bot.polling")
 #		print(e)
