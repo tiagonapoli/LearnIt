@@ -6,6 +6,8 @@ import abc
 from flashcard import Word
 from flashcard import Card
 
+def treat_str_SQL(str):
+	return str.replace("'", "''")
 
 '''
 	Database Interface
@@ -235,13 +237,13 @@ class Database(DatabaseInterface):
 			- "'{}'' is already added", if the language was already added before.
 			In the above examples {} means the language name.
 		"""
-		self.cursor.execute("SELECT language_name FROM languages WHERE user_id={} AND language_name='{}';".format(user_id, language))
+		self.cursor.execute("SELECT language_name FROM languages WHERE user_id={} AND language_name='{}';".format(user_id, treat_str_SQL(language)))
 		rows = self.cursor.fetchall()
 		for row in rows:
 			if row[0] == language:
 				return "'{}' is already added".format(language)
 
-		self.cursor.execute("INSERT INTO languages VALUES ({}, '{}');".format(user_id, language))
+		self.cursor.execute("INSERT INTO languages VALUES ({}, '{}');".format(user_id, treat_str_SQL(language)))
 		self.conn.commit()
 		return "'{}' added successfully to your languages".format(language)
 
@@ -261,12 +263,12 @@ class Database(DatabaseInterface):
 			- "'{}' is not in your languages", if the language is not in the database.
 			In the above examples {} means the language name.
 		"""
-		self.cursor.execute("SELECT language_name FROM languages WHERE user_id={} AND language_name='{}';".format(user_id, language))
+		self.cursor.execute("SELECT language_name FROM languages WHERE user_id={} AND language_name='{}';".format(user_id, treat_str_SQL(language)))
 		rows = self.cursor.fetchall()
 		if(len(rows) == 0):
 			return "'{}' is not in your languages".format(language)
 
-		self.cursor.execute("SELECT user_card_id FROM cards WHERE user_id={} AND language='{}';".format(user_id, language))
+		self.cursor.execute("SELECT user_card_id FROM cards WHERE user_id={} AND language='{}';".format(user_id, treat_str_SQL(language)))
 		rows = self.cursor.fetchall()
 
 		for card_id in rows:
@@ -282,7 +284,7 @@ class Database(DatabaseInterface):
 						print("ERROR in erase_language")
 						print(e)
 
-		self.cursor.execute("DELETE FROM languages WHERE user_id={} AND language_name='{}';".format(user_id, language))
+		self.cursor.execute("DELETE FROM languages WHERE user_id={} AND language_name='{}';".format(user_id, treat_str_SQL(language)))
 		self.conn.commit()
 		return "'{}' removed successfully".format(language)
 	
@@ -335,8 +337,8 @@ class Database(DatabaseInterface):
 
 
 		self.cursor.execute("INSERT INTO cards VALUES ({}, {}, '{}', '{}', '{}', {}, '{}', {}, {}, {}, '{}')"
-			.format(user_id, word_id, language, topic, foreign_word,
-					card_id, content_type,
+			.format(user_id, word_id, treat_str_SQL(language), treat_str_SQL(topic), treat_str_SQL(foreign_word),
+					card_id, treat_str_SQL(content_type),
 					card.attempts, card.ef, card.interval,
 				str(card.next_date.year) + '-' + str(card.next_date.month) + '-' + str(card.next_date.day)))
 
@@ -346,7 +348,7 @@ class Database(DatabaseInterface):
 		for path in card.archives:
 			counter += 1
 			self.cursor.execute("INSERT INTO archives VALUES ({}, {}, {}, '{}', '{}')"
-									.format(user_id, card_id, counter, content_type, path))
+									.format(user_id, card_id, counter, treat_str_SQL(content_type), treat_str_SQL(path)))
 
 		self.conn.commit()
 
@@ -393,13 +395,13 @@ class Database(DatabaseInterface):
 		return "Card successfuly removed"
 
 	def add_topic(self, user_id, language, topic):
-		self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, language, topic))
+		self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, treat_str_SQL(language), treat_str_SQL(topic)))
 		row = self.cursor.fetchall()
 
 		if(len(row) > 0):
 			return
 
-		self.cursor.execute("INSERT INTO topics VALUES ({}, '{}', '{}')".format(user_id, language, topic))
+		self.cursor.execute("INSERT INTO topics VALUES ({}, '{}', '{}')".format(user_id, treat_str_SQL(language), treat_str_SQL(topic)))
 		self.conn.commit()
 
 
@@ -428,7 +430,7 @@ class Database(DatabaseInterface):
 		cards = word.cards 
 
 		self.cursor.execute("SELECT foreign_word FROM words WHERE user_id={} AND language='{}' AND foreign_word='{}';"
-			.format(user_id, language, foreign_word))
+			.format(user_id, treat_str_SQL(language), treat_str_SQL(foreign_word)))
 		rows = self.cursor.fetchall()
 		if(len(rows) > 0):
 			return "{} is already in your words".format(word.get_word())
@@ -439,7 +441,7 @@ class Database(DatabaseInterface):
 		self.cursor.execute("UPDATE users SET highest_word_id={} WHERE id={}".format(word_id, user_id))
 		
 		self.cursor.execute("INSERT INTO words VALUES ({}, {}, '{}', '{}', '{}')"
-			.format(user_id, word_id, language, topic, foreign_word))
+			.format(user_id, word_id, treat_str_SQL(language), treat_str_SQL(topic), treat_str_SQL(foreign_word)))
 
 
 		self.conn.commit()
@@ -452,14 +454,14 @@ class Database(DatabaseInterface):
 		return "Word '{}' and content added successfully!".format(foreign_word)
 
 	def erase_topic_empty_words(self, user_id, language, topic):
-		self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id,language,topic))
+		self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id,treat_str_SQL(language),treat_str_SQL(topic)))
 		rows = self.cursor.fetchall()
 
 		if len(rows) == 0:
 			print("Topic {},{},{} doesn't exist.".format(user_id,language,topic))
 			return
 
-		self.cursor.execute("DELETE FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, language,topic))
+		self.cursor.execute("DELETE FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, treat_str_SQL(language),treat_str_SQL(topic)))
 		self.conn.commit()
 		print("Topic {},{},{} erased.".format(user_id, language, topic))
 		return
@@ -501,7 +503,7 @@ class Database(DatabaseInterface):
 		self.conn.commit()
 
 		#maybe erase topic
-		self.cursor.execute("SELECT topic FROM words WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, language, topic))
+		self.cursor.execute("SELECT topic FROM words WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, treat_str_SQL(language), treat_str_SQL(topic)))
 		rows = self.cursor.fetchall()
 
 		if len(rows) == 0:
@@ -654,7 +656,7 @@ class Database(DatabaseInterface):
 
 
 	def get_all_topics(self, user_id, language):
-		self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}';".format(user_id, language))
+		self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}';".format(user_id, treat_str_SQL(language)))
 		topics = self.cursor.fetchall()
 
 		ret = []
@@ -666,7 +668,7 @@ class Database(DatabaseInterface):
 
 
 	def get_words_on_topic(self, user_id, language, topic):
-		self.cursor.execute("SELECT user_id,user_word_id FROM words WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, language, topic))
+		self.cursor.execute("SELECT user_id,user_word_id FROM words WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, treat_str_SQL(language), treat_str_SQL(topic)))
 		words = self.cursor.fetchall()
 
 		ret = []

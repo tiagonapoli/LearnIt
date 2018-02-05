@@ -5,6 +5,34 @@ def get_file_extension(filename):
 	path, extension = os.path.splitext(filename)
 	return extension 
 
+def parse_option(text, topics_array):
+	if text[0] != '/':
+		return False,""
+	text = text[1:]
+	try:
+		number = int(text)
+		print("PARSE OPTION NUMBER {}".format(number))
+		number -= 1
+		if number >= 0 and number < len(topics_array):
+			return True,topics_array[number]
+		else:
+			return False,""
+	except Exception as e:
+		print(e)
+		return False,""
+
+
+def treat_special_chars(text):
+	ant = text 
+	text = text.strip()
+	text = text.replace('_', ' ')
+	text = text.replace('/', '')
+	text = text.replace('\\', '')
+	text = text.strip()
+	text = text.replace('\n', '')
+	print("{} -> treated -> {}".format(ant,text))
+	return text
+
 def save_image(image_msg, path, image_name, bot):
 	"""
 		Saves image received from user on Telegram
@@ -100,10 +128,19 @@ def backup_data():
 		print(e);
 		return "Data backup failed"
 
+def erase_at_jobs():
+	try:
+		os.system("atrm $(atq | cut -f1)")
+		return "Deleted at jobs"
+	except Exception as e:
+		print(e)
+		return "Failed to delete at jobs"
+
 def turn_off(db):
 	"""
 		Safely turns of LingoBot. Makes a backup of the data (future)
 	"""
 	print(backup_data())
 	print(db.backup())
+	print(erase_at_jobs())
 	pass

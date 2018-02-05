@@ -256,6 +256,9 @@ class RuntimeData:
 		""" 
 		return self.db.get_all_words(user_id)
 
+	def get_words_on_topic(self, user_id, language, topic):
+		return self.db.get_words_on_topic(user_id, language, topic)
+
 	def set_supermemo_data(self, card):
 		"""Sets the data of some word about the supermemo algorithm.
 

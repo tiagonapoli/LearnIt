@@ -8,13 +8,21 @@ import time
 import bot_utils
 import fsm
 
-import message_handlers.add_language 
-import message_handlers.add_word
 import message_handlers.cancel
+import message_handlers.add_word
+import message_handlers.list_words
+import message_handlers.erase_words
+
+import message_handlers.add_language 
+import message_handlers.list_languages 
+import message_handlers.erase_languages
+
+import message_handlers.settings
+import message_handlers.help
+import message_handlers.setup_user
+
 import message_handlers.card_answering
 import message_handlers.message_not_understood
-import message_handlers.settings
-import message_handlers.setup_user
 import message_handlers.set_state
 
 from runtimedata import RuntimeData
@@ -67,8 +75,16 @@ message_handlers.card_answering.handle_card_answer(bot, rtd)
 message_handlers.add_language.handle_add_language(bot,rtd)
 
 
+#=====================LIST LANGUAGES=====================
+message_handlers.list_languages.handle_list_languages(bot,rtd)
+
+
 #=====================ADD WORD=====================
 message_handlers.add_word.handle_add_word(bot,rtd)
+
+
+#=====================LIST WORDS=====================
+message_handlers.list_words.handle_list_words(bot,rtd)
 
 
 #=====================SET STATE=====================
@@ -77,6 +93,10 @@ message_handlers.set_state.handle_set_state(bot,rtd)
 
 #=====================SETTINGS=====================
 message_handlers.settings.handle_settings(bot,rtd)
+
+
+#=====================HELP=====================
+message_handlers.help.handle_help(bot,rtd)
 
 
 #=====================MESSAGE NOT UNDERSTOOD=====================

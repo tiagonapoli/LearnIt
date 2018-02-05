@@ -1,5 +1,9 @@
-add_word - Adds a word into a language vocabulary
-add_language - Adds a language into your language list
 cancel - Cancel any existing process
+add_word - Adds a word into a language vocabulary
+list_words - List all registered words
+erase_words - Erases selected words
+add_language - Adds a language into your language list
+list_languages - List all registered languages
+erase_languages - Erase selected languages
+help - Help and developers contact information
 start - Sign in to use the bot
-help - wololo

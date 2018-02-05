@@ -5,9 +5,6 @@ from flashcard import Word, Card
 from bot_utils import get_id, create_key_button
 
 
-
-
-
 def handle_add_word(bot, rtd):	
 
 	def back_to_relate_menu(msg):
@@ -74,29 +71,47 @@ def handle_add_word(bot, rtd):
 		user_id = get_id(msg)
 		rtd.set_state(user_id, fsm.LOCKED)
 		known_languages = rtd.get_user_languages(user_id)
-		language = msg.text.strip()
+		language = utils.treat_special_chars(msg.text)
 		if not (language in known_languages):
 			bot.reply_to(msg, "Please choose from keyboard")
 			rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.GET_LANGUAGE)]['error'])
 			return
 
-
-
 		markup = telebot.types.ReplyKeyboardRemove()
 		bot.send_message(user_id, "Send the word's topic, either a new topic or select from existing".format(language),
 						reply_markup=markup)
 		topics = rtd.get_all_topics(user_id, language)
+		topics.sort()
 
 		if len(topics) > 0:
-			str = "Topics registered:\n"
+
+			btn = []
 			for topic in topics:
-				str += "/" + topic.replace(' ', '_') + '\n'
-			bot.send_message(user_id, str)
+				btn.append(create_key_button(topic))
+
+			markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+
+			for i in range(0,len(btn)//3):
+				markup.row(btn[3*i], btn[3*i+1], btn[3*i+2])
+
+			if len(btn)%3 == 2:
+				markup.row(btn[len(btn)-2],btn[len(btn)-1])
+
+			if len(btn)%3 == 1:
+				markup.row(btn[len(btn)-1])
+
+			str = "Topics registered:\n"
+			aux_cnt = 1
+			for topic in topics:
+				str += "/{}. ".format(aux_cnt) + topic + '\n'
+				aux_cnt += 1
+			bot.send_message(user_id, str, reply_markup=markup)
 		else: 
 			bot.send_message(user_id, "There are no topics registered in this language yet.")
 		rtd.temp_user[user_id] = []
 		rtd.temp_user[user_id].append(Word(user_id, rtd.get_highest_word_id(user_id) + 1))
 		rtd.temp_user[user_id][0].language = language
+		rtd.temp_user[user_id].append(topics)
 		rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.GET_LANGUAGE)]['done'])
 
 
@@ -112,15 +127,15 @@ def handle_add_word(bot, rtd):
 		user_id = get_id(msg)
 		rtd.set_state(user_id, fsm.LOCKED)
 		language = rtd.temp_user[user_id][0].get_language()
-		topic = msg.text.strip()
-		topic = topic.replace('_', ' ')
-		topic = topic.replace('/', '')
-		topic = topic.replace('\\', '')
-		topic = topic.strip()
-		topic = topic.replace('\n', '')
+		
+		valid, topic = utils.parse_option(msg.text.strip(), rtd.temp_user[user_id][1])
+		if valid == False:
+			topic = utils.treat_special_chars(msg.text)
 
+		markup = telebot.types.ReplyKeyboardRemove()
 		rtd.temp_user[user_id][0].topic = topic
-		bot.send_message(user_id, "Send word to add (in {})".format(language))
+		bot.send_message(user_id, "Word's topic: {}".format(topic))
+		bot.send_message(user_id, "Send word to add (in {})".format(language), reply_markup=markup)
 		rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.GET_TOPIC)])
 
 
@@ -136,7 +151,7 @@ def handle_add_word(bot, rtd):
 		user_id = get_id(msg)
 		rtd.set_state(user_id, fsm.LOCKED)
 
-		word = msg.text.strip()
+		word = utils.treat_special_chars(msg.text)
 		rtd.temp_user[user_id][0].foreign_word = word
 		word = rtd.temp_user[user_id][0]
 		card_default = Card(word.user_id, word.word_id, word.language, word.topic, word.foreign_word, rtd.get_highest_card_id(user_id) + 1, 'default')
@@ -318,7 +333,7 @@ def handle_add_word(bot, rtd):
 		markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 		markup.row(btn1)
 		
-		translation = msg.text.strip()
+		translation = utils.treat_special_chars(msg.text)
 		print(translation)
 		word = rtd.temp_user[user_id][0].foreign_word
 		rtd.temp_user[user_id][1].add_archive(translation)
@@ -346,7 +361,7 @@ def handle_add_word(bot, rtd):
 			back_to_relate_menu(msg)
 			return
 		elif len(msg.text.strip()) != 0:
-			translation = msg.text.strip()
+			translation = utils.treat_special_chars(msg.text)
 			print(translation)
 			word = rtd.temp_user[user_id][0].foreign_word
 			rtd.temp_user[user_id][1].add_archive(translation)
