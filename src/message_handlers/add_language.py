@@ -1,5 +1,6 @@
 import telebot
 import fsm
+import utils
 from bot_utils import get_id, create_key_button
 
 def handle_add_language(bot, rtd):
@@ -29,8 +30,7 @@ def handle_add_language(bot, rtd):
 		"""
 		user_id = get_id(msg)
 		rtd.set_state(user_id, fsm.LOCKED)
-		language = msg.text
-		language = language.strip()
+		language = utils.treat_special_chars(msg.text)
 		print(language)
 		bot.send_message(user_id, rtd.add_language(user_id, language))
 		rtd.set_state(user_id, fsm.next_state[fsm.ADD_LANGUAGE])
