@@ -21,6 +21,12 @@ SEND_TRANSLATION_LOOP = 14
 RELATE_MENU = 15
 WAITING_POLL_REMEMBER = 16
 LIST_WORDS = 17
+ERASE_WORDS = 18
+SELECT_WORDS = 19
+ERASE_LANGUAGES = 20
+SELECT_LANGUAGES = 21	
+
+
 
 
 '''FSM'''
@@ -32,7 +38,9 @@ next_state = {
       		 'add_language': ADD_LANGUAGE,
       		 'card_remember': WAITING_POLL_REMEMBER,
       		 'list_words': (LIST_WORDS, GET_LANGUAGE),
-      		 'list_languages': IDLE}
+      		 'list_languages': IDLE,
+      		 'erase_words': (ERASE_WORDS, GET_LANGUAGE),
+      		 'erase_languages': (ERASE_LANGUAGES, SELECT_LANGUAGES)}
 }
 
 
@@ -81,3 +89,19 @@ next_state.update({
 })
 
 
+#=====================ERASE WORDS=====================
+next_state.update({
+	(ERASE_WORDS, GET_LANGUAGE): {'done': (ERASE_WORDS, GET_TOPIC),
+								 'no topics': IDLE,
+								 'error': (ERASE_WORDS, GET_LANGUAGE)},
+	(ERASE_WORDS, GET_TOPIC): {'done': (ERASE_WORDS, SELECT_WORDS),
+							  'error': (ERASE_WORDS, GET_TOPIC)},
+	(ERASE_WORDS, SELECT_WORDS): {'continue': (ERASE_WORDS, SELECT_WORDS),
+								  'done': IDLE}
+})
+
+#=====================ERASE LANGUAGES=====================
+next_state.update({
+	(ERASE_LANGUAGES, SELECT_LANGUAGES): {'continue': (ERASE_LANGUAGES, SELECT_LANGUAGES),
+								  		  'done': IDLE}
+})

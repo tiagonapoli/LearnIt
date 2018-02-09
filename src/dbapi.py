@@ -268,21 +268,11 @@ class Database(DatabaseInterface):
 		if(len(rows) == 0):
 			return "'{}' is not in your languages".format(language)
 
-		self.cursor.execute("SELECT user_card_id FROM cards WHERE user_id={} AND language='{}';".format(user_id, treat_str_SQL(language)))
-		rows = self.cursor.fetchall()
+		self.cursor.execute("SELECT user_word_id FROM words WHERE user_id={} AND language='{}';".format(user_id, treat_str_SQL(language)))
+		words = self.cursor.fetchall()
 
-		for card_id in rows:
-			self.cursor.execute("SELECT type, content_path FROM archives WHERE user_id={} AND user_card_id={};".format(user_id, card_id[0]))
-			archives = self.cursor.fetchall()
-			for archive in archives:
-				print(archive[0] + " " + archive[1])
-				if archive[0] != 'translation' and os.path.exists(archive[1]):
-					try:
-						print("Erased file {}".format(archive[1]))
-						os.remove(archive[1])
-					except Exception as e:
-						print("ERROR in erase_language")
-						print(e)
+		for word in words:
+			self.erase_word(user_id, word[0])
 
 		self.cursor.execute("DELETE FROM languages WHERE user_id={} AND language_name='{}';".format(user_id, treat_str_SQL(language)))
 		self.conn.commit()
@@ -301,7 +291,7 @@ class Database(DatabaseInterface):
 			return "Archive {}, {}, {} is not in yout archives".format(user_id, card_id, counter); 
 
 		for archive in archives:
-			if archive[0] != 'translation' and os.path.exists(archive[1]):
+			if (archive[0] == 'image' or archive[0] == 'audio') and os.path.exists(archive[1]):
 				try:
 					os.remove(archive[1])
 					print("Erased file {}".format(archive[1]))
@@ -381,18 +371,16 @@ class Database(DatabaseInterface):
 			return "Card {}, {} doesn't exist".format(user_id, user_card_id)
 
 		# erasing archives of the card
-		self.cursor.execute("SELECT content_path FROM archives WHERE user_id={} AND user_card_id={};".format(user_id, user_card_id))
+		self.cursor.execute("SELECT counter FROM archives WHERE user_id={} AND user_card_id={};".format(user_id, user_card_id))
 		rows = self.cursor.fetchall()
 		for row in rows:
-			try:
-				os.remove(row[0])
-			except Exception as e:
-				print(e)
+			self.erase_archive(user_id,user_card_id,row[0])
 
 		self.cursor.execute("DELETE FROM cards WHERE user_id={} AND user_card_id={}"
 						.format(user_id, user_card_id))
 		self.conn.commit()
 		return "Card successfuly removed"
+
 
 	def add_topic(self, user_id, language, topic):
 		self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, treat_str_SQL(language), treat_str_SQL(topic)))
@@ -725,6 +713,7 @@ class Database(DatabaseInterface):
 			os.system("psql -U {} -d {} -c \"Copy (Select * From languages) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/languages.csv".format(self.DB_USER_NAME, self.DB_NAME))
 			os.system("psql -U {} -d {} -c \"Copy (Select * From topics) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/topics.csv".format(self.DB_USER_NAME, self.DB_NAME))
 			os.system("psql -U {} -d {} -c \"Copy (Select * From words) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/words.csv".format(self.DB_USER_NAME, self.DB_NAME))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From archives) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/archives.csv".format(self.DB_USER_NAME, self.DB_NAME))
 			return "Backup made successfully"
 		except Exception as e:
 			print(e);

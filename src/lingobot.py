@@ -9,6 +9,8 @@ import bot_utils
 import fsm
 
 import message_handlers.cancel
+import message_handlers.error_handling
+
 import message_handlers.add_word
 import message_handlers.list_words
 import message_handlers.erase_words
@@ -37,6 +39,7 @@ def signal_handler(signal, frame):
 		Handles CTRL+C signal that exits gently the bot
 	"""
 	bot.send_message(359999978,"Bot turned off")
+	#bot.send_message(113538563,"Bot turned off")
 	utils.turn_off(rtd)
 	print("Exiting bot...")
 	sys.exit(0)
@@ -58,13 +61,26 @@ rtd = RuntimeData()
 rtd.reset_all_states()
 systemtools.schedule_daily_setup()
 
+'''
+@bot.message_handler(func = lambda msg: True)
+def debug(msg):
+	str = ("Bot is under development. Some bugs ocurred. You can contact one of the developers to ask about the situation: " +
+		   "\n*Tiago Napoli*\nTelegram: t.me/tiagonapoli\nEmail: napoli.tiago@hotmail.com\n" + 
+		   "\n*Gabriel Camargo*\nTelegram: t.me/gabriel\_camargo\nEmail: gacamargo1.000@gmail.com\n")
+	bot.send_message(msg.chat.id, str, disable_web_page_preview=True, parse_mode="Markdown")
+'''
+
 
 #=====================SETUP USER=====================
-message_handlers.setup_user.handler_setup_user(bot, rtd)	
+message_handlers.setup_user.handle_setup_user(bot, rtd)
+
+
+#=====================USER DOESN'T EXIST=====================
+message_handlers.error_handling.handle_user_dont_exist(bot, rtd)	
 
 
 #=====================CANCEL=====================
-message_handlers.cancel.handler_cancel(bot, rtd)
+message_handlers.cancel.handle_cancel(bot, rtd)
 
 
 #=====================ANSWER AND RATE CARD DIFFICULTY=====================
@@ -79,12 +95,20 @@ message_handlers.add_language.handle_add_language(bot,rtd)
 message_handlers.list_languages.handle_list_languages(bot,rtd)
 
 
+#=====================ERASE LANGUAGES=====================
+message_handlers.erase_languages.handle_erase_languages(bot,rtd)
+
+
 #=====================ADD WORD=====================
 message_handlers.add_word.handle_add_word(bot,rtd)
 
 
 #=====================LIST WORDS=====================
 message_handlers.list_words.handle_list_words(bot,rtd)
+
+
+#=====================ERASE WORD=====================
+message_handlers.erase_words.handle_erase_words(bot,rtd)
 
 
 #=====================SET STATE=====================
@@ -103,6 +127,7 @@ message_handlers.help.handle_help(bot,rtd)
 message_handlers.message_not_understood.handle_message_not_understood(bot,rtd)
 
 
+
 #while True:
 #	try:
 print("Press Ctrl+C to exit gently")
@@ -111,6 +136,8 @@ try:
 	bot.polling(none_stop=True)
 except Exception as e:
 	bot.send_message(359999978,"Bot Crashed!!")
+	#bot.send_message(113538563,"Bot Crashed!!")
+
 	print(e)
 #	utils.turn_off(rtd)
 	print("Exiting bot...")

@@ -180,6 +180,9 @@ class RuntimeData:
 		self.known_users.add(user_id)
 		return self.db.add_user(user_id)
 
+	def check_user_existence(self, user_id):
+		return (user_id in self.known_users)
+
 	def get_card(self, user_id, card_id):
 		return self.db.get_card(user_id, card_id)
 
@@ -259,6 +262,13 @@ class RuntimeData:
 	def get_words_on_topic(self, user_id, language, topic):
 		return self.db.get_words_on_topic(user_id, language, topic)
 
+	def get_string_words_on_topic(self, user_id, language, topic):
+		lst = self.db.get_words_on_topic(user_id, language, topic)
+		ret = []
+		for word in lst:
+			ret.append(word.get_word())
+		return ret
+
 	def set_supermemo_data(self, card):
 		"""Sets the data of some word about the supermemo algorithm.
 
@@ -294,3 +304,6 @@ class RuntimeData:
 	
 	def backup(self):
 		return self.db.backup()
+
+	def erase_language(self, user_id, language):
+		return self.db.erase_language(user_id,language)

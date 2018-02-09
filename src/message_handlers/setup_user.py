@@ -2,7 +2,7 @@ import telebot
 import fsm
 from bot_utils import get_id
 
-def handler_setup_user(bot, rtd):
+def handle_setup_user(bot, rtd):
 
 	#=====================SETUP USER=====================
 	@bot.message_handler(commands = ['start'])

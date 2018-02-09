@@ -11,7 +11,7 @@ def handle_list_words(bot, rtd):
 	@bot.message_handler(func = lambda msg:
 					rtd.get_state(get_id(msg)) == fsm.IDLE, 
 					commands = ['list_words'])
-	def list_words(msg):
+	def erase_words(msg):
 		user_id = get_id(msg)
 		rtd.set_state(user_id, fsm.LOCKED)
 		known_languages = rtd.get_user_languages(user_id)
@@ -43,7 +43,7 @@ def handle_list_words(bot, rtd):
 	@bot.message_handler(func = lambda msg:
 					rtd.get_state(get_id(msg)) == (fsm.LIST_WORDS, fsm.GET_LANGUAGE),
 					content_types=['text'])
-	def list_words1(msg):
+	def erase_words1(msg):
 		"""
 			Get word's language
 		"""
@@ -79,12 +79,12 @@ def handle_list_words(bot, rtd):
 			if len(btn)%3 == 1:
 				markup.row(btn[len(btn)-1])
 
-			str = "Topics registered:\n"
+			text = "Topics registered:\n"
 			aux_cnt = 1
 			for topic in topics:
-				str += "/{}. ".format(aux_cnt) + topic + '\n'
+				text += "/{}. ".format(aux_cnt) + topic + '\n'
 				aux_cnt += 1
-			bot.send_message(user_id, str, reply_markup=markup)
+			bot.send_message(user_id, text, reply_markup=markup)
 			rtd.temp_user[user_id] = []
 			rtd.temp_user[user_id].append(Word(user_id, None))
 			rtd.temp_user[user_id][0].language = language

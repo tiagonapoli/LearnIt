@@ -5,21 +5,11 @@ def get_file_extension(filename):
 	path, extension = os.path.splitext(filename)
 	return extension 
 
-def parse_option(text, topics_array):
-	if text[0] != '/':
-		return False,""
-	text = text[1:]
-	try:
-		number = int(text)
-		print("PARSE OPTION NUMBER {}".format(number))
-		number -= 1
-		if number >= 0 and number < len(topics_array):
-			return True,topics_array[number]
-		else:
-			return False,""
-	except Exception as e:
-		print(e)
-		return False,""
+def words_to_string_list(words):
+	ret = []
+	for word in words:
+		ret.append(word.get_word())
+	return ret
 
 
 def treat_special_chars(text):

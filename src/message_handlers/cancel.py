@@ -2,7 +2,7 @@ import telebot
 import fsm
 from bot_utils import get_id
 
-def handler_cancel(bot, rtd):
+def handle_cancel(bot, rtd):
 
 	#=====================CANCEL=====================
 	@bot.message_handler(func = lambda msg: rtd.not_locked(get_id(msg)) , commands = ['cancel'])
