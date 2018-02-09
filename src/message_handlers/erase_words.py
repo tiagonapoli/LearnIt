@@ -23,9 +23,10 @@ def handle_erase_words(bot, rtd):
 			return 	
 
 		markup = bot_utils.create_keyboard(known_languages, 2)
+		text = "Please select the language:\n" + bot_utils.create_string_keyboard(known_languages)
+		rtd.temp_user[user_id] = known_languages
 
-		bot.send_message(user_id, "Please select the language.", 
-						reply_markup=markup)	
+		bot.send_message(user_id, text,	reply_markup=markup)	
 		rtd.set_state(user_id, fsm.next_state[fsm.IDLE]['erase_words'])
 
 
@@ -38,9 +39,9 @@ def handle_erase_words(bot, rtd):
 		"""
 		user_id = get_id(msg)
 		rtd.set_state(user_id, fsm.LOCKED)
-		known_languages = rtd.get_user_languages(user_id)
-		language = utils.treat_special_chars(msg.text)
-		if not (language in known_languages):
+		known_languages = rtd.temp_user[user_id]
+		valid, language = bot_utils.parse_string_keyboard_ans(msg.text, known_languages)
+		if valid == False:
 			bot.reply_to(msg, "Please choose from keyboard")
 			rtd.set_state(user_id, fsm.next_state[(fsm.ERASE_WORDS, fsm.GET_LANGUAGE)]['error'])
 			return
@@ -91,9 +92,10 @@ def handle_erase_words(bot, rtd):
 		btn = bot_utils.create_inline_keys_sequential(words_string)
 		markup = bot_utils.keyboard_remove()
 		bot.send_message(user_id, "...", reply_markup=markup)
-		markup = bot_utils.create_inline_keyboard(btn, 3, ("End selection", "DONE"))
+		btn_set = set()
+		markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
 
-		rtd.temp_user[user_id].append(set())
+		rtd.temp_user[user_id].append(btn_set)
 		rtd.temp_user[user_id].append(btn)
 		rtd.temp_user[user_id].append(words)
 		bot.send_message(user_id, "Select words to erase:", reply_markup=markup, parse_mode="Markdown")
@@ -106,30 +108,21 @@ def handle_erase_words(bot, rtd):
 	def callback_select_words(call):
 		user_id = get_id(call.message)
 		print("CALLBACK TEXT: {}   DATA: {}".format(call.message.text,call.data))
-		btn_number = call.data
 
-		set_btn = rtd.temp_user[user_id][2]
+		btn_set = rtd.temp_user[user_id][2]
+		btn_set, done = bot_utils.parse_selection_inline_keyboard_ans(call.data, btn_set)
 		btn = rtd.temp_user[user_id][3]
-		try:
-			btn_number = int(btn_number)
-
-			if btn_number in set_btn:
-				set_btn.remove(btn_number)
-			else:
-				set_btn.add(btn_number)
-
-			markup = bot_utils.create_selection_inline_keyboard(set_btn, btn, 3, ("End selection", "DONE"))
-			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="Select words to erase:", reply_markup=markup)
-			rtd.set_state(user_id, fsm.next_state[(fsm.ERASE_WORDS, fsm.SELECT_WORDS)]['continue'])
-
-		except ValueError:
-			#DONE
+		
+		if done == True:
 			bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
 			words = rtd.temp_user[user_id][4]
 			text = "_Erased words:_\n"
-			for i in set_btn:
+			for i in btn_set:
 				print(rtd.erase_word(words[i].get_user(), words[i].get_word_id()))
 				text += "*." + words[i].get_word() + "*\n"
 			bot.send_message(user_id, text, parse_mode="Markdown")
-			rtd.set_state(user_id, fsm.next_state[(fsm.ERASE_WORDS, fsm.SELECT_WORDS)]['done'])
-		
+			rtd.set_state(user_id, fsm.next_state[(fsm.ERASE_WORDS, fsm.SELECT_WORDS)]['done'])		
+		else:
+3			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
+			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="Select words to erase:", reply_markup=markup)
+			rtd.set_state(user_id, fsm.next_state[(fsm.ERASE_WORDS, fsm.SELECT_WORDS)]['continue'])

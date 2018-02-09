@@ -1,8 +1,9 @@
 import telebot
 import fsm
 import utils
+import bot_utils
 from flashcard import Word, Card
-from bot_utils import get_id, create_key_button
+from bot_utils import get_id
 
 
 def handle_list_words(bot, rtd):	
@@ -16,25 +17,16 @@ def handle_list_words(bot, rtd):
 		rtd.set_state(user_id, fsm.LOCKED)
 		known_languages = rtd.get_user_languages(user_id)
 
-		btn = []
-		for language in known_languages:
-			btn.append(create_key_button(language))
-		
-		if len(btn) == 0:
+		if len(known_languages) == 0:
 			bot.send_message(user_id, "Please, add a language first.")
 			rtd.set_state(user_id, fsm.IDLE)
 			return 	
 
-		markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+		markup = bot_utils.create_keyboard(known_languages, 2)
+		text = "Please select the language:\n" + bot_utils.create_string_keyboard(known_languages)
+		rtd.temp_user[user_id] = known_languages
 
-		for i in range(0,len(btn)//2):
-			markup.row(btn[2*i], btn[2*i+1])
-
-		if len(btn)%2 == 1:
-			markup.row(btn[len(btn)-1])
-
-		bot.send_message(user_id, "Please select the language.", 
-						reply_markup=markup)	
+		bot.send_message(user_id, text,	reply_markup=markup)	
 		rtd.set_state(user_id, fsm.next_state[fsm.IDLE]['list_words'])
 
 
@@ -49,14 +41,14 @@ def handle_list_words(bot, rtd):
 		"""
 		user_id = get_id(msg)
 		rtd.set_state(user_id, fsm.LOCKED)
-		known_languages = rtd.get_user_languages(user_id)
-		language = utils.treat_special_chars(msg.text)
-		if not (language in known_languages):
+		known_languages = rtd.temp_user[user_id]
+		valid, language = bot_utils.parse_string_keyboard_ans(msg.text, known_languages)
+		if valid == False:
 			bot.reply_to(msg, "Please choose from keyboard")
 			rtd.set_state(user_id, fsm.next_state[(fsm.LIST_WORDS, fsm.GET_LANGUAGE)]['error'])
 			return
 
-		markup = telebot.types.ReplyKeyboardRemove()
+		markup = bot_utils.keyboard_remove()
 		bot.send_message(user_id, "Select the word's topic.",
 						reply_markup=markup)
 		topics = rtd.get_all_topics(user_id, language)
@@ -64,31 +56,15 @@ def handle_list_words(bot, rtd):
 
 		if len(topics) > 0:
 
-			btn = []
-			for topic in topics:
-				btn.append(create_key_button(topic))
+			btn = list(topics)
+			markup = bot_utils.create_keyboard(btn)
+			keyboard = "Topics registered:\n" + bot_utils.create_string_keyboard(btn) 
 
-			markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-
-			for i in range(0,len(btn)//3):
-				markup.row(btn[3*i], btn[3*i+1], btn[3*i+2])
-
-			if len(btn)%3 == 2:
-				markup.row(btn[len(btn)-2],btn[len(btn)-1])
-
-			if len(btn)%3 == 1:
-				markup.row(btn[len(btn)-1])
-
-			text = "Topics registered:\n"
-			aux_cnt = 1
-			for topic in topics:
-				text += "/{}. ".format(aux_cnt) + topic + '\n'
-				aux_cnt += 1
-			bot.send_message(user_id, text, reply_markup=markup)
+			bot.send_message(user_id, keyboard, reply_markup=markup)
 			rtd.temp_user[user_id] = []
 			rtd.temp_user[user_id].append(Word(user_id, None))
 			rtd.temp_user[user_id][0].language = language
-			rtd.temp_user[user_id].append(topics)
+			rtd.temp_user[user_id].append(btn)
 			rtd.set_state(user_id, fsm.next_state[(fsm.LIST_WORDS, fsm.GET_LANGUAGE)]['done'])
 		else: 
 			bot.send_message(user_id, "There are no topics registered in this language yet.")
@@ -107,21 +83,18 @@ def handle_list_words(bot, rtd):
 		user_id = get_id(msg)
 		rtd.set_state(user_id, fsm.LOCKED)
 		language = rtd.temp_user[user_id][0].get_language()
-		valid, topic = utils.parse_option(msg.text.strip(), rtd.temp_user[user_id][1])
+		valid, topic = bot_utils.parse_string_keyboard_ans(msg.text, rtd.temp_user[user_id][1])
 		if valid == False:
-			topic = utils.treat_special_chars(msg.text)
-
-		known_topics = rtd.get_all_topics(user_id, language)
-		if not (topic in known_topics):
 			bot.reply_to(msg, "Please choose from options.")
 			rtd.set_state(user_id, fsm.next_state[(fsm.LIST_WORDS, fsm.GET_TOPIC)]['error'])
-			return
+			return	
+		
 		words = rtd.get_words_on_topic(user_id, language, topic)
 		str = "_Language:_ *{}*\n_Topic:_ *{}*\n_Words:_\n".format(language,topic)
 		for word in words:
 			str += "*." + word.get_word() + "*\n"
 
-		markup = telebot.types.ReplyKeyboardRemove()
-		bot.send_message(user_id, str, reply_markup=markup, parse_mode="Markdown")
+		markup = bot_utils.keyboard_remove()
+		bot.send_message(user_id, st3r, reply_markup=markup, parse_mode="Markdown")
 		rtd.set_state(user_id, fsm.next_state[(fsm.LIST_WORDS, fsm.GET_TOPIC)]['done'])
 

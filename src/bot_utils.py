@@ -51,10 +51,15 @@ def parse_string_keyboard_ans(ans, keys):
 	ans = ans.strip()
 	if ans[0] != '/':
 		ans = utils.treat_special_chars(ans)
-		if ans in keys:
-			return True, ans
-		else:
-			return False, ans
+		for key in keys:
+			if type(key) == "tuple":
+				if ans == key[0]:
+					return True, ans
+			else:
+				if ans == key:
+					return True, ans
+		return False, ans
+		 
 	ans = ans[1:]
 	try:
 		number = int(ans)
@@ -71,6 +76,23 @@ def parse_string_keyboard_ans(ans, keys):
 		return False, utils.treat_special_chars(ans)
 
 
+def parse_selection_inline_keyboard_ans(callback_data,set_btn):
+	'''
+ 		Altera o set_btn
+ 	'''
+	print("CALLBACK DATA: {}".format(callback_data))
+	done = False
+	try:
+		btn_number = int(callback_data)
+		if btn_number in set_btn:
+			set_btn.remove(btn_number)
+		else:
+			set_btn.add(btn_number)
+		return set_btn, done 
+	except ValueError:
+		#DONE
+		done = True
+		return set_btn, done
 
 
 def create_inline_key_button(text, data):
@@ -101,9 +123,9 @@ def create_keyboard(keys, width = 3, done_button = None):
 
 	if done_button != None:
 		if type(done_button) == "tuple":
-			markup.row(create_inline_key_button(done_button[0]))
+			markup.row(create_key_button(done_button[0]))
 		else:
-			markup.row(create_inline_key_button(done_button))
+			markup.row(create_key_button(done_button))
 		
 	return markup
 
