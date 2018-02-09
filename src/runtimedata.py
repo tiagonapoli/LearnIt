@@ -120,9 +120,8 @@ class RuntimeData:
 	def __init__(self):
 		self.db = Database()
 		self.known_users = self.db.get_known_users()
-		self.loop = {}
 		self.temp_user = {}
-		self.counter_user = {}
+		self.receive_queue = {}
 		
 	def get_state(self, user_id):
 		"""Gets the primary state of the user.
