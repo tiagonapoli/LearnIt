@@ -39,9 +39,9 @@ def handle_add_word_images(bot, rtd):
 		bot.send_message(user_id, "Image received successfuly")
 
 		if rtd.receive_queue[user_id].empty():
+			message_handlers.add_word.save_word(bot, rtd, user_id)
 			rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.SEND_IMAGE)]['done'])
 		else:
 			content_type = rtd.receive_queue[user_id].get()
 			message_handlers.add_word.prepare_to_receive(bot, user_id, content_type)
-			print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ' + content_type)
 			rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.SEND_IMAGE)][content_type])

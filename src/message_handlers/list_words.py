@@ -90,11 +90,11 @@ def handle_list_words(bot, rtd):
 			return	
 		
 		words = rtd.get_words_on_topic(user_id, language, topic)
-		str = "_Language:_ *{}*\n_Topic:_ *{}*\n_Words:_\n".format(language,topic)
+		text = "_Language:_ *{}*\n_Topic:_ *{}*\n_Words:_\n".format(language,topic)
 		for word in words:
-			str += "*." + word.get_word() + "*\n"
+			text += "*." + word.get_word() + "*\n"
 
 		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id, st3r, reply_markup=markup, parse_mode="Markdown")
+		bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
 		rtd.set_state(user_id, fsm.next_state[(fsm.LIST_WORDS, fsm.GET_TOPIC)]['done'])
 

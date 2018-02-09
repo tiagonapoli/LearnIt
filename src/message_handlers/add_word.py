@@ -24,6 +24,11 @@ def prepare_to_receive(bot, user_id, content_type):
 	if content_type_aux == 'image':
 		bot.send_message(user_id, "Use @pic <image_name> or @bing <image_name> to select an image")
 
+def save_word(bot, rtd, user_id):
+	word = rtd.temp_user[user_id][0]
+	rtd.add_word(word)
+	bot.send_message(user_id, "Successfully done!")
+
 def handle_add_word(bot, rtd):
 
 
@@ -169,6 +174,7 @@ def handle_add_word(bot, rtd):
 				rtd.receive_queue[user_id].put(btn[i][0])
 
 			if rtd.receive_queue[user_id].empty():
+				save_word(bot, rtd, user_id)
 				rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)]['done'])
 			else:
 				content_type = rtd.receive_queue[user_id].get()

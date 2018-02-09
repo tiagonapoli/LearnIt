@@ -43,6 +43,7 @@ def handle_add_word_audio(bot, rtd):
 		bot.send_message(user_id, "Audio received successfuly")
 
 		if rtd.receive_queue[user_id].empty():
+			message_handlers.add_word.save_word(bot, rtd, user_id)
 			rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.SEND_AUDIO)]['done'])
 		else:
 			content_type = rtd.receive_queue[user_id].get()

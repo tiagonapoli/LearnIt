@@ -27,12 +27,13 @@ def handle_add_word_translation(bot, rtd):
 		card = Card(word.user_id, word.word_id, word.language, word.topic, word.foreign_word,
 					card_id, 'translation')
 
-		card.add_archive(path)
+		card.add_archive(translation)
 		word.set_card(card)
 		print(str(rtd.temp_user[user_id][0]))
 		bot.send_message(user_id, "Translation received successfuly")
 
 		if rtd.receive_queue[user_id].empty():
+			message_handlers.add_word.save_word(bot, rtd, user_id)
 			rtd.set_state(user_id, fsm.next_state[(fsm.ADD_WORD, fsm.SEND_TRANSLATION)]['done'])
 		else:
 			content_type = rtd.receive_queue[user_id].get()
