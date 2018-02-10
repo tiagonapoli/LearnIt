@@ -6,7 +6,7 @@ def handle_settings(bot, rtd):
 
 	#=====================SETTINGS=====================
 	@bot.message_handler(func = lambda msg: 
-				rtd.get_state(get_id(msg)) == fsm.IDLE, 
+				rtd.get_user(get_id(msg)).get_state() == fsm.IDLE, 
 				commands = ['settings'])
 	def set_settings(msg):
 		"""

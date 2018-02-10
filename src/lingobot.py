@@ -25,7 +25,6 @@ import message_handlers.setup_user
 
 import message_handlers.card_answering
 import message_handlers.message_not_understood
-import message_handlers.set_state
 
 from runtimedata import RuntimeData
 
@@ -109,10 +108,6 @@ message_handlers.list_words.handle_list_words(bot,rtd)
 
 #=====================ERASE WORD=====================
 message_handlers.erase_words.handle_erase_words(bot,rtd)
-
-
-#=====================SET STATE=====================
-message_handlers.set_state.handle_set_state(bot,rtd)
 
 
 #=====================SETTINGS=====================

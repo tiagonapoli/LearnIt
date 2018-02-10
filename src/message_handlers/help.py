@@ -13,7 +13,7 @@ def handle_help(bot, rtd):
 
 	#=====================HELP=====================
 	@bot.message_handler(func = lambda msg:
-					rtd.get_state(get_id(msg)) == fsm.IDLE,
+					rtd.get_user(get_id(msg)).get_state() == fsm.IDLE,
 					commands = ['help'])
 	def help(msg):
 		user_id = get_id(msg)

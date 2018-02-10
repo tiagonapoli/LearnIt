@@ -9,12 +9,14 @@ def handle_list_languages(bot, rtd):
 
 	#=====================LIST LANGUAGES=====================
 	@bot.message_handler(func = lambda msg:
-					rtd.get_state(get_id(msg)) == fsm.IDLE, 
+					rtd.get_user(get_id(msg)).get_state() == fsm.IDLE, 
 					commands = ['list_languages'])
 	def list_languages(msg):
-		user_id = get_id(msg)
-		rtd.set_state(user_id, fsm.LOCKED)
-		known_languages = rtd.get_user_languages(user_id)
+		user = rtd.get_user(get_id(msg))
+		user_id = user.get_id()
+		user.set_state(fsm.LOCKED)
+
+		known_languages = user.get_languages()
 		text = "_Languages:_\n"
 		for language in known_languages:
 			text += "*." + language + "*\n"
@@ -24,6 +26,6 @@ def handle_list_languages(bot, rtd):
 			return
 
 		bot.send_message(user_id, text, parse_mode="Markdown")
-		rtd.set_state(user_id, fsm.next_state[fsm.IDLE]['list_languages'])
+		user.set_state(fsm.next_state[fsm.IDLE]['list_languages'])
 
 
