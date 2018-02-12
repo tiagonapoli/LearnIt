@@ -2,9 +2,11 @@
 import telebot
 import sys
 import systemtools 
+import fsm
+import bot_utils
+import utils
 from runtimedata import RuntimeData
 from flashcard import Card
-import fsm
 
 """
 	Script to send a card query through message in Telegram. If this was 
@@ -19,15 +21,6 @@ import fsm
 		card_id: id of the card to send
 		tries: tries unsuccessfuly done to send this card to this user
 """
-
-def create_key_button(text):
-	"""
-		Creates a key button to add to a telegram custom keyboard.
-		
-		Args:
-			text: Text of the button
-	"""
-	return telebot.types.KeyboardButton(text)
 
 
 try:
@@ -48,14 +41,17 @@ print(sys.argv[3])
 user_id = int(sys.argv[1])
 card_id = int(sys.argv[2])
 tried = int(sys.argv[3])
-rtd = RuntimeData()
 
-if rtd.get_state(user_id) == fsm.IDLE:
-	rtd.set_state(user_id, fsm.LOCKED)
-	card = rtd.get_card(user_id,card_id)
+rtd = RuntimeData()
+user = rtd.get_user(user_id)
+
+if user.get_state() == fsm.IDLE:
+	
+	user.set_state(fsm.LOCKED)	
+	card = user.get_card(card_id)
 	language = card.get_language()
 	
-	bot.send_message(user_id, "Review card!")
+	bot.send_message(user_id, "*Review card!")
 	rtd.set_card_waiting(user_id, card.card_id)
 	markup = telebot.types.ForceReply(selective = False)
 	question = card.get_question()

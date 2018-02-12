@@ -29,13 +29,13 @@ def handle_topic_review(bot, rtd):
 		
 		
 		if len(known_languages) == 0:
-			bot.send_message(user_id, "Please, add a language first.")
+			bot.send_message(user_id, "_Please, add a language first._", parse_mode="Markdown")
 			user.set_state(fsm.IDLE)
 			return 	
 
 		markup = bot_utils.create_keyboard(known_languages, 2)
 
-		text = "Please select the word's language:\n" + bot_utils.create_string_keyboard(known_languages)
+		text = "*Please select the word's language:*\n" + bot_utils.create_string_keyboard(known_languages)
 
 		bot.send_message(user_id, text, reply_markup=markup)
 		user.keyboard_options = known_languages
@@ -104,17 +104,28 @@ def handle_topic_review(bot, rtd):
 		btn = user.keyboard_options
 		
 		if done == True:
-			bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
+
 			user.cards_to_review = []
 			for i in btn_set:
 				user.cards_to_review.extend(user.get_cards_on_topic(user.temp_language, user.keyboard_options[i][0], False))
 
-			options = ['5', '10', '15', '20']
-			markup = bot_utils.create_keyboard(options, 2)
-			text = "Please select the number of review cards that you want to receive:\n" + bot_utils.create_string_keyboard(options)
-			bot.send_message(user_id, text, reply_markup=markup)
-			user.keyboard_options = options
-			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_TOPICS)]['done'])
+			if len(user.cards_to_review) == 0:
+				markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
+				try:
+					bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, 
+						text="Please, select *at least one* topic to review:", 
+						reply_markup=markup, parse_mode="Markdown")
+				except Exception as e:
+					print("CANT EDIT MESSAGE")
+				user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_TOPICS)]['continue'])
+			else:
+				bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
+				options = ['5', '10', '15', '20', '25']
+				markup = bot_utils.create_keyboard(options, 2)
+				text = "*Please select the number of review cards that you want to receive:*\n" + bot_utils.create_string_keyboard(options)
+				bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
+				user.keyboard_options = options
+				user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_TOPICS)]['done'])
 		else:
 			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
 			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="Select the topics that you want to review:", reply_markup=markup)
@@ -142,34 +153,10 @@ def handle_topic_review(bot, rtd):
 		user.counter = int(number)
 		user.pos = 0
 		user.review_card_number = 1
-		markup = bot_utils.keyboard_remove()
-
+		
 		shuffle(user.cards_to_review)
-		send_review_card(user.cards_to_review[0], user, user.review_card_number)
+		utils.send_review_card(bot, rtd, user.cards_to_review[0], user, user.review_card_number)
 		user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_NUMBER)]['done'])
-
-
-	def send_review_card(card, user, number):
-		language = card.get_language()
-		user_id = user.get_id()
-		bot.send_message(user_id, "*Review card #{}!*".format(number), parse_mode="Markdown")
-		user.set_card_waiting(card.card_id)
-		markup = telebot.types.ForceReply(selective = False)
-		question = card.get_question()
-		content = card.get_type()
-		if content == 'image':
-			bot.send_message(user_id, "Relate the image to a word in _{}_".format(language), parse_mode="Markdown")
-			question = open(question,'rb')
-			bot.send_photo(user_id, question, reply_markup = markup)
-			question.close()
-		elif content == 'audio':
-			bot.send_message(user_id, "Transcribe the audio in _{}_".format(language), parse_mode="Markdown")
-			question = open(question,'rb')
-			bot.send_voice(user_id, question, reply_markup = markup)
-			question.close()
-		elif content == 'translation':
-			bot.send_message(user_id, "Translate the word to _{}_".format(language), parse_mode="Markdown")
-			bot.send_message(user_id, question, reply_markup = markup)
 
 
 	@bot.message_handler(func = lambda msg:
@@ -204,7 +191,7 @@ def handle_topic_review(bot, rtd):
 			user.pos = 0
 
 		if user.counter > 0:
-			send_review_card(user.cards_to_review[user.pos], user, user.review_card_number)
+			utils.send_review_card(bot, rtd, user.cards_to_review[user.pos], user, user.review_card_number)
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.WAITING_CARD_ANS)]['continue'])
 		else:
 			bot.send_message(user_id, "*Review session done!*", parse_mode="Markdown")

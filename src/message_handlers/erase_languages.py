@@ -19,7 +19,7 @@ def handle_erase_languages(bot, rtd):
 		known_languages = user.get_languages()
 
 		if len(known_languages) == 0:
-			bot.send_message(user_id, "Please, add a language first.")
+			bot.send_message(user_id, "_Please, add a language first._", parse_mode="Markdown")
 			user.set_state(fsm.IDLE)
 			return 	
 		
@@ -30,7 +30,7 @@ def handle_erase_languages(bot, rtd):
 		
 		user.btn_set = btn_set
 		user.keyboard_options = btn
-		bot.send_message(user_id, "Select languages to erase:", reply_markup=markup, parse_mode="Markdown")
+		bot.send_message(user_id, "_Select languages to erase:_", reply_markup=markup, parse_mode="Markdown")
 		user.set_state(fsm.next_state[fsm.IDLE]['erase_languages'])
 		
 

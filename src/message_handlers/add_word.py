@@ -21,14 +21,14 @@ def prepare_to_receive(bot, user, content_type):
 	if content_type_aux == 'translation':
 		article = 'a'
 
-	bot.send_message(user_id,"Send {} {}:".format(article, content_type_aux))
+	bot.send_message(user_id,"Send {} *{}*:".format(article, content_type_aux), parse_mode="Markdown")
 	if content_type_aux == 'image':
-		bot.send_message(user_id, "Use @pic <image_name> or @bing <image_name> to select an image")
+		bot.send_message(user_id, "_Use_ @pic _<image_\__name> or_ @bing _<image_\__name> to select an image_", parse_mode="Markdown")
 
 def save_word(bot, user):
 	word = user.temp_word
 	user.add_word(word)
-	bot.send_message(user.get_id(), "Successfully done!")
+	bot.send_message(user.get_id(), "_Successfully done!_", parse_mode="Markdown")
 
 def handle_add_word(bot, rtd):
 
@@ -50,15 +50,15 @@ def handle_add_word(bot, rtd):
 		
 		
 		if len(known_languages) == 0:
-			bot.send_message(user_id, "Please, add a language first.")
+			bot.send_message(user_id, "_Please, add a language first._", parse_mode="Markdown")
 			user.set_state(fsm.IDLE)
 			return 	
 
 		markup = bot_utils.create_keyboard(known_languages, 2)
 
-		text = "Please select the word's language:\n" + bot_utils.create_string_keyboard(known_languages)
+		text = "*Please select the word's language:*\n" + bot_utils.create_string_keyboard(known_languages)
 
-		bot.send_message(user_id, text, reply_markup=markup)
+		bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
 		user.keyboard_options = known_languages
 		user.set_state(fsm.next_state[fsm.IDLE]['add_word'])
 
@@ -84,17 +84,17 @@ def handle_add_word(bot, rtd):
 			return
 
 		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id, "Send the word's topic, either a new topic or select from existing".format(language),
-						reply_markup=markup)
+		bot.send_message(user_id, "*Send the word's topic*. You can send a *new topic* or *select from existing*".format(language),
+						reply_markup=markup, parse_mode="Markdown")
 		topics = user.get_all_topics(language)
 		topics.sort()
 
 		if len(topics) > 0:
 			markup = bot_utils.create_keyboard(topics, 3)
-			text = "Topics registered:\n" + bot_utils.create_string_keyboard(topics)
-			bot.send_message(user_id, text, reply_markup=markup)
+			text = "_Topics registered:_\n" + bot_utils.create_string_keyboard(topics)
+			bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
 		else: 
-			bot.send_message(user_id, "There are no topics registered in this language yet.")
+			bot.send_message(user_id, "_There are no topics registered in this language yet, so please_ *send a new topic*", parse_mode="Markdown")
 		
 		user.temp_word = Word(user_id, user.get_highest_word_id() + 1)
 		user.temp_word.language = language
@@ -121,8 +121,8 @@ def handle_add_word(bot, rtd):
 
 		markup = bot_utils.keyboard_remove()
 		user.temp_word.topic = topic
-		bot.send_message(user_id, "Word's topic: {}".format(topic))
-		bot.send_message(user_id, "Send word to add (in {})".format(language), reply_markup=markup)
+		bot.send_message(user_id, "Word's topic: *{}*".format(topic), parse_mode="Markdown")
+		bot.send_message(user_id, "*Send word to add* (in _{}_)".format(language), reply_markup=markup, parse_mode="Markdown")
 		user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_TOPIC)])
 
 
@@ -155,8 +155,8 @@ def handle_add_word(bot, rtd):
 		user.btn_set = btn_set
 		user.keyboard_options = btn
 
-		bot.send_message(user_id, "Select the ways you want to relate to the word:",
-						reply_markup=markup)	
+		bot.send_message(user_id, "_Select the ways you want to relate to the word (one or more):_",
+						reply_markup=markup, parse_mode="Markdown")	
 		user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)])
 
 	@bot.callback_query_handler(func=lambda call:
@@ -177,21 +177,27 @@ def handle_add_word(bot, rtd):
 		btn = user.keyboard_options
 		
 		if done == True:
-			bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
 			user.receive_queue = Queue()
 			for i in btn_set:
 				user.receive_queue.put(btn[i][0])
 
-			if user.receive_queue.empty():
-				save_word(bot, user)
-				user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)]['done'])
+			if user.receive_queue.empty() == True:
+				markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
+				try:
+					bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="Please, select *at least one way* to relate to the word: ", 
+							reply_markup=markup, parse_mode="Markdown")
+				except Exception as e:
+					print("CANT EDIT MESSAGE")
+				user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)]['continue'])
 			else:
+				bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
 				content_type = user.receive_queue.get()
 				prepare_to_receive(bot, user, content_type)
 				user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)][content_type])
 		else:
 			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
-			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="Select the ways you want to relate to the word:", reply_markup=markup)
+			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="_Select the ways you want to relate to the word (one or more):_", 
+							reply_markup=markup, parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)]['continue'])
 
 

@@ -14,7 +14,7 @@ def handle_user_dont_exist(bot, rtd):
 		bot.send_message(user_id, error_msg)
 
 	#=====================USER DOESN'T EXIST - CALLBACK=====================
-	@bot.callback_query_handler(func = lambda call:	rtd.check_user_existence(get_id(call.message)) == False, content_types=['text','photo','audio','voice'])
+	@bot.callback_query_handler(func = lambda call:	rtd.check_user_existence(get_id(call.message)) == False)
 	def callback_user_existence(call):
 		user_id = get_id(call.message)
 		error_msg = ("LingoBot is under development, so sometimes we have to do some experiments and reset some things" +

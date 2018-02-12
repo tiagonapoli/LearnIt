@@ -127,22 +127,15 @@ message_handlers.help.handle_help(bot,rtd)
 message_handlers.message_not_understood.handle_message_not_understood(bot,rtd)
 
 
-
-#while True:
-#	try:
-print("Press Ctrl+C to exit gently")
-print("Bot Polling!!!")
-try:
-	bot.polling(none_stop=True)
-except Exception as e:
-	bot.send_message(359999978,"Bot Crashed!!")
-	#bot.send_message(113538563,"Bot Crashed!!")
-
-	print(e)
-#	utils.turn_off(rtd)
-	print("Exiting bot...")
-#	except Exception as e:
-#		print("An error ocurred with bot.polling")
-#		print(e)
-#		time.sleep(5)	
+while True:
+	try:
+		print("Press Ctrl+C to exit gently")
+		print("Bot Polling!!!")
+		bot.polling(none_stop=True)	
+	except Exception as e:
+		bot.send_message(113538563,"Bot Crashed!!")
+		bot.send_message(359999978,"Bot Crashed!!")
+		print("=====================An error ocurred with bot.polling======================")
+		print(e)
+		time.sleep(5)	
 

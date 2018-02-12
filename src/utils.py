@@ -5,11 +5,47 @@ def get_file_extension(filename):
 	path, extension = os.path.splitext(filename)
 	return extension 
 
+
+
 def words_to_string_list(words):
 	ret = []
 	for word in words:
 		ret.append(word.get_word())
 	return ret
+
+
+
+def send_review_card(bot, rtd, card, user, number = None):
+		
+		if number == None:
+			number = ""
+		else:
+			number = " #" + str(number)
+
+		language = card.get_language()
+		user_id = user.get_id()
+
+		markup = bot_utils.keyboard_remove()
+		bot.send_message(user_id, "*Review card{}!*".format(number), parse_mode="Markdown", reply_markup=markup)
+		
+		user.set_card_waiting(card.card_id)
+		markup = telebot.types.ForceReply(selective = False)
+		question = card.get_question()
+		content = card.get_type()
+		if content == 'image':
+			bot.send_message(user_id, "Relate the image to a word in _{}_".format(language), parse_mode="Markdown")
+			question = open(question,'rb')
+			bot.send_photo(user_id, question, reply_markup = markup)
+			question.close()
+		elif content == 'audio':
+			bot.send_message(user_id, "Transcribe the audio in _{}_".format(language), parse_mode="Markdown")
+			question = open(question,'rb')
+			bot.send_voice(user_id, question, reply_markup = markup)
+			question.close()
+		elif content == 'translation':
+			bot.send_message(user_id, "Translate the word to _{}_".format(language), parse_mode="Markdown")
+			bot.send_message(user_id, question, reply_markup = markup)
+
 
 
 def treat_special_chars(text):

@@ -22,7 +22,7 @@ def handle_list_languages(bot, rtd):
 			text += "*." + language + "*\n"
 		
 		if len(known_languages) == 0:
-			bot.send_message(user_id, "No languages registered yet...")
+			bot.send_message(user_id, "_No languages registered yet..._", parse_mode="Markdown")
 			return
 
 		bot.send_message(user_id, text, parse_mode="Markdown")

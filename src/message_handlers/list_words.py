@@ -20,15 +20,15 @@ def handle_list_words(bot, rtd):
 		known_languages = user.get_languages()
 
 		if len(known_languages) == 0:
-			bot.send_message(user_id, "Please, add a language first.")
+			bot.send_message(user_id, "_Please, add a language first._", parse_mode="Markdown")
 			user.set_state(fsm.IDLE)
 			return 	
 
 		markup = bot_utils.create_keyboard(known_languages, 2)
-		text = "Please select the language:\n" + bot_utils.create_string_keyboard(known_languages)
+		text = "*Please select the language:*\n" + bot_utils.create_string_keyboard(known_languages)
 		user.keyboard_options = known_languages
 
-		bot.send_message(user_id, text,	reply_markup=markup)	
+		bot.send_message(user_id, text,	reply_markup=markup, parse_mode="Markdown")	
 		user.set_state(fsm.next_state[fsm.IDLE]['list_words'])
 
 
@@ -47,13 +47,13 @@ def handle_list_words(bot, rtd):
 
 		valid, language = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 		if valid == False:
-			bot.reply_to(msg, "Please choose from keyboard")
+			bot.reply_to(msg, "Please choose from keyboard", parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.GET_LANGUAGE)]['error'])
 			return
 
 		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id, "Select the word's topic.",
-						reply_markup=markup)
+		bot.send_message(user_id, "*Select the word's topic.*",
+						reply_markup=markup, parse_mode="Markdown")
 		topics = user.get_all_topics(language)
 		topics.sort()
 
@@ -61,15 +61,15 @@ def handle_list_words(bot, rtd):
 
 			btn = list(topics)
 			markup = bot_utils.create_keyboard(btn)
-			keyboard = "Topics registered:\n" + bot_utils.create_string_keyboard(btn) 
+			keyboard = "_Topics registered:_\n" + bot_utils.create_string_keyboard(btn) 
 
-			bot.send_message(user_id, keyboard, reply_markup=markup)
+			bot.send_message(user_id, keyboard, reply_markup=markup, parse_mode="Markdown")
 			user.temp_word = Word(user_id, None)
 			user.temp_word.language = language
 			user.keyboard_options = btn
 			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.GET_LANGUAGE)]['done'])
 		else: 
-			bot.send_message(user_id, "There are no topics registered in this language yet.")
+			bot.send_message(user_id, "_There are no topics registered in this language yet._", parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.GET_LANGUAGE)]['no topics'])
 
 
@@ -89,7 +89,7 @@ def handle_list_words(bot, rtd):
 		language = user.temp_word.get_language()
 		valid, topic = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 		if valid == False:
-			bot.reply_to(msg, "Please choose from options.")
+			bot.reply_to(msg, "*Please choose from options.*", parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.GET_TOPIC)]['error'])
 			return	
 		
