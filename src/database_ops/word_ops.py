@@ -209,12 +209,17 @@ class WordOps():
 		return ret
 
 
+	def add_topic(self, user_id, language, topic):
+		topic_ops.add_topic(user_id, language, topic)
+
+
+	def get_all_topics(self, user_id, language):
+		return topic_ops.get_all_topics(user_id, language)
+
+
 	def get_words_on_topic(self, user_id, language, topic):
-		self.cursor.execute("SELECT user_id,user_word_id FROM words WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, treat_str_SQL(language), treat_str_SQL(topic)))
-		words = self.cursor.fetchall()
+		return topic_ops.get_words_on_topic(user_id, language, topic)
 
-		ret = []
-		for word in words:
-			ret.append(self.get_word(word[0],word[1]))
 
-		return ret
+	def erase_topic_empty_words(self, user_id, language, topic):
+		topic_ops.erase_topic_empty_words(user_id, language, topic)
