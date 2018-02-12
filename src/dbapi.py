@@ -46,6 +46,7 @@ class Database():
 			self.cursor = self.conn.cursor()
 			print("Connected with database!")
 			self.word_ops = database_ops.word_ops.WordOps(self.conn, self.cursor)
+			self.archive_ops = database_ops.archive_ops.ArquiveOps(self.conn, self.cursor)
 
 		except Exception as e:
 			print("Uh oh, can't connect. Invalid dbname, user or password?")
@@ -86,8 +87,46 @@ class Database():
 	def set_state(self, user_id, state1, state2, state3):
 		self.user_ops.set_state(user_id, state1, state2, state3)
 
+	
 	def add_user(self, user_id):
 		self.user_ops.add_user(user_id)
+
+
+	#=================CARD ops===================
+
+	def get_highest_card_id(self, user_id):
+		return self.card_ops.get_highest_card_id(user_id)
+
+
+	def add_card(self, card):
+		self.card_ops.add_card(card)
+
+
+	def get_card(self, user_id, user_card_id):
+		return self.card_ops.get_card(user_id, user_card_id)
+
+
+	def erase_card(self, user_id, user_card_id):
+		return self.card_ops.erase_card(user_id, user_card_id)
+
+
+	def set_supermemo_data(self, card):
+		self.card_ops.set_supermemo_data(card)
+
+
+	def set_card_waiting(self, user_id, card_id):
+		self.card_ops.set_card_waiting(user_id, card_id)
+
+
+	def get_card_waiting(self, user_id):
+		return self.card_ops.get_card_waiting(user_id)
+
+
+	#==================ARCHIVE ops==================
+
+
+	def erase_archive(self, user_id, card_id, counter):
+		return self.archive_ops.erase_archive(user_id, card_id, counter):
 
 
 	add_user = database_ops.user_ops.add_user
@@ -109,15 +148,6 @@ class Database():
 
 	#==================CARD ops==================
 	get_highest_card_id = database_ops.card_ops.get_highest_card_id
-	add_card = database_ops.card_ops.add_card
-	get_card = database_ops.card_ops.get_card
-	erase_card = database_ops.card_ops.erase_card
-	set_card_waiting = database_ops.card_ops.set_card_waiting
-	get_card_waiting = database_ops.card_ops.get_card_waiting
-
-
-	#==================ARCHIVE ops==================
-	erase_archive = database_ops.archive_ops.erase_archive
 
 
 	def backup(self):
