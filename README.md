@@ -7,7 +7,7 @@ After answering a question, you will be asked to grade your performance, and bas
 <br />
 There is also a review feature, in which the user can choose the topics to be reviewed and a number of cards to receive. The bot will send random cards of the choosen topics to the user to answer. <br />
 <br />
-Important: The bot is still in development and will be online just during tests sessions.
+Important: The bot is still in development and will be online just during testing sessions.
 
 # Commands
 /cancel - Cancel any existing process <br />
@@ -22,3 +22,7 @@ Important: The bot is still in development and will be online just during tests 
 /start - Sign in to use the bot
 
 # Some examples
+![Alt text](https://i.imgur.com/7eUItlj.jpg)
+![Alt text](https://i.imgur.com/dZszo1D.jpg)
+![Alt text](https://i.imgur.com/0oqKC1x.jpg)
+![Alt text](https://i.imgur.com/yNRdeUD.jpg)
