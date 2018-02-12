@@ -17,7 +17,7 @@ def handle_add_language(bot, rtd):
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 
-		bot.send_message(user_id, "Text me the language you want to add")
+		bot.send_message(user_id, "*Text me the language you want to add*", parse_mode="Markdown")
 		user.set_state(fsm.next_state[fsm.IDLE]['add_language'])
 
 

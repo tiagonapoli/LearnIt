@@ -28,11 +28,20 @@ def handle_card_answer(bot, rtd):
 		else:
 			bot.send_message(user_id, "There was a mistake :(")
 		bot.send_message(user_id, "Answer: " + card.foreign_word)
-		btn = ["1", "2", "3", "4", "5"]
-		markup = bot_utils.create_keyboard(btn,5)
+		
+		text = ("*5* - _perfect response_\n" +
+			 "*4* - _correct response after a hesitation_\n" +
+			 "*3* - _correct response recalled with serious difficulty_\n" + 
+			 "*2* - _incorrect response; where the correct one seemed easy to recall_\n" + 
+			 "*1* - _incorrect response; the correct one remembered_\n" +
+			 "*0* - _complete blackout._")
 
-		bot.send_message(user_id,"Please grade your performance to answer the card",
-						reply_markup=markup)
+		options = ['0', '1', '2', '3', '4', '5']
+		markup = bot_utils.create_keyboard(options, 6)
+		user.keyboard_options = options
+		bot.send_message(user_id,"_Please grade your performance to answer the card_\n" + text,
+						reply_markup=markup, parse_mode="Markdown")
+
 		user.set_state(fsm.next_state[fsm.WAITING_ANS])
 
 
@@ -50,23 +59,21 @@ def handle_card_answer(bot, rtd):
 		user.set_state(fsm.LOCKED)
 
 		card = user.temp_card
-		try:
-			grade = int(msg.text)
-		except:
-			bot.send_message(user_id, "Please use the custom keyboard")
+
+		valid, grade = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
+
+		if valid == False:
+			bot.reply_to(msg, "Please choose from keyboard")
 			user.set_state(fsm.next_state[fsm.WAITING_POLL_ANS]['error'])
 			return
-		
-		if not (grade <= 5 and grade >= 0):
-			bot.send_message(user_id, "Please use the custom keyboard")
-			user.set_state(fsm.next_state[fsm.WAITING_POLL_ANS]['error'])
-			return
-		
+			
+		grade = int(grade)
+
 		card.calc_next_date(grade)
 		user.set_supermemo_data(card)
 		print(card.get_next_date())
 		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id,"OK!", reply_markup=markup)
+		bot.send_message(user_id,"_OK!_", reply_markup=markup, parse_mode="Markdown")
 		user.set_state(fsm.next_state[fsm.WAITING_POLL_ANS]['done'])
 
 
@@ -86,23 +93,20 @@ def handle_card_answer(bot, rtd):
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 
-		card_id = user.get_card_waiting()
-		card = user.get_card(card_id)
-		try:
-			grade = int(msg.text)
-		except:
-			bot.send_message(user_id, "Please use the custom keyboard")
-			user.set_state(fsm.next_state[fsm.WAITING_POLL_REMEMBER]['error'])
+		card = user.temp_card
+
+		valid, grade = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
+
+		if valid == False:
+			bot.reply_to(msg, "Please choose from keyboard")
+			user.set_state(fsm.next_state[fsm.WAITING_POLL_ANS]['error'])
 			return
-		
-		if not (grade <= 5 and grade >= 1):
-			bot.send_message(user_id, "Please use the custom keyboard")
-			user.set_state(fsm.next_state[fsm.WAITING_POLL_REMEMBER]['error'])
-			return
-		
+			
+		grade = int(grade)
+
 		card.calc_next_date(grade)
 		user.set_supermemo_data(card)
 		print(card.get_next_date())
 		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id,"OK!", reply_markup=markup)
+		bot.send_message(user_id,"_OK!_", reply_markup=markup, parse_mode="Markdown")
 		user.set_state(fsm.next_state[fsm.WAITING_POLL_REMEMBER]['done'])
