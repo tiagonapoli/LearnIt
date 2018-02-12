@@ -1,8 +1,8 @@
 import telebot
 import fsm
-import utils
 from flashcard import Word, Card
-from bot_utils import get_id, create_key_button
+from utilities import utils
+from utilities.bot_utils import get_id, create_key_button
 
 
 def handle_list_languages(bot, rtd):	

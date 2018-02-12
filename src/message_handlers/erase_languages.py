@@ -1,8 +1,8 @@
 import telebot
 import fsm
-import bot_utils
+from utilities import bot_utils
 from flashcard import Word, Card
-from bot_utils import get_id
+from utilities.bot_utils import get_id
 
 
 def handle_erase_languages(bot, rtd):

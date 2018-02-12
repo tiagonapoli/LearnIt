@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 import telebot
 import sys
-import systemtools 
 import fsm
-import bot_utils
-import utils
 from runtimedata import RuntimeData
 from flashcard import Card
+from utilities import utils
+from utilities import systemtools 
+from utilities import bot_utils
 
 """
 	Script to send a card query through message in Telegram. If this was 

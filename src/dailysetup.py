@@ -1,8 +1,8 @@
 #! /usr/bin/python3
-import systemtools
 import datetime
 from runtimedata import RuntimeData
 from flashcard import Card
+from utilities import systemtools
 
 """
 	Script that schedules all send jobs that have to be sent today.

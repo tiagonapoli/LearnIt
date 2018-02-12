@@ -1,7 +1,7 @@
 import telebot
 import fsm
-import bot_utils
-from bot_utils import get_id
+from utilities import bot_utils
+from utilities.bot_utils import get_id
 
 def handle_cancel(bot, rtd):
 

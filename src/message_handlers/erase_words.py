@@ -1,9 +1,9 @@
 import telebot
 import fsm
-import utils
-import bot_utils
+from utilities import bot_utils
+from utilities import utils
 from flashcard import Word, Card
-from bot_utils import get_id
+from utilities.bot_utils import get_id
 
 
 def handle_erase_words(bot, rtd):	

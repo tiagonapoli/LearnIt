@@ -1,12 +1,12 @@
 import telebot
 import fsm
-import utils
-import bot_utils
 import message_handlers.add_word_audio
 import message_handlers.add_word_translation
 import message_handlers.add_word_images
+from utilities import utils
+from utilities import bot_utils
 from flashcard import Word, Card
-from bot_utils import get_id
+from utilities.bot_utils import get_id
 from queue import Queue
 
 def prepare_to_receive(bot, user, content_type):

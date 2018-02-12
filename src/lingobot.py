@@ -1,11 +1,8 @@
 #! /usr/bin/python3
 import sys
 import telebot
-import utils
 import signal
-import systemtools
 import time
-import bot_utils
 import fsm
 
 import message_handlers.cancel
@@ -28,6 +25,9 @@ import message_handlers.card_answering
 import message_handlers.message_not_understood
 
 from runtimedata import RuntimeData
+from utilities import utils
+from utilities import systemtools
+from utilities import bot_utils
 
 
 """

@@ -1,7 +1,7 @@
 import telebot
 import fsm
-import utils
-from bot_utils import get_id, create_key_button
+from utilities import utils
+from utilities.bot_utils import get_id, create_key_button
 
 def handle_add_language(bot, rtd):
 

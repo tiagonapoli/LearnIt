@@ -1,13 +1,13 @@
 import telebot
 import fsm
-import utils
-import bot_utils
 import message_handlers.add_word_audio
 import message_handlers.add_word_translation
 import message_handlers.add_word_images
 from flashcard import Word, Card
-from bot_utils import get_id
+from utilities.bot_utils import get_id
 from random import shuffle
+from utilities import utils
+from utilities import bot_utils
 
 def handle_topic_review(bot, rtd):
 

@@ -1,10 +1,10 @@
 import telebot
 import fsm
-import utils
-import bot_utils
 import message_handlers.add_word
+from utilities import utils
+from utilities import bot_utils
 from flashcard import Word, Card
-from bot_utils import get_id
+from utilities.bot_utils import get_id
 
 def handle_add_word_audio(bot, rtd):
 

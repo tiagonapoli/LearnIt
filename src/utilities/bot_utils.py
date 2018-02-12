@@ -1,5 +1,5 @@
 import telebot
-import utils
+from utilities import utils
 import sys
 
 def get_id(msg):

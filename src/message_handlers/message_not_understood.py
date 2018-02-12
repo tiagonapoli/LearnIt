@@ -1,5 +1,5 @@
 import telebot
-from bot_utils import get_id
+from utilities.bot_utils import get_id
 
 def handle_message_not_understood(bot, rtd):
 

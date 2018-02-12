@@ -1,6 +1,6 @@
 import telebot
 import fsm
-from bot_utils import get_id
+from utilities.bot_utils import get_id
 
 
 def handle_user_dont_exist(bot, rtd):

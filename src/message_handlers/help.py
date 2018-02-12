@@ -1,7 +1,7 @@
 import telebot
 import fsm
 from flashcard import Word, Card
-from bot_utils import get_id, create_key_button
+from utilities.bot_utils import get_id, create_key_button
 
 help_msg = ("NOT YET IMPLEMENTED.\n" +
 		   "If you have questions or want to support the project, please contact one of the developers:" +
