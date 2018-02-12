@@ -45,7 +45,9 @@ def send_review_card(bot, rtd, card, user, number = None):
 		elif content == 'translation':
 			bot.send_message(user_id, "Translate the word to _{}_".format(language), parse_mode="Markdown")
 			bot.send_message(user_id, question, reply_markup = markup)
-
+		elif content == 'default':
+			bot.send_message(user_id, "Just remember the _usage_ and _meaning_ of the next word.".format(language), parse_mode="Markdown")
+			bot.send_message(user_id, question, reply_markup= markup)
 
 
 def treat_special_chars(text):

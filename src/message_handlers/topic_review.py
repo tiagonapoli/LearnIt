@@ -37,7 +37,7 @@ def handle_topic_review(bot, rtd):
 
 		text = "*Please select the word's language:*\n" + bot_utils.create_string_keyboard(known_languages)
 
-		bot.send_message(user_id, text, reply_markup=markup)
+		bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
 		user.keyboard_options = known_languages
 		user.set_state(fsm.next_state[fsm.IDLE]['review'])
 
@@ -76,12 +76,12 @@ def handle_topic_review(bot, rtd):
 			user.btn_set = btn_set
 			user.keyboard_options = btn
 
-			bot.send_message(user_id, "Select the topics that you want to review",
-							reply_markup=markup)
+			bot.send_message(user_id, "_Select the topics that you want to review_",
+							reply_markup=markup, parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_LANGUAGE)]['done'])
 
 		else: 
-			bot.send_message(user_id, "There are no topics registered in this language yet.")
+			bot.send_message(user_id, "_There are no topics registered in this language yet._", parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_LANGUAGE)]['no topics'])
 			return
 

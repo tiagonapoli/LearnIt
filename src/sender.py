@@ -51,42 +51,28 @@ if user.get_state() == fsm.IDLE:
 	card = user.get_card(card_id)
 	language = card.get_language()
 	
-	bot.send_message(user_id, "*Review card!")
+	bot.send_message(user_id, "*Review card!*", )
 	rtd.set_card_waiting(user_id, card.card_id)
 	markup = telebot.types.ForceReply(selective = False)
 	question = card.get_question()
 	content = card.get_type()
-	if content == 'image':
-		bot.send_message(user_id, "Relate the image to a word in {}".format(language))
-		question = open(question,'rb')
-		bot.send_photo(user_id, question, reply_markup = markup)
-		question.close()
-		rtd.set_state(user_id, fsm.next_state[fsm.IDLE]['card_query'])
-	elif content == 'audio':
-		bot.send_message(user_id, "Transcribe the audio in {}".format(language))
-		question = open(question,'rb')
-		bot.send_voice(user_id, question, reply_markup = markup)
-		question.close()
-		rtd.set_state(user_id, fsm.next_state[fsm.IDLE]['card_query'])
-	elif content == 'translation':
-		bot.send_message(user_id, "Translate the word to {}".format(language))
-		bot.send_message(user_id, question, reply_markup = markup)
-		rtd.set_state(user_id, fsm.next_state[fsm.IDLE]['card_query'])
-	elif content == 'default':
-		bot.send_message(user_id, "Just remember the usage and meaning of the next word.".format(language))
-		bot.send_message(user_id, question)
-		btn0 = create_key_button("0");
-		btn1 = create_key_button("1");
-		btn2 = create_key_button("2");
-		btn3 = create_key_button("3");
-		btn4 = create_key_button("4");
-		btn5 = create_key_button("5");
-		markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-		markup.row(btn0,btn1,btn2,btn3,btn4,btn5)
 
-		bot.send_message(user_id,"Please grade how difficult is this word",
-						reply_markup=markup)
+	utils.send_review_card(bot, rtd, card, user)
+
+	if content == 'default':
+		text = ("*5* - _perfect response_\n" +
+			 "*4* - _correct response after a hesitation_\n" +
+			 "*3* - _correct response recalled with serious difficulty_\n" + 
+			 "*2* - _incorrect response; where the correct one seemed easy to recall_\n" + 
+			 "*1* - _incorrect response; the correct one remembered_\n" +
+			 "*0* - _complete blackout._")
+		markup = bot_utils.create_keyboard(['0','1','2','3','4','5'], 6)
+		bot.send_message(user_id,"_Please grade how difficult is this word_\n" + text,
+						reply_markup=markup, parse_mode="Markdown")
 		rtd.set_state(user_id, fsm.next_state[fsm.IDLE]['card_remember'])
+	else:
+		rtd.set_state(user_id, fsm.next_state[fsm.IDLE]['card_query'])
+		
 else:
 	tried += 1
 	systemtools.set_new_at_job_card(min(tried,10),user_id,card_id, tried)	
