@@ -12,7 +12,7 @@ def handle_message_not_understood(bot, rtd):
 		user_id = get_id(msg)
 		bot.send_message(user_id, "Oops, didn't understand your message")
 
-	@bot.callback_query_handler(func=lambda call: True)
+	@bot.callback_query_handler(func=lambda call: rtd.get_user(get_id(msg)).not_locked())
 	def callback_not_understood(call):
 		user_id = get_id(call.message)
 		print("Callback from user {} not understood or thrown away: {}".format(user_id, call.message.text))
