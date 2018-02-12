@@ -45,8 +45,14 @@ class Database():
 			# create a psycopg2 cursor that can execute queries
 			self.cursor = self.conn.cursor()
 			print("Connected with database!")
-			self.word_ops = database_ops.word_ops.WordOps(self.conn, self.cursor)
 
+			self.word_ops = database_ops.word_ops.WordOps(self.conn, self.cursor)
+			self.user_ops = database_ops.user_ops.UserOps(self.conn, self.cursor)
+			self.topic_ops = database_ops.topic_ops.TopicOps(self.conn, self.cursor)
+			self.language_ops = database_ops.language_ops.LanguageOps(self.conn, self.cursor)
+			self.card_ops = database_ops.card_ops.CardOps(self.conn, self.cursor)
+			self.archive_ops = database_ops.archive_ops.ArchiveOps(self.conn, self.cursor)
+			
 		except Exception as e:
 			print("Uh oh, can't connect. Invalid dbname, user or password?")
 			print("Exception: {}".format(e))
@@ -89,35 +95,38 @@ class Database():
 	def add_user(self, user_id):
 		self.user_ops.add_user(user_id)
 
-
-	add_user = database_ops.user_ops.add_user
-	get_known_users = database_ops.user_ops.get_known_users
-
+	def get_known_users(self):
+		self.user_ops.get_known_users()
 
 	#==================TOPIC ops==================
-	add_topic = database_ops.topic_ops.add_topic
-	get_all_topics = database_ops.topic_ops.get_all_topics
-	get_words_on_topic = database_ops.topic_ops.get_words_on_topic
-	erase_topic_empty_words = database_ops.topic_ops.erase_topic_empty_words
+	def add_topic(self, user_id, language, topic):
+		self.topic_ops.add_topic(user_id, language, topic)
+
+	def get_all_topics(self, user_id, language):
+		self.topic_ops.get_all_topics(user_id, language)
+
+
+	def get_words_on_topic(self, user_id, language, topic):
+		self.topic_ops.get_words_on_topic(user_id, language, topic)
+
+	def erase_topic_empty_words(self, user_id, language, topic):
+		self.topic_ops.erase_topic_empty_words(user_id, language, topic)
 
 
 	#==================LANGUAGE ops==================
-	add_language = database_ops.language_ops.add_language
-	erase_language = database_ops.language_ops.erase_language
-	get_user_languages = database_ops.language_ops.get_user_languages
+	def add_language(self, user_id, language):
+		self.language_ops.add_language(user_id, language)
+
+	def erase_language(self, user_id, language):
+		self.language_ops.erase_language(user_id, language)
+
+	def get_user_languages(self, user_id):
+		self.language_ops.get_user_languages(user_id)
 
 
 	#==================CARD ops==================
-	get_highest_card_id = database_ops.card_ops.get_highest_card_id
-	add_card = database_ops.card_ops.add_card
-	get_card = database_ops.card_ops.get_card
-	erase_card = database_ops.card_ops.erase_card
-	set_card_waiting = database_ops.card_ops.set_card_waiting
-	get_card_waiting = database_ops.card_ops.get_card_waiting
-
 
 	#==================ARCHIVE ops==================
-	erase_archive = database_ops.archive_ops.erase_archive
 
 
 	def backup(self):
