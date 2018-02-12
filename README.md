@@ -1,18 +1,28 @@
 # LingoBot
-LingoBot is a Telegram Bot, with handle @theLingoBot, created to help people to memorize other laguages’ vocabulary. The main ideia is: if you know a word in a certain language and don't want to forget it, you can add the word in the foreign language and relate it to a translation, images or audio. After it, the bot will occasionally send you content you added (audio, image or translation) and the respective language, and then ask you what the image or audio is representing. Then you can answer the question and the bot will tell you if your answer is correct or not, and give you the correct answer in case what you sent was wrong.
-After answering a question, you will be asked to grade your performance, and based on that, the algorithm will decide which words will be more frequently sent to you. This is done based on the supermemo2 algorithm. You can read more about it at http://super-memory.com/english/ol/sm2.htm.
+LingoBot is a Telegram Bot, with handle @theLingoBot, created to help people to memorize other laguages’ vocabulary.<br />
+<br />
+The main ideia is: if you know a word in a certain language and don't want to forget it, you can add the word in the foreign language and relate it a topic and to a translation, images and/or audio. After it, the bot will occasionally send you content you added (audio, image and/or translation) and the respective language, and then ask you what the content is representing. Then you can answer the question and the bot will tell you wheter your answer is correct or not, and give you the correct answer in case what you sent was wrong. <br />
+<br />
+After answering a question, you will be asked to grade your performance, and based on that, the algorithm will decide which words will be more frequently sent to you. This is done based on the supermemo2 algorithm. You can read more about it at http://super-memory.com/english/ol/sm2.htm. <br />
+<br />
+There is also a review feature, in which the user can choose the topics to be reviewed and a number of cards to receive. The bot will send random cards of the choosen topics to the user to answer. <br />
+<br />
+Important: The bot is still in development and will be online just during testing sessions.
 
-The bot is still in development and is not guaranteed that it will be online all the time.
 # Commands
-/start: Starts the bot. <br />
-/add_language: Adds a new language you are interested in learning. <br />
-/add_word: Adds a new word in some foreign language that you added before and an english translation and some related images. You can send the images from your device or use the suggested images that the bot will get from Google Images. <br />
-/cancel: Cancels any operation. 
+/cancel - Cancel any existing process <br />
+/add_word - Adds a word into a language vocabulary <br />
+/list_words - List all registered words <br />
+/erase_words - Erases selected words <br />
+/review - Select some topics to review <br />
+/add_language - Adds a language into your language list <br />
+/list_languages - List all registered languages <br />
+/erase_languages - Erase selected languages <br />
+/help - Help and developers contact information <br />
+/start - Sign in to use the bot
 
 # Some examples
-![Alt text](https://i.imgur.com/DAP2dhi.jpg)
-![Alt text](https://i.imgur.com/9g17dk3.jpg)
-![Alt text](https://i.imgur.com/dq02LL8.jpg)
-![Alt text](https://i.imgur.com/hVjsXp1.jpg)
-![Alt text](https://i.imgur.com/Mdd2cl2.jpg)
-![Alt text](https://i.imgur.com/IzahCZu.jpg)
+![Alt text](https://i.imgur.com/7eUItlj.jpg)
+![Alt text](https://i.imgur.com/dZszo1D.jpg)
+![Alt text](https://i.imgur.com/0oqKC1x.jpg)
+![Alt text](https://i.imgur.com/yNRdeUD.jpg)
