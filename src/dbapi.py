@@ -80,8 +80,16 @@ class Database():
 
 
 	#==================USER ops==================
-	get_state = database_ops.user_ops.get_state
-	set_state = database_ops.user_ops.set_state
+	def get_state(self, user_id):
+		self.user_ops.get_state(user_id)
+
+	def set_state(self, user_id, state1, state2, state3):
+		self.user_ops.set_state(user_id, state1, state2, state3)
+
+	def add_user(self, user_id):
+		self.user_ops.add_user(user_id)
+
+
 	add_user = database_ops.user_ops.add_user
 	get_known_users = database_ops.user_ops.get_known_users
 
