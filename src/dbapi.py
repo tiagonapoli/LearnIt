@@ -31,33 +31,32 @@ class Database():
 	"""
 
 	def __init__(self):
-		try:
-			arq = open("../credentials/connect_str.txt", "r")
-			connect_str = arq.read()
-			self.DB_NAME = connect_str.split()[0][7:]
-			self.DB_USER_NAME = connect_str.split()[1][5:]
-			print("DB_NAME: {}".format(self.DB_NAME))
-			print("DB_USER_NAME: {}".format(self.DB_USER_NAME))
-			print(connect_str)
-			arq.close()
-			# use our connection values to establish a connection
-			self.conn = psycopg2.connect(connect_str)
-			# create a psycopg2 cursor that can execute queries
-			self.cursor = self.conn.cursor()
-			print("Connected with database!")
-			
-			self.word_ops = database_ops.word_ops.WordOps(self.conn, self.cursor)
-			self.archive_ops = database_ops.archive_ops.ArquiveOps(self.conn, self.cursor)
-			self.word_ops = database_ops.word_ops.WordOps(self.conn, self.cursor)
-			self.user_ops = database_ops.user_ops.UserOps(self.conn, self.cursor)
-			self.topic_ops = database_ops.topic_ops.TopicOps(self.conn, self.cursor)
-			self.language_ops = database_ops.language_ops.LanguageOps(self.conn, self.cursor)
-			self.card_ops = database_ops.card_ops.CardOps(self.conn, self.cursor)
-			self.archive_ops = database_ops.archive_ops.ArchiveOps(self.conn, self.cursor)
-			
-		except Exception as e:
-			print("Uh oh, can't connect. Invalid dbname, user or password?")
-			print("Exception: {}".format(e))
+		#try:
+		arq = open("../credentials/connect_str.txt", "r")
+		connect_str = arq.read()
+		self.DB_NAME = connect_str.split()[0][7:]
+		self.DB_USER_NAME = connect_str.split()[1][5:]
+		print("DB_NAME: {}".format(self.DB_NAME))
+		print("DB_USER_NAME: {}".format(self.DB_USER_NAME))
+		print(connect_str)
+		arq.close()
+		# use our connection values to establish a connection
+		self.conn = psycopg2.connect(connect_str)
+		# create a psycopg2 cursor that can execute queries
+		self.cursor = self.conn.cursor()
+		print("Connected with database!")
+		
+		self.word_ops = database_ops.word_ops.WordOps(self.conn, self.cursor)
+		self.archive_ops = database_ops.archive_ops.ArchiveOps(self.conn, self.cursor)
+		self.user_ops = database_ops.user_ops.UserOps(self.conn, self.cursor)
+		self.topic_ops = database_ops.topic_ops.TopicOps(self.conn, self.cursor)
+		self.language_ops = database_ops.language_ops.LanguageOps(self.conn, self.cursor)
+		self.card_ops = database_ops.card_ops.CardOps(self.conn, self.cursor)
+		'''
+	except Exception as e:
+		print("Uh oh, can't connect. Invalid dbname, user or password?")
+		print("Exception: {}".format(e))
+		'''
 
 
 	def __del__(self):
@@ -88,32 +87,28 @@ class Database():
 
 	#==================USER ops==================
 	def get_state(self, user_id):
-		self.user_ops.get_state(user_id)
+		return self.user_ops.get_state(user_id)
 
 	def set_state(self, user_id, state1, state2, state3):
-		self.user_ops.set_state(user_id, state1, state2, state3)
+		return self.user_ops.set_state(user_id, state1, state2, state3)
 
 	
 	def add_user(self, user_id):
-		self.user_ops.add_user(user_id)
+		return self.user_ops.add_user(user_id)
 
 	def get_known_users(self):
-		self.user_ops.get_known_users()
+		return self.user_ops.get_known_users()
 
 
 	#==================TOPIC ops==================
 	def add_topic(self, user_id, language, topic):
-		self.topic_ops.add_topic(user_id, language, topic)
+		return self.topic_ops.add_topic(user_id, language, topic)
 
 	def get_all_topics(self, user_id, language):
-		self.topic_ops.get_all_topics(user_id, language)
-
-
-	def get_words_on_topic(self, user_id, language, topic):
-		self.topic_ops.get_words_on_topic(user_id, language, topic)
+		return self.topic_ops.get_all_topics(user_id, language)
 
 	def erase_topic_empty_words(self, user_id, language, topic):
-		self.topic_ops.erase_topic_empty_words(user_id, language, topic)
+		return self.topic_ops.erase_topic_empty_words(user_id, language, topic)
 
 
 	#=================CARD ops===================
@@ -123,7 +118,7 @@ class Database():
 
 
 	def add_card(self, card):
-		self.card_ops.add_card(card)
+		return self.card_ops.add_card(card)
 
 
 	def get_card(self, user_id, user_card_id):
@@ -135,11 +130,11 @@ class Database():
 
 
 	def set_supermemo_data(self, card):
-		self.card_ops.set_supermemo_data(card)
+		return self.card_ops.set_supermemo_data(card)
 
 
 	def set_card_waiting(self, user_id, card_id):
-		self.card_ops.set_card_waiting(user_id, card_id)
+		return self.card_ops.set_card_waiting(user_id, card_id)
 
 
 	def get_card_waiting(self, user_id):
@@ -148,18 +143,18 @@ class Database():
 
 	#==================ARCHIVE ops==================
 	def erase_archive(self, user_id, card_id, counter):
-		return self.archive_ops.erase_archive(user_id, card_id, counter):
+		return self.archive_ops.erase_archive(user_id, card_id, counter)
 
 
 	#==================LANGUAGE ops==================
 	def add_language(self, user_id, language):
-		self.language_ops.add_language(user_id, language)
+		return self.language_ops.add_language(user_id, language)
 
 	def erase_language(self, user_id, language):
-		self.language_ops.erase_language(user_id, language)
+		return self.language_ops.erase_language(user_id, language)
 
 	def get_user_languages(self, user_id):
-		self.language_ops.get_user_languages(user_id)
+		return self.language_ops.get_user_languages(user_id)
 
 
 	def backup(self):

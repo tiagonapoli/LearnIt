@@ -6,6 +6,8 @@ import abc
 from flashcard import Word
 from flashcard import Card
 from database_ops.db_utils import treat_str_SQL
+import database_ops.word_ops
+
 
 class LanguageOps():
 

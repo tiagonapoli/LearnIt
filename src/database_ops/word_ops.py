@@ -6,6 +6,8 @@ import abc
 from flashcard import Word
 from flashcard import Card
 from database_ops.db_utils import treat_str_SQL
+import database_ops.topic_ops
+import database_ops.card_ops
 
 
 
@@ -17,6 +19,8 @@ class WordOps():
 		self.conn = conn
 		self.cursor = cursor
 		self.topic_ops = database_ops.topic_ops.TopicOps(conn,cursor)
+		self.card_ops = database_ops.card_ops.CardOps(conn,cursor)
+
 
 
 	def get_highest_word_id(self, user_id):
@@ -67,7 +71,7 @@ class WordOps():
 		for ctype, card in word.cards.items():
 			if card == None:
 				continue
-			self.add_card(card)
+			self.card_ops.add_card(card)
 
 		return "Word '{}' and content added successfully!".format(foreign_word)
 
@@ -100,7 +104,7 @@ class WordOps():
 
 		#erasing cards
 		for card in rows:
-			self.erase_card(user_id, card[0])
+			self.card_ops.erase_card(user_id, card[0])
 
 		# erasing the word from the database
 		self.cursor.execute("DELETE FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
@@ -209,17 +213,15 @@ class WordOps():
 		return ret
 
 
-	def add_topic(self, user_id, language, topic):
-		topic_ops.add_topic(user_id, language, topic)
-
-
-	def get_all_topics(self, user_id, language):
-		return topic_ops.get_all_topics(user_id, language)
-
-
 	def get_words_on_topic(self, user_id, language, topic):
-		return topic_ops.get_words_on_topic(user_id, language, topic)
+		self.cursor.execute("SELECT user_id,user_word_id FROM words WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, treat_str_SQL(language), treat_str_SQL(topic)))
+		words = self.cursor.fetchall()
+
+		ret = []
+		for word in words:
+			ret.append(self.get_word(word[0],word[1]))
+
+		return ret
 
 
-	def erase_topic_empty_words(self, user_id, language, topic):
-		topic_ops.erase_topic_empty_words(user_id, language, topic)
+	

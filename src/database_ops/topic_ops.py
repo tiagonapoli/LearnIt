@@ -6,12 +6,15 @@ import abc
 from flashcard import Word
 from flashcard import Card
 from database_ops.db_utils import treat_str_SQL
+import database_ops.word_ops
+
 
 class TopicOps():
 
 	def __init__(self, conn, cursor):
 		self.conn = conn
 		self.cursor = cursor
+
 
 	def add_topic(self, user_id, language, topic):
 		self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, treat_str_SQL(language), treat_str_SQL(topic)))
@@ -35,18 +38,6 @@ class TopicOps():
 
 		return ret;
 
-
-	def get_words_on_topic(self, user_id, language, topic):
-		self.cursor.execute("SELECT user_id,user_word_id FROM words WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, treat_str_SQL(language), treat_str_SQL(topic)))
-		words = self.cursor.fetchall()
-
-		ret = []
-		for word in words:
-			ret.append(self.get_word(word[0],word[1]))
-
-		return ret
-
-		
 
 	def erase_topic_empty_words(self, user_id, language, topic):
 		self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id,treat_str_SQL(language),treat_str_SQL(topic)))
