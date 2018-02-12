@@ -139,35 +139,36 @@ def handle_topic_review(bot, rtd):
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_NUMBER)]['error'])
 			return
 
-		user.counter = number
+		user.counter = int(number)
 		user.pos = 0
+		user.review_card_number = 1
 		markup = bot_utils.keyboard_remove()
 
 		shuffle(user.cards_to_review)
-		send_review_card(user.cards_to_review[0], user)
+		send_review_card(user.cards_to_review[0], user, user.review_card_number)
 		user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_NUMBER)]['done'])
 
 
-	def send_review_card(card, user):
+	def send_review_card(card, user, number):
 		language = card.get_language()
 		user_id = user.get_id()
-		bot.send_message(user_id, "Review card!")
+		bot.send_message(user_id, "*Review card #{}!*".format(number), parse_mode="Markdown")
 		user.set_card_waiting(card.card_id)
 		markup = telebot.types.ForceReply(selective = False)
 		question = card.get_question()
 		content = card.get_type()
 		if content == 'image':
-			bot.send_message(user_id, "Relate the image to a word in {}".format(language))
+			bot.send_message(user_id, "Relate the image to a word in _{}_".format(language), parse_mode="Markdown")
 			question = open(question,'rb')
 			bot.send_photo(user_id, question, reply_markup = markup)
 			question.close()
 		elif content == 'audio':
-			bot.send_message(user_id, "Transcribe the audio in {}".format(language))
+			bot.send_message(user_id, "Transcribe the audio in _{}_".format(language), parse_mode="Markdown")
 			question = open(question,'rb')
-			bot.send_audio(user_id, question, reply_markup = markup)
+			bot.send_voice(user_id, question, reply_markup = markup)
 			question.close()
 		elif content == 'translation':
-			bot.send_message(user_id, "Translate the word to {}".format(language))
+			bot.send_message(user_id, "Translate the word to _{}_".format(language), parse_mode="Markdown")
 			bot.send_message(user_id, question, reply_markup = markup)
 
 
@@ -192,9 +193,10 @@ def handle_topic_review(bot, rtd):
 			bot.send_message(user_id, "That was correct!")
 		else:
 			bot.send_message(user_id, "There was a mistake :(")
-		bot.send_message(user_id, "Answer: " + card.foreign_word)
+		bot.send_message(user_id, "*Answer:* " + "_" + card.foreign_word + "_", parse_mode="Markdown")
 		
 		user.counter -= 1
+		user.review_card_number += 1
 		user.pos += 1
 
 		if user.pos == len(user.cards_to_review):
@@ -202,8 +204,9 @@ def handle_topic_review(bot, rtd):
 			user.pos = 0
 
 		if user.counter > 0:
-			send_review_card(user.cards_to_review[user.pos], user)
-			user.set_state(fsm.next_state[(fsm.REVIEW, WAITING_CARD_ANS)]['continue'])
+			send_review_card(user.cards_to_review[user.pos], user, user.review_card_number)
+			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.WAITING_CARD_ANS)]['continue'])
 		else:
-			user.set_state(fsm.next_state[(fsm.REVIEW, WAITING_CARD_ANS)]['done'])
+			bot.send_message(user_id, "*Review session done!*", parse_mode="Markdown")
+			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.WAITING_CARD_ANS)]['done'])
 			

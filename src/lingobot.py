@@ -23,6 +23,7 @@ import message_handlers.settings
 import message_handlers.help
 import message_handlers.setup_user
 
+import message_handlers.topic_review
 import message_handlers.card_answering
 import message_handlers.message_not_understood
 
@@ -108,6 +109,10 @@ message_handlers.list_words.handle_list_words(bot,rtd)
 
 #=====================ERASE WORD=====================
 message_handlers.erase_words.handle_erase_words(bot,rtd)
+
+
+#=====================TOPIC REVIEW=====================
+message_handlers.topic_review.handle_topic_review(bot,rtd)
 
 
 #=====================SETTINGS=====================

@@ -191,7 +191,7 @@ def handle_add_word(bot, rtd):
 				user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)][content_type])
 		else:
 			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
-			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="Select words to erase:", reply_markup=markup)
+			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="Select the ways you want to relate to the word:", reply_markup=markup)
 			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)]['continue'])
 
 

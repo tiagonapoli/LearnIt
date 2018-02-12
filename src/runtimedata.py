@@ -19,6 +19,7 @@ class User:
 		self.cards_to_review = None
 		self.temp_language = None
 		self.counter = None
+		self.review_card_number = None
 		self.pos = None
 
 
@@ -191,6 +192,9 @@ class User:
 
 	def get_card_waiting(self):
 		return self.db.get_card_waiting(self.user_id)
+
+	def get_cards_on_topic(self, language, topic, get_default):
+		return self.db.get_cards_on_topic(self.user_id, language, topic, get_default)
 	
 
 	def erase_language(self, language):

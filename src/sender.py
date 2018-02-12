@@ -69,7 +69,7 @@ if rtd.get_state(user_id) == fsm.IDLE:
 	elif content == 'audio':
 		bot.send_message(user_id, "Transcribe the audio in {}".format(language))
 		question = open(question,'rb')
-		bot.send_audio(user_id, question, reply_markup = markup)
+		bot.send_voice(user_id, question, reply_markup = markup)
 		question.close()
 		rtd.set_state(user_id, fsm.next_state[fsm.IDLE]['card_query'])
 	elif content == 'translation':
