@@ -140,6 +140,9 @@ class Database():
 	def get_card_waiting(self, user_id):
 		return self.card_ops.get_card_waiting(user_id)
 
+	def get_cards_on_topic(self, user_id, language, topic, get_default):
+		return self.card_ops.get_cards_on_topic(user_id, language, topic, get_default)
+
 
 	#==================ARCHIVE ops==================
 	def erase_archive(self, user_id, card_id, counter):
@@ -262,6 +265,19 @@ if __name__ == '__main__':
 	words = test.get_words_on_topic(42, 'Portuges', 'MEGAS XLR')
 	for word in words:
 		print(word)
+
+
+	#Get cards on topic
+	print("\n-----------------GET CARDS ON TOPICS-----------------\n")
+	cards = test.get_cards_on_topic(42, 'Portuges', 'Miscelania', True)
+	print('----Miscelania com DEFAULT----')
+	for card in cards:
+		print(card)
+
+	print('\n----MEGAS XLR sem DEFAULT----')
+	cards = test.get_cards_on_topic(42, 'Portuges', 'MEGAS XLR', False)
+	for card in cards:
+		print(card)
 
 	#erase_card Portuges
 	print("-----------------Delete card-----------------\n\n")

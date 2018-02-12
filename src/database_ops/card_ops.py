@@ -80,6 +80,30 @@ class CardOps():
 			card.add_archive(row[0])
 		return card
 
+	def get_cards_on_topic(self, user_id, language, topic, get_default):
+		self.cursor.execute("SELECT * FROM cards WHERE user_id={} AND language='{}' AND topic='{}'"
+				.format(user_id, treat_str_SQL(language), treat_str_SQL(topic)))
+		rows = self.cursor.fetchall()
+
+		if len(rows) == 0:
+			print("Error in get_cards_on_topic")
+			print("Card {}, {}, {} doesn't exist".format(user_id, language, topic))		
+			return "Card {}, {}, {} doesn't exist".format(user_id, language, topic)
+
+		cards = []
+		for row in rows:
+			card = Card(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10])
+			if card.get_type() == 'default' and  get_default == False:
+					continue
+			user_card_id = card.get_card_id()
+			self.cursor.execute("SELECT content_path FROM archives WHERE user_id={} AND user_card_id={};".format(user_id, user_card_id))
+			archives = self.cursor.fetchall()
+			for archive in archives:
+				card.add_archive(archive[0])
+			cards.append(card)
+
+		return cards
+
 	def erase_card(self, user_id, user_card_id):
 		self.cursor.execute("SELECT * FROM cards WHERE user_id={} AND user_card_id={}"
 						.format(user_id, user_card_id))
