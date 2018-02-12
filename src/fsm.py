@@ -40,7 +40,8 @@ next_state = {
       		 'list_words': (LIST_WORDS, GET_LANGUAGE),
       		 'list_languages': IDLE,
       		 'erase_words': (ERASE_WORDS, GET_LANGUAGE),
-      		 'erase_languages': (ERASE_LANGUAGES, SELECT_LANGUAGES)}
+      		 'erase_languages': (ERASE_LANGUAGES, SELECT_LANGUAGES),
+      		 'review' : (REVIEW, GET_LANGUAGE)}
 }
 
 
@@ -108,4 +109,17 @@ next_state.update({
 next_state.update({
 	(ERASE_LANGUAGES, SELECT_LANGUAGES): {'continue': (ERASE_LANGUAGES, SELECT_LANGUAGES),
 								  		  'done': IDLE}
+})
+
+#=====================TOPIC REVIEW=====================
+next_state.update({
+	(REVIEW, GET_LANGUAGE) : {'error' : (REVIEW, GET_LANGUAGE),
+							  'no topics' : IDLE,
+							  'done' : (REVIEW, GET_TOPICS)},
+	(REVIEW, GET_TOPICS) : {'continue' : (REVIEW, GET_TOPICS),
+							'done' : (REVIEW, GET_NUMBER)},
+	(REVIEW, GET_NUMBER) : {'error' : (REVIEW, GET_NUMBER),
+							'done' : (REVIEW, WAITING_CARD_ANS)},
+	(REVIEW, WAITING_CARD_ANS) : {'continue' : (REVIEW, WAITING_CARD_ANS),
+								  'done' : IDLE}
 })

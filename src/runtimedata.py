@@ -16,6 +16,10 @@ class User:
 		self.btn_set = None
 		self.keyboard_options = None
 		self.receive_queue = None
+		self.cards_to_review = None
+		self.temp_language = None
+		self.counter = None
+		self.pos = None
 
 
 	def get_state(self):
