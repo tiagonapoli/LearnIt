@@ -5,6 +5,8 @@ import datetime
 import abc
 from flashcard import Word
 from flashcard import Card
+from database_ops.db_utils import treat_str_SQL
+
 
 def add_topic(self, user_id, language, topic):
 	self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, treat_str_SQL(language), treat_str_SQL(topic)))

@@ -5,6 +5,8 @@ import datetime
 import abc
 from flashcard import Word
 from flashcard import Card
+from database_ops.db_utils import treat_str_SQL
+
 
 def get_state(self, user_id):
 	"""Gets the current state information about the user

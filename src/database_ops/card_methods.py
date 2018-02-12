@@ -5,6 +5,8 @@ import datetime
 import abc
 from flashcard import Word
 from flashcard import Card
+from database_ops.db_utils import treat_str_SQL
+
 
 def get_highest_card_id(self, user_id):
 	self.cursor.execute("SELECT highest_card_id FROM users WHERE id={}".format(user_id))
@@ -90,14 +92,14 @@ def erase_card(self, user_id, user_card_id):
 	return "Card successfuly removed"
 
 
-	def set_supermemo_data(self, card):
+def set_supermemo_data(self, card):
 	"""Updates on the database the information about the supermemo algorithm that are contained in a word.
 
 	Args:
-		word: A Word instance.
+	word: A Word instance.
 	"""
 	self.cursor.execute("UPDATE cards SET attempts={}, easiness_factor={}, interval={}, next_date='{}' WHERE user_id={} AND user_card_id={};"
-		.format(card.attempts, card.ef, card.interval, card.next_date.strftime('%Y-%m-%d'), card.get_user(), card.card_id))
+	.format(card.attempts, card.ef, card.interval, card.next_date.strftime('%Y-%m-%d'), card.get_user(), card.card_id))
 	self.conn.commit()
 
 

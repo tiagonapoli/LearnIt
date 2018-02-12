@@ -6,8 +6,13 @@ import abc
 from flashcard import Word
 from flashcard import Card
 
-def treat_str_SQL(str):
-	return str.replace("'", "''")
+import database_ops.word_ops
+import database_ops.user_methods
+import database_ops.topic_methods
+import database_ops.language_methods
+import database_ops.card_methods
+import database_ops.archive_methods
+
 
 
 '''
@@ -15,7 +20,7 @@ def treat_str_SQL(str):
 '''
 
 
-class Database(DatabaseInterface):
+class Database():
 	"""Class that controls the database operations.
 
 	Uses Postgres as object-relational database management system
@@ -40,11 +45,11 @@ class Database(DatabaseInterface):
 			# create a psycopg2 cursor that can execute queries
 			self.cursor = self.conn.cursor()
 			print("Connected with database!")
+			self.word_ops = database_ops.word_ops.WordOps(self.conn, self.cursor)
+
 		except Exception as e:
 			print("Uh oh, can't connect. Invalid dbname, user or password?")
 			print("Exception: {}".format(e))
-
-
 
 
 	def __del__(self):
@@ -52,6 +57,59 @@ class Database(DatabaseInterface):
 		self.cursor.close()
 
 
+	#==================WORD METHODS==================
+	def get_highest_word_id(self, user_id):
+		return self.word_ops.get_highest_word_id(user_id)
+
+
+	def add_word(self, word):
+		return self.word_ops.add_word(word)
+
+	def erase_word(self, user_id, word_id):
+		return self.word_ops.erase_word(user_id, word_id)
+	
+	def get_word(self, user_id, word_id):
+		return self.word_ops.get_word(user_id, word_id)
+
+	def get_all_words(self, user_id):
+		return self.word_ops.get_all_words(user_id)
+
+	def get_words_on_topic(self, user_id, language, topic):
+		return self.word_ops.get_words_on_topic(user_id, language, topic)
+
+
+
+	#==================USER METHODS==================
+	get_state = database_ops.user_methods.get_state
+	set_state = database_ops.user_methods.set_state
+	add_user = database_ops.user_methods.add_user
+	get_known_users = database_ops.user_methods.get_known_users
+
+
+	#==================TOPIC METHODS==================
+	add_topic = database_ops.topic_methods.add_topic
+	get_all_topics = database_ops.topic_methods.get_all_topics
+	get_words_on_topic = database_ops.topic_methods.get_words_on_topic
+	erase_topic_empty_words = database_ops.topic_methods.erase_topic_empty_words
+
+
+	#==================LANGUAGE METHODS==================
+	add_language = database_ops.language_methods.add_language
+	erase_language = database_ops.language_methods.erase_language
+	get_user_languages = database_ops.language_methods.get_user_languages
+
+
+	#==================CARD METHODS==================
+	get_highest_card_id = database_ops.card_methods.get_highest_card_id
+	add_card = database_ops.card_methods.add_card
+	get_card = database_ops.card_methods.get_card
+	erase_card = database_ops.card_methods.erase_card
+	set_card_waiting = database_ops.card_methods.set_card_waiting
+	get_card_waiting = database_ops.card_methods.get_card_waiting
+
+
+	#==================ARCHIVE METHODS==================
+	erase_archive = database_ops.archive_methods.erase_archive
 
 
 	def backup(self):
@@ -70,7 +128,6 @@ class Database(DatabaseInterface):
 		except Exception as e:
 			print(e);
 			return "Backup failed"
-			
 
 if __name__ == '__main__':
 	
@@ -190,3 +247,4 @@ if __name__ == '__main__':
 	print(test.get_word(42,1))
 
 	print(test.backup())
+
