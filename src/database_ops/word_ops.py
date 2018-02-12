@@ -111,7 +111,7 @@ class WordOps():
 		rows = self.cursor.fetchall()
 
 		if len(rows) == 0:
-			self.erase_topic_empty_words(user_id, language, topic)
+			self.topic_ops.erase_topic_empty_words(user_id, language, topic)
 
 		return "Word {} erased successfully!".format(word_text)
 

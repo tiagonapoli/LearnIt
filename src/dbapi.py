@@ -7,11 +7,11 @@ from flashcard import Word
 from flashcard import Card
 
 import database_ops.word_ops
-import database_ops.user_methods
-import database_ops.topic_methods
-import database_ops.language_methods
-import database_ops.card_methods
-import database_ops.archive_methods
+import database_ops.user_ops
+import database_ops.topic_ops
+import database_ops.language_ops
+import database_ops.card_ops
+import database_ops.archive_ops
 
 
 
@@ -57,7 +57,7 @@ class Database():
 		self.cursor.close()
 
 
-	#==================WORD METHODS==================
+	#==================WORD ops==================
 	def get_highest_word_id(self, user_id):
 		return self.word_ops.get_highest_word_id(user_id)
 
@@ -79,37 +79,37 @@ class Database():
 
 
 
-	#==================USER METHODS==================
-	get_state = database_ops.user_methods.get_state
-	set_state = database_ops.user_methods.set_state
-	add_user = database_ops.user_methods.add_user
-	get_known_users = database_ops.user_methods.get_known_users
+	#==================USER ops==================
+	get_state = database_ops.user_ops.get_state
+	set_state = database_ops.user_ops.set_state
+	add_user = database_ops.user_ops.add_user
+	get_known_users = database_ops.user_ops.get_known_users
 
 
-	#==================TOPIC METHODS==================
-	add_topic = database_ops.topic_methods.add_topic
-	get_all_topics = database_ops.topic_methods.get_all_topics
-	get_words_on_topic = database_ops.topic_methods.get_words_on_topic
-	erase_topic_empty_words = database_ops.topic_methods.erase_topic_empty_words
+	#==================TOPIC ops==================
+	add_topic = database_ops.topic_ops.add_topic
+	get_all_topics = database_ops.topic_ops.get_all_topics
+	get_words_on_topic = database_ops.topic_ops.get_words_on_topic
+	erase_topic_empty_words = database_ops.topic_ops.erase_topic_empty_words
 
 
-	#==================LANGUAGE METHODS==================
-	add_language = database_ops.language_methods.add_language
-	erase_language = database_ops.language_methods.erase_language
-	get_user_languages = database_ops.language_methods.get_user_languages
+	#==================LANGUAGE ops==================
+	add_language = database_ops.language_ops.add_language
+	erase_language = database_ops.language_ops.erase_language
+	get_user_languages = database_ops.language_ops.get_user_languages
 
 
-	#==================CARD METHODS==================
-	get_highest_card_id = database_ops.card_methods.get_highest_card_id
-	add_card = database_ops.card_methods.add_card
-	get_card = database_ops.card_methods.get_card
-	erase_card = database_ops.card_methods.erase_card
-	set_card_waiting = database_ops.card_methods.set_card_waiting
-	get_card_waiting = database_ops.card_methods.get_card_waiting
+	#==================CARD ops==================
+	get_highest_card_id = database_ops.card_ops.get_highest_card_id
+	add_card = database_ops.card_ops.add_card
+	get_card = database_ops.card_ops.get_card
+	erase_card = database_ops.card_ops.erase_card
+	set_card_waiting = database_ops.card_ops.set_card_waiting
+	get_card_waiting = database_ops.card_ops.get_card_waiting
 
 
-	#==================ARCHIVE METHODS==================
-	erase_archive = database_ops.archive_methods.erase_archive
+	#==================ARCHIVE ops==================
+	erase_archive = database_ops.archive_ops.erase_archive
 
 
 	def backup(self):
