@@ -45,7 +45,9 @@ class Database():
 			# create a psycopg2 cursor that can execute queries
 			self.cursor = self.conn.cursor()
 			print("Connected with database!")
-
+			
+			self.word_ops = database_ops.word_ops.WordOps(self.conn, self.cursor)
+			self.archive_ops = database_ops.archive_ops.ArquiveOps(self.conn, self.cursor)
 			self.word_ops = database_ops.word_ops.WordOps(self.conn, self.cursor)
 			self.user_ops = database_ops.user_ops.UserOps(self.conn, self.cursor)
 			self.topic_ops = database_ops.topic_ops.TopicOps(self.conn, self.cursor)
@@ -66,7 +68,6 @@ class Database():
 	#==================WORD ops==================
 	def get_highest_word_id(self, user_id):
 		return self.word_ops.get_highest_word_id(user_id)
-
 
 	def add_word(self, word):
 		return self.word_ops.add_word(word)
@@ -92,11 +93,13 @@ class Database():
 	def set_state(self, user_id, state1, state2, state3):
 		self.user_ops.set_state(user_id, state1, state2, state3)
 
+	
 	def add_user(self, user_id):
 		self.user_ops.add_user(user_id)
 
 	def get_known_users(self):
 		self.user_ops.get_known_users()
+
 
 	#==================TOPIC ops==================
 	def add_topic(self, user_id, language, topic):
@@ -113,6 +116,41 @@ class Database():
 		self.topic_ops.erase_topic_empty_words(user_id, language, topic)
 
 
+	#=================CARD ops===================
+
+	def get_highest_card_id(self, user_id):
+		return self.card_ops.get_highest_card_id(user_id)
+
+
+	def add_card(self, card):
+		self.card_ops.add_card(card)
+
+
+	def get_card(self, user_id, user_card_id):
+		return self.card_ops.get_card(user_id, user_card_id)
+
+
+	def erase_card(self, user_id, user_card_id):
+		return self.card_ops.erase_card(user_id, user_card_id)
+
+
+	def set_supermemo_data(self, card):
+		self.card_ops.set_supermemo_data(card)
+
+
+	def set_card_waiting(self, user_id, card_id):
+		self.card_ops.set_card_waiting(user_id, card_id)
+
+
+	def get_card_waiting(self, user_id):
+		return self.card_ops.get_card_waiting(user_id)
+
+
+	#==================ARCHIVE ops==================
+	def erase_archive(self, user_id, card_id, counter):
+		return self.archive_ops.erase_archive(user_id, card_id, counter):
+
+
 	#==================LANGUAGE ops==================
 	def add_language(self, user_id, language):
 		self.language_ops.add_language(user_id, language)
@@ -122,11 +160,6 @@ class Database():
 
 	def get_user_languages(self, user_id):
 		self.language_ops.get_user_languages(user_id)
-
-
-	#==================CARD ops==================
-
-	#==================ARCHIVE ops==================
 
 
 	def backup(self):
