@@ -1,7 +1,9 @@
 import telebot
 import fsm
 from flashcard import Word, Card
-from utilities.bot_utils import get_id, create_key_button
+from utilities.bot_utils import get_id
+from utilities import bot_utils
+from utilities import utils
 
 def handle_card_answer(bot, rtd):
 
@@ -93,9 +95,10 @@ def handle_card_answer(bot, rtd):
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 
-		card = user.temp_card
+		card_id = user.get_card_waiting()
+		card = user.get_card(card_id)
 
-		valid, grade = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
+		valid, grade = bot_utils.parse_string_keyboard_ans(msg.text, ['0', '1', '2', '3', '4', '5'])
 
 		if valid == False:
 			bot.reply_to(msg, "Please choose from keyboard")

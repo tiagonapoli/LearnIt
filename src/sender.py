@@ -34,9 +34,6 @@ except Exception as e:
 	print(e)
 	sys.exit(0)
 
-print(sys.argv[1])
-print("card id = " + sys.argv[2])
-print(sys.argv[3])
 
 user_id = int(sys.argv[1])
 card_id = int(sys.argv[2])
@@ -45,15 +42,19 @@ tried = int(sys.argv[3])
 rtd = RuntimeData()
 user = rtd.get_user(user_id)
 
+print(sys.argv[1])
+print("card id = " + sys.argv[2])
+print(sys.argv[3])
+
 if user.get_state() == fsm.IDLE:
 	
+	print("POSSO MANDAR A CARD ALEATORIA")
+
 	user.set_state(fsm.LOCKED)	
 	card = user.get_card(card_id)
 	language = card.get_language()
 	
-	bot.send_message(user_id, "*Review card!*", )
-	rtd.set_card_waiting(user_id, card.card_id)
-	markup = telebot.types.ForceReply(selective = False)
+	user.set_card_waiting(card.card_id)
 	question = card.get_question()
 	content = card.get_type()
 
@@ -69,11 +70,12 @@ if user.get_state() == fsm.IDLE:
 		markup = bot_utils.create_keyboard(['0','1','2','3','4','5'], 6)
 		bot.send_message(user_id,"_Please grade how difficult is this word_\n" + text,
 						reply_markup=markup, parse_mode="Markdown")
-		rtd.set_state(user_id, fsm.next_state[fsm.IDLE]['card_remember'])
+		user.set_state(fsm.next_state[fsm.IDLE]['card_remember'])
 	else:
-		rtd.set_state(user_id, fsm.next_state[fsm.IDLE]['card_query'])
+		user.set_state(fsm.next_state[fsm.IDLE]['card_query'])
 		
 else:
+	print("NAOO POSSO MANDAR A CARD ALEATORIA")
 	tried += 1
 	systemtools.set_new_at_job_card(min(tried,10),user_id,card_id, tried)	
 

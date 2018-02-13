@@ -76,7 +76,7 @@ def handle_topic_review(bot, rtd):
 			user.btn_set = btn_set
 			user.keyboard_options = btn
 
-			bot.send_message(user_id, "_Select the topics that you want to review_",
+			bot.send_message(user_id, "_Select the topics that you want to review:_",
 							reply_markup=markup, parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_LANGUAGE)]['done'])
 
@@ -128,7 +128,8 @@ def handle_topic_review(bot, rtd):
 				user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_TOPICS)]['done'])
 		else:
 			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
-			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="Select the topics that you want to review:", reply_markup=markup)
+			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, 
+				text="_Select the topics that you want to review:_", reply_markup=markup, parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_TOPICS)]['continue'])
 
 

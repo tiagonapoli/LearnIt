@@ -1,0 +1,44 @@
+user_id,user_word_id,language,topic,foreign_word,user_card_id,type,attempts,easiness_factor,interval,next_date
+113538563,1,português,coisas,lápis,2,image,1,2.5,1,2018-02-13
+113538563,1,português,coisas,lápis,1,default,1,2.5,1,2018-02-13
+113538563,1,português,coisas,lápis,3,translation,1,2.5,1,2018-02-13
+113538563,2,português,coisas,caneta,5,image,1,2.5,1,2018-02-13
+113538563,2,português,coisas,caneta,4,default,1,2.5,1,2018-02-13
+113538563,2,português,coisas,caneta,6,audio,1,2.5,1,2018-02-13
+359999978,1,한국어,Drinks,우유,2,image,1,2.5,1,2018-02-13
+359999978,1,한국어,Drinks,우유,1,default,1,2.5,1,2018-02-13
+359999978,1,한국어,Drinks,우유,3,audio,1,2.5,1,2018-02-13
+113538563,3,português,pessoas,Tiago,8,image,1,2.5,1,2018-02-13
+113538563,3,português,pessoas,Tiago,7,default,1,2.5,1,2018-02-13
+113538563,3,português,pessoas,Tiago,9,translation,1,2.5,1,2018-02-13
+359999978,2,한국어,Numbers,하나,6,translation,1,2.5,1,2018-02-13
+359999978,2,한국어,Numbers,하나,4,default,1,2.5,1,2018-02-13
+359999978,2,한국어,Numbers,하나,5,audio,1,2.5,1,2018-02-13
+359999978,3,한국어,Numbers,둘,9,translation,1,2.5,1,2018-02-13
+359999978,3,한국어,Numbers,둘,7,default,1,2.5,1,2018-02-13
+359999978,3,한국어,Numbers,둘,8,audio,1,2.5,1,2018-02-13
+113538563,4,português,pessoas,thalão,11,image,1,2.5,1,2018-02-13
+113538563,4,português,pessoas,thalão,10,default,1,2.5,1,2018-02-13
+113538563,4,português,pessoas,thalão,12,translation,1,2.5,1,2018-02-13
+359999978,4,한국어,Numbers,셋,12,translation,1,2.5,1,2018-02-13
+359999978,4,한국어,Numbers,셋,10,default,1,2.5,1,2018-02-13
+359999978,4,한국어,Numbers,셋,11,audio,1,2.5,1,2018-02-13
+359999978,5,한국어,Numbers,넷,15,translation,1,2.5,1,2018-02-13
+359999978,5,한국어,Numbers,넷,13,default,1,2.5,1,2018-02-13
+359999978,5,한국어,Numbers,넷,14,audio,1,2.5,1,2018-02-13
+359999978,6,한국어,Numbers,다섯,18,translation,1,2.5,1,2018-02-13
+359999978,6,한국어,Numbers,다섯,16,default,1,2.5,1,2018-02-13
+359999978,6,한국어,Numbers,다섯,17,audio,1,2.5,1,2018-02-13
+359999978,7,한국어,Numbers,여섯,21,translation,1,2.5,1,2018-02-13
+359999978,7,한국어,Numbers,여섯,19,default,1,2.5,1,2018-02-13
+359999978,7,한국어,Numbers,여섯,20,audio,1,2.5,1,2018-02-13
+179867572,1,French,list words,add word,1,default,1,2.5,1,2018-02-13
+359999978,8,Testes,Prudente's gang,Tiago,22,default,1,2.5,1,2018-02-13
+359999978,8,Testes,Prudente's gang,Tiago,23,image,1,2.5,1,2018-02-13
+359999978,9,Testes,Prudente's gang,Camargo,25,image,1,2.5,1,2018-02-13
+359999978,9,Testes,Prudente's gang,Camargo,24,default,1,2.5,1,2018-02-13
+359999978,10,Testes,wololo,wololo,29,translation,1,2.5,1,2018-02-13
+359999978,10,Testes,wololo,wololo,27,image,1,2.5,1,2018-02-13
+359999978,10,Testes,wololo,wololo,26,default,1,2.5,1,2018-02-13
+359999978,10,Testes,wololo,wololo,28,audio,1,2.5,1,2018-02-13
+42,1,Portuges,Miscelania,Camargao,2,audio,1,2.5,1,2018-02-13
