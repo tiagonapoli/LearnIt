@@ -29,14 +29,13 @@ def handle_card_answer(bot, rtd):
 			bot.send_message(user_id, "That was correct!")
 		else:
 			bot.send_message(user_id, "There was a mistake :(")
-		bot.send_message(user_id, "Answer: " + card.foreign_word)
+		bot.send_message(user_id, "*Answer:*" + card.foreign_word, parse_mode="Markdown")
+
+		cards = user.get_cards_on_word(card.get_word_id())
+		for ans in cards:
+			utils.send_ans_card(bot, ans, card.get_type())
 		
-		text = ("*5* - _perfect response_\n" +
-			 "*4* - _correct response after a hesitation_\n" +
-			 "*3* - _correct response recalled with serious difficulty_\n" + 
-			 "*2* - _incorrect response; where the correct one seemed easy to recall_\n" + 
-			 "*1* - _incorrect response; the correct one remembered_\n" +
-			 "*0* - _complete blackout._")
+		text = utils.poll_text
 
 		options = ['0', '1', '2', '3', '4', '5']
 		markup = bot_utils.create_keyboard(options, 6)
@@ -73,7 +72,9 @@ def handle_card_answer(bot, rtd):
 
 		card.calc_next_date(grade)
 		user.set_supermemo_data(card)
-		print(card.get_next_date())
+		print("NEXT CARD DATE {}".format(card.get_next_date()))
+
+
 		markup = bot_utils.keyboard_remove()
 		bot.send_message(user_id,"_OK!_", reply_markup=markup, parse_mode="Markdown")
 		user.set_state(fsm.next_state[fsm.WAITING_POLL_ANS]['done'])
@@ -111,5 +112,10 @@ def handle_card_answer(bot, rtd):
 		user.set_supermemo_data(card)
 		print(card.get_next_date())
 		markup = bot_utils.keyboard_remove()
+		
+		cards = user.get_cards_on_word(card.get_word_id())
+		for ans in cards:
+			utils.send_ans_card(bot, ans, card.get_type())
+
 		bot.send_message(user_id,"_OK!_", reply_markup=markup, parse_mode="Markdown")
 		user.set_state(fsm.next_state[fsm.WAITING_POLL_REMEMBER]['done'])

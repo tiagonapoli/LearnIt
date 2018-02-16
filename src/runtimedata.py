@@ -3,6 +3,7 @@ from datetime import datetime
 from flashcard import Word,Card
 import fsm
 import abc
+from random import shuffle
 
 
 class User:
@@ -43,7 +44,7 @@ class User:
 		if len(ret) == 1:
 			ret = ret[0]
 
-		print("id:{}  state:{}".format(self.user_id,ret))
+		print("get state - id:{}  state:{}".format(self.user_id,ret))
 		return ret
 
 
@@ -200,6 +201,25 @@ class User:
 	def erase_language(self, language):
 		return self.db.erase_language(self.user_id,language)
 
+	def get_all_cards(self):
+		return self.db.get_all_cards(self.user_id)
+
+	def get_cards_on_word(self, word_id):
+		cards = self.db.get_word(self.user_id, word_id).get_cards()
+		return cards
+
+	def get_cards_expired(self, now):
+		cards = self.get_all_cards()
+		ret = []
+		for card in cards:
+			if card.get_next_date() <= now.date():
+				ret.append(card)
+		shuffle(ret)
+		ret.sort()
+		return ret
+
+	def working_hours(self, hour):
+		return (7 <= hour and hour <= 24) or (hour <= 1)
 
 
 
@@ -227,8 +247,17 @@ class RuntimeData:
 		for user_id in known_users:
 			self.users[user_id] = User(user_id,self.db) 
 		
+
 	def get_user(self,user_id):
 		return self.users[user_id]
+
+
+	def get_known_users(self):
+		known_users = self.db.get_known_users()
+		for user_id in known_users:
+			if not (user_id in self.users.keys()):
+				self.users[user_id] = User(user_id,self.db)
+		return known_users
 
 
 	def reset_all_states(self):

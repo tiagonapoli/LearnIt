@@ -143,6 +143,9 @@ class Database():
 	def get_cards_on_topic(self, user_id, language, topic, get_default):
 		return self.card_ops.get_cards_on_topic(user_id, language, topic, get_default)
 
+	def get_all_cards(self, user_id):
+		return self.card_ops.get_all_cards(user_id)
+
 
 	#==================ARCHIVE ops==================
 	def erase_archive(self, user_id, card_id, counter):

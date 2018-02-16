@@ -16,7 +16,38 @@ def words_to_string_list(words):
 
 
 
-def send_review_card(bot, rtd, card, user, number = None):
+def send_ans_card(bot, card, query_type):
+	user_id = card.get_user()
+	question = card.get_question()
+	content = card.get_type()
+	if content == query_type or content == 'default':
+		return
+
+	markup = bot_utils.keyboard_remove()
+	if content == 'image':
+		bot.send_message(user_id, "*Image answer:*",reply_markup = markup, parse_mode="Markdown")
+		question = open(question,'rb')
+		bot.send_photo(user_id, question, reply_markup = markup)
+		question.close()
+	elif content == 'audio':
+		bot.send_message(user_id, "*Audio answer:*",reply_markup = markup, parse_mode="Markdown")
+		question = open(question,'rb')
+		bot.send_voice(user_id, question, reply_markup = markup)
+		question.close()
+	elif content == 'translation':
+		bot.send_message(user_id, "*Translation:*",reply_markup = markup, parse_mode="Markdown")
+		bot.send_message(user_id, question, reply_markup = markup)
+	
+
+poll_text = ("*5* - _perfect response_\n" +
+			 "*4* - _correct response after a hesitation_\n" +
+			 "*3* - _correct response recalled with difficulty_\n" + 
+			 "*2* - _incorrect response; where the correct one seemed easy to recall_\n" + 
+			 "*1* - _incorrect response; the correct one was remembered_\n" +
+			 "*0* - _complete blackout._")
+
+
+def send_review_card(bot, card, user, number = None):
 		
 		if number == None:
 			number = ""
@@ -49,6 +80,13 @@ def send_review_card(bot, rtd, card, user, number = None):
 		elif content == 'default':
 			bot.send_message(user_id, "Just remember the _usage_ and _meaning_ of the next word.".format(language), parse_mode="Markdown")
 			bot.send_message(user_id, question, reply_markup= markup)
+			text = poll_text
+			options = ['0', '1', '2', '3', '4', '5']
+			markup = bot_utils.create_keyboard(options, 6)
+			user.keyboard_options = options
+			bot.send_message(user_id,"_Please grade how difficult this word is for now_\n" + text,
+							reply_markup=markup, parse_mode="Markdown")
+
 
 
 def treat_special_chars(text):
@@ -151,19 +189,13 @@ def backup_data():
 	try:
 		if not os.path.exists("../backup/"):
 			os.mkdir("../backup/")
-		os.system("cp -r ../data/ ../backup/data")
+		os.system("cp -TRv ../data/ ../backup/data")
 		return "Data backup was successfull"
 	except Exception as e:
 		print(e);
 		return "Data backup failed"
 
-def erase_at_jobs():
-	try:
-		os.system("atrm $(atq | cut -f1)")
-		return "Deleted at jobs"
-	except Exception as e:
-		print(e)
-		return "Failed to delete at jobs"
+
 
 def turn_off(db):
 	"""
@@ -171,5 +203,4 @@ def turn_off(db):
 	"""
 	print(backup_data())
 	print(db.backup())
-	print(erase_at_jobs())
 	pass

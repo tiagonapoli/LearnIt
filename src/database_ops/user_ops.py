@@ -23,11 +23,22 @@ class UserOps():
 		Returns:
 			A tuple containing two integers, the primary and secondary states of the user.
 		"""
-		self.cursor.execute("SELECT state1, state2, state3 FROM users WHERE id={}".format(user_id))
-		row = self.cursor.fetchall()
-		if len(row) == 0:
-			return "User doesn't exist"
-		return (row[0][0], row[0][1], row[0][2])
+		tries = 5
+		while tries > 0:
+			tries -= 1
+			try:
+				self.cursor.execute("SELECT state1, state2, state3 FROM users WHERE id={}".format(user_id))
+				row = self.cursor.fetchall()
+				if len(row) == 0:
+					return "User doesn't exist"
+				return (row[0][0], row[0][1], row[0][2])
+			except psycopg2.ProgrammingError:
+				print("EXCECAO PROGRAMMING ERROR")
+				log = open('get_state_log', 'w')
+				log.write("GET STATE USER_OPS {}\n".format(user_id) + 
+						  "EXCECAO PROGRAMMING ERROR\n" +
+						  "SELECT state1, state2, state3 FROM users WHERE id={}\n\n".format(user_id))
+		return []
 
 
 	def set_state(self, user_id, state1, state2, state3):

@@ -69,7 +69,7 @@ class CardOps():
 		if len(row) == 0:
 			print("Error in get_card")
 			print("Card {}, {} doesn't exist".format(user_id, user_card_id))		
-			return "Card {}, {} doesn't exist".format(user_id, user_card_id)
+			return None
 
 		row = row[0]
 		card = Card(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10])
@@ -88,7 +88,7 @@ class CardOps():
 		if len(rows) == 0:
 			print("Error in get_cards_on_topic")
 			print("Card {}, {}, {} doesn't exist".format(user_id, language, topic))		
-			return "Card {}, {}, {} doesn't exist".format(user_id, language, topic)
+			return []
 
 		cards = []
 		for row in rows:
@@ -103,6 +103,28 @@ class CardOps():
 			cards.append(card)
 
 		return cards
+
+	def get_all_cards(self, user_id):
+		self.cursor.execute("SELECT * FROM cards WHERE user_id={}"
+				.format(user_id))
+		rows = self.cursor.fetchall()
+
+		if len(rows) == 0:
+			print("EMPTY in get_all_cards")
+			return []
+
+		cards = []
+		for row in rows:
+			card = Card(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10])
+			user_card_id = card.get_card_id()
+			self.cursor.execute("SELECT content_path FROM archives WHERE user_id={} AND user_card_id={};".format(user_id, user_card_id))
+			archives = self.cursor.fetchall()
+			for archive in archives:
+				card.add_archive(archive[0])
+			cards.append(card)
+
+		return cards
+	
 
 	def erase_card(self, user_id, user_card_id):
 		self.cursor.execute("SELECT * FROM cards WHERE user_id={} AND user_card_id={}"

@@ -17,8 +17,7 @@ class TimeControl(object):
 	"""
 
 	def __init__(self,_attempts=1, _ef=2.5,_interval=1,
-			     _next_date = 
-				 datetime.datetime.now() + datetime.timedelta(days=1)):
+			     _next_date = None):
 		self.attempts = _attempts
 		self.ef = _ef
 		self.interval = _interval
@@ -137,19 +136,25 @@ class Card(TimeControl, WordInfo):
 				user_id, word_id, language, topic, foreign_word,
 				card_id, content_type, 
 				attempts = 1, ef = 2.5, interval = 1,
-				next_date = datetime.datetime.now() + datetime.timedelta(days=1)):
+				next_date = None):
 		self.card_id = card_id
 		self.content_type = content_type
 		self.archives = []
+		if next_date == None:
+			next_date = datetime.datetime.now() + datetime.timedelta(days=1)
 		WordInfo.__init__(self, user_id, word_id, language, topic, foreign_word)
 		TimeControl.__init__(self,attempts,ef,interval,next_date)
 	
 	def __str__(self):
-		str = "           --Card--\n" + "Word ID: {}\nCard ID: {}\nWord: {}\nContent Type: {}\n Archives:\n".format(self.word_id, self.card_id, self.foreign_word, self.content_type)
+		text = "           --Card--\n" + "Word ID: {}\nCard ID: {}\nWord: {}\nContent Type: {}\nNext Date: {}\nArchives:\n".format(
+										self.word_id, self.card_id, self.foreign_word, self.content_type, str(self.get_next_date()))
 		for archive in self.archives:
-			str += archive + "\n"
-		str += "\n"
-		return str
+			text += archive + "\n"
+		text += "\n"
+		return text
+
+	def __lt__(self,other):
+		return self.next_date > other.next_date
 
 	def get_type(self):
 		return self.content_type
@@ -185,7 +190,8 @@ class Card(TimeControl, WordInfo):
 
 
 if __name__ == '__main__':
-		
+	
+	cards_sort = []
 
 	word = Word(42,1,"Portuges", "Miscelania", "Camargao")
 	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 1, 'image') 
@@ -194,15 +200,27 @@ if __name__ == '__main__':
 	word.set_card(card)
 	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 1, 'image') 
 	card.add_archive('AAAAAAAAAAAAAAAAAAAAAAAAAAAA')
+	cards_sort.append(card)
 	word.set_card(card)
+	time.sleep(2)
 	card = Card(42,1,"Portuges", "Miscelania", "Camargao", 1, 'audio') 
 	card.add_archive('BBBBBBBBBBBBBBBBB')
+	cards_sort.append(card)
 	word.set_card(card)
 	print(word)
-
+	time.sleep(2)
 
 	word = Word(42,2,"ingels", "wololo", "tiagao")
 	card = Card(42,2,"ingels", "wololo", "tiago", 1, 'image') 
 	card.add_archive('CCCCCCCCCCCCCCCCCC')
+	cards_sort.append(card)
 	word.set_card(card)
 	print(word)
+
+	cards_sort.sort()
+
+	print("\n\n\n")
+	print("SORT TEST")
+	for card in cards_sort:
+		print(card)
+
