@@ -11,8 +11,11 @@ def handle_setup_user(bot, rtd):
 			Register user into database.
 		"""
 		user_id = get_id(msg)
-		if rtd.check_user_existence(user_id):
+		if rtd.check_user_existence(user_id) and user.get_active() == 0:
+			user.set_active(1)
+			bot.send_message(user_id, "Welcome back!")
 			return
+			
 		m = rtd.add_user(user_id)
 		bot.send_message(user_id, m)
 		user = rtd.get_user(user_id)

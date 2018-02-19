@@ -26,6 +26,9 @@ REVIEW = 22
 GET_TOPICS = 23
 GET_NUMBER = 24
 WAITING_CARD_ANS = 25
+SETTINGS = 26
+GET_OPTIONS = 27
+CARDS_PER_HOUR = 28
 
 
 
@@ -42,7 +45,8 @@ next_state = {
       		 'list_languages': IDLE,
       		 'erase_words': (ERASE_WORDS, GET_LANGUAGE),
       		 'erase_languages': (ERASE_LANGUAGES, SELECT_LANGUAGES),
-      		 'review' : (REVIEW, GET_LANGUAGE)}
+      		 'review' : (REVIEW, GET_LANGUAGE),
+      		 'settings' : (SETTINGS, GET_OPTION)}
 }
 
 
@@ -122,5 +126,14 @@ next_state.update({
 	(REVIEW, GET_NUMBER) : {'error' : (REVIEW, GET_NUMBER),
 							'done' : (REVIEW, WAITING_CARD_ANS)},
 	(REVIEW, WAITING_CARD_ANS) : {'continue' : (REVIEW, WAITING_CARD_ANS),
+								  'done' : IDLE}
+})
+
+
+#=====================SETTINGS=====================
+next_state.update({
+	(SETTINGS, GET_OPTION) : {'error' : (SETTINGS, GET_OPTION),
+							  'cards per hour' : (SETTINGS, CARDS_PER_HOUR)},
+	(SETTINGS, CARDS_PER_HOUR) : {'error' : (SETTINGS, CARDS_PER_HOUR),
 								  'done' : IDLE}
 })
