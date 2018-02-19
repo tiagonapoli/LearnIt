@@ -1,5 +1,6 @@
 CREATE TABLE users(
 	id int primary key,
+	active int DEFAULT 1,
 	cards_per_hour int DEFAULT 3,
 	review_cards_per_day int DEFAULT 40,
 	learning_words_per_day int DEFAULT 5, 

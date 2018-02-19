@@ -130,6 +130,14 @@ class Database():
 	def set_cards_per_hour(self, user_id, cards_per_hour):
 		return self.user_ops.set_cards_per_hour(user_id, cards_per_hour)
 
+	def get_active(self, user_id):
+		return self.user_ops.get_active(user_id)
+
+	def set_active(self, user_id, active):
+		return self.user_ops.set_active(user_id, active)
+
+
+
 	#==================TOPIC ops==================
 	def add_topic(self, user_id, language, topic):
 		return self.topic_ops.add_topic(user_id, language, topic)

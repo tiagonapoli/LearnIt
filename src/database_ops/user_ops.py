@@ -90,7 +90,7 @@ class UserOps():
 				if(len(rows) > 0):
 					return "Welcome back to LingoBot!"
 
-				self.cursor.execute("INSERT INTO users VALUES ({}, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT);".format(user_id))
+				self.cursor.execute("INSERT INTO users VALUES ({}, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT);".format(user_id))
 				self.conn.commit()
 				return "Welcome to LingoBot!\n" + "Use the command /add_language to add the languages you are interested in learning and then use the command /add_word to add words you are interested in memorizing.\n"
 			except psycopg2.ProgrammingError as e:
@@ -274,6 +274,34 @@ class UserOps():
 		while tries > 0:
 			tries -= 1
 			cmd = "UPDATE users SET cards_per_hour={} WHERE id={}".format(cards_per_hour, user_id)
+			try:
+				self.cursor.execute(cmd)
+				self.conn.commit()
+				return 
+			except psycopg2.ProgrammingError as e:
+				handle_exception(e, cmd)
+		return None
+
+	def get_active(self, user_id):
+		tries = 5
+		while tries > 0:
+			tries -= 1
+			cmd = "SELECT active from users WHERE id={};".format(user_id)
+			try:
+				self.cursor.execute(cmd)
+				rows = self.cursor.fetchall()
+				if(len(rows) == 0):
+					return 0
+				return rows[0][0]
+			except psycopg2.ProgrammingError as e:
+				handle_exception(e, cmd)
+		return None
+
+	def set_active(self, user_id, active):
+		tries = 5
+		while tries > 0:
+			tries -= 1
+			cmd = "UPDATE users SET active={} WHERE id={}".format(active, user_id)
 			try:
 				self.cursor.execute(cmd)
 				self.conn.commit()
