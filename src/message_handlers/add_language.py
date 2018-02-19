@@ -7,7 +7,8 @@ def handle_add_language(bot, rtd):
 
 	#=====================ADD LANGUAGE=====================
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == fsm.IDLE, 
+					(rtd.get_user(get_id(msg)).get_state() == fsm.IDLE and
+					 rtd.get_user(get_id(msg)).get_active() == 1), 
 					commands = ['add_language'])
 	def add_language(msg):
 		""" 

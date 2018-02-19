@@ -20,6 +20,7 @@ import message_handlers.list_languages
 import message_handlers.erase_languages
 
 import message_handlers.settings
+import message_handlers.stop
 import message_handlers.help
 import message_handlers.setup_user
 
@@ -114,6 +115,9 @@ while True:
 
 		#=====================HELP=====================
 		message_handlers.help.handle_help(bot,rtd)
+
+		#=====================STOP=====================
+		message_handlers.stop.handle_stop(bot,rtd)
 
 
 		#=====================MESSAGE NOT UNDERSTOOD=====================

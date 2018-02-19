@@ -10,7 +10,8 @@ def handle_erase_words(bot, rtd):
 
 	#=====================ERASE WORDS=====================
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == fsm.IDLE, 
+					(rtd.get_user(get_id(msg)).get_state() == fsm.IDLE and
+					 rtd.get_user(get_id(msg)).get_active() == 1), 
 					commands = ['erase_words'])
 	def erase_words(msg):
 		user = rtd.get_user(get_id(msg))

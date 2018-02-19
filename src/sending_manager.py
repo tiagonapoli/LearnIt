@@ -71,6 +71,9 @@ while True:
 		users = rtd.users
 
 		for user_id, user in users.items():
+			if user.get_active() == 0:
+				continue
+
 			if (user_id in cards_review_for_day.keys()) and hour == 0 and initialized_for_day[user_id] == False:
 				sending_utils.process_end_day(user, 
 											  cards_learning_for_day[user_id], 
@@ -111,6 +114,9 @@ while True:
 		if last_hour != hour:
 			last_hour = hour
 			for user_id, user in users.items():
+				if user.get_active() == 0:
+					continue
+				
 				sending_utils.hourly_init(user,
 									      learning_cnt_hourly, learning_total_hourly,
 										  review_cnt_hourly, review_total_hourly)
@@ -120,6 +126,9 @@ while True:
 		minute = now.minute
 
 		for user_id, user in users.items():
+			if user.get_active() == 0:
+				continue
+
 			sending_utils.prepare_queue(user,
 								  	    cards_review_for_day, cards_learning_for_day, grades_for_day,
 								  	    learning_cnt_day, learning_cnt_hourly, learning_total_hourly,
@@ -131,6 +140,9 @@ while True:
 			
 
 		for user_id, user in users.items():
+			if user.get_active() == 0:
+				continue
+			
 			sending_utils.process_queue(bot, user,
 								  	    cards_review_for_day, cards_learning_for_day, grades_for_day,
 								  	    learning_cnt_day, learning_cnt_hourly, learning_total_hourly,

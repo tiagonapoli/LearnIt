@@ -268,6 +268,12 @@ class User:
 	def set_cards_per_hour(self, cards_per_hour):
 		return self.db.set_cards_per_hour(self.user_id, cards_per_hour)
 
+	def get_active(self):
+		return self.db.get_active(self.user_id)
+
+	def set_active(self, active):
+		return self.db.set_active(self.user_id, active)
+
 
 class RuntimeData: 
 	"""Class that do all the runtime data management.

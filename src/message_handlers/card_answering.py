@@ -9,7 +9,8 @@ def handle_card_answer(bot, rtd):
 
 	#=====================ANSWER CARD=====================
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == fsm.WAITING_ANS, 
+					(rtd.get_user(get_id(msg)).get_state() == fsm.WAITING_ANS and
+					rtd.get_user(get_id(msg)).get_active() == 1), 
 					content_types = ['text'])
 	def answer_card(msg):
 		"""
@@ -84,7 +85,8 @@ def handle_card_answer(bot, rtd):
 	#=====================REMEMBER CARD=====================
 
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == fsm.WAITING_POLL_REMEMBER,
+					(rtd.get_user(get_id(msg)).get_state() == fsm.WAITING_POLL_REMEMBER and
+					 rtd.get_user(get_id(msg)).get_active() == 1),
 					content_types=['text'])
 	def poll_difficulty(msg):
 		"""

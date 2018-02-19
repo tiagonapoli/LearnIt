@@ -9,7 +9,8 @@ def handle_list_languages(bot, rtd):
 
 	#=====================LIST LANGUAGES=====================
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == fsm.IDLE, 
+					(rtd.get_user(get_id(msg)).get_state() == fsm.IDLE and
+					 rtd.get_user(get_id(msg)).get_active() == 1), 
 					commands = ['list_languages'])
 	def list_languages(msg):
 		user = rtd.get_user(get_id(msg))

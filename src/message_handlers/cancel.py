@@ -6,7 +6,9 @@ from utilities.bot_utils import get_id
 def handle_cancel(bot, rtd):
 
 	#=====================CANCEL=====================
-	@bot.message_handler(func = lambda msg: rtd.get_user(get_id(msg)).not_locked() , commands = ['cancel'])
+	@bot.message_handler(func = lambda msg: (rtd.get_user(get_id(msg)).not_locked() and
+											 rtd.get_user(get_id(msg)).get_active() == 1),
+						commands = ['cancel'])
 	def cancel(msg):
 		"""
 			Cancels any ongoing events for the user.

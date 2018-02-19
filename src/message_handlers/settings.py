@@ -1,12 +1,15 @@
 import telebot
 import fsm
+from utilities import utils
+from utilities import bot_utils
 from utilities.bot_utils import get_id
 
 def handle_settings(bot, rtd):
 
 	#=====================SETTINGS=====================
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == fsm.IDLE, 
+					(rtd.get_user(get_id(msg)).get_state() == fsm.IDLE and
+					 rtd.get_user(get_id(msg)).get_active() == 1), 
 					commands = ['settings'])
 	def settings(msg):
 		"""
@@ -78,6 +81,7 @@ def handle_settings(bot, rtd):
 			user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.CARDS_PER_HOUR)]['error'])
 			return
 
+		markup = bot_utils.keyboard_remove()
 		user.set_cards_per_hour(int(cards_per_hour))
-		bot.send_message(user_id, "_Cards per hour set successfuly!_".format(topic), parse_mode="Markdown")
+		bot.send_message(user_id, "_Cards per hour set successfuly!_", reply_markup=markup, parse_mode="Markdown")
 		user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.CARDS_PER_HOUR)]['done'])

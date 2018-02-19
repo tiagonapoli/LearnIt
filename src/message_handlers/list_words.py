@@ -10,7 +10,8 @@ def handle_list_words(bot, rtd):
 
 	#=====================LIST WORDS=====================
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == fsm.IDLE, 
+					(rtd.get_user(get_id(msg)).get_state() == fsm.IDLE and
+					 rtd.get_user(get_id(msg)).get_active() == 1), 
 					commands = ['list_words'])
 	def erase_words(msg):
 		user = rtd.get_user(get_id(msg))

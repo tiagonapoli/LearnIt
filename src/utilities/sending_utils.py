@@ -44,6 +44,9 @@ def init_user(user,
 			  review_cnt_day, review_cnt_hourly, review_total_hourly,
 			  sending_queue,
 			  now):
+	if user.get_active() == 0:
+		return
+
 	user_id = user.get_id()
 	(cards_learning_for_day[user_id],
 	 cards_review_for_day[user_id]) =  user.get_cards_for_day(now,
@@ -70,6 +73,8 @@ def init_user_day(user,
 			  review_cnt_day, review_cnt_hourly, review_total_hourly,
 			  sending_queue,
 			  now):
+	if user.get_active() == 0:
+		return
 	init_user(user,
 			  cards_review_for_day, cards_learning_for_day, grades_for_day,
 			  learning_cnt_day, learning_cnt_hourly, learning_total_hourly,
@@ -81,6 +86,9 @@ def init_user_day(user,
 def hourly_init(user,
 				learning_cnt_hourly, learning_total_hourly,
 				review_cnt_hourly, review_total_hourly):
+	if user.get_active() == 0:
+		return
+
 	user_id = user.get_id()
 	learning_cnt_hourly[user_id] = 0
 	review_cnt_hourly[user_id] = 0
@@ -90,7 +98,7 @@ def hourly_init(user,
 		qtd = 2
 	learning_total_hourly[user_id] = int(0.5 * qtd)
 	remaining = qtd - learning_total_hourly[user_id]
-	review_total_hourly[user_id] = randint(1, remaining)
+	review_total_hourly[user_id] = remaining
 	print("--------------- {} HOURLY INIT l:{}  r:{} ---------------".format(user_id,
 																			 learning_total_hourly[user_id],
 										  									 review_total_hourly[user_id]))
@@ -102,6 +110,8 @@ def prepare_queue(user,
 			  	  review_cnt_day, review_cnt_hourly, review_total_hourly,
 			  	  sending_queue,
 			  	  hour, minute):
+	if user.get_active() == 0:
+		return
 
 	user_id = user.get_id()
 	total = learning_total_hourly[user_id] + review_total_hourly[user_id]
@@ -192,6 +202,9 @@ def process_queue(bot, user,
 			  	  review_cnt_day, review_cnt_hourly, review_total_hourly,
 			  	  sending_queue,
 			  	  hour):
+	if user.get_active() == 0:
+		return
+		
 	user_id = user.get_id()
 	do_grading(user, grades_for_day[user_id])
 
