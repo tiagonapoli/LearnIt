@@ -21,9 +21,11 @@ def handle_card_answer(bot, rtd):
 		user.set_state(fsm.LOCKED)
 
 		card_id = user.get_card_waiting()
+		print("CARD_ID WAITING {}".format(card_id))
+
 		card = user.get_card(card_id)
 		res = utils.treat_special_chars(msg.text.lower())
-		
+
 		user.temp_card = card
 		if res == card.foreign_word.lower():
 			bot.send_message(user_id, "That was correct!")
@@ -70,10 +72,7 @@ def handle_card_answer(bot, rtd):
 			
 		grade = int(grade)
 
-		card.calc_next_date(grade)
-		user.set_supermemo_data(card)
-		print("NEXT CARD DATE {}".format(card.get_next_date()))
-
+		user.set_grade_waiting(grade)
 
 		markup = bot_utils.keyboard_remove()
 		bot.send_message(user_id,"_OK!_", reply_markup=markup, parse_mode="Markdown")
@@ -108,9 +107,8 @@ def handle_card_answer(bot, rtd):
 			
 		grade = int(grade)
 
-		card.calc_next_date(grade)
-		user.set_supermemo_data(card)
-		print(card.get_next_date())
+		user.set_grade_waiting(grade)
+		
 		markup = bot_utils.keyboard_remove()
 		
 		cards = user.get_cards_on_word(card.get_word_id())

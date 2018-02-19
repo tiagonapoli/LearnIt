@@ -50,6 +50,8 @@ signal.signal(signal.SIGINT, signal_handler)
 
 sending_manager = subprocess.Popen("gnome-terminal -x ./sending_manager.py", stdout=subprocess.PIPE, shell=True) 
 
+rtd = RuntimeData()
+rtd.reset_all_states()
 
 while True:
 	try:
@@ -60,7 +62,7 @@ while True:
 		bot = telebot.TeleBot(TOKEN)
 		print("Bot initialized successfully!")
 
-		rtd = RuntimeData()
+		
 
 		#=====================SETUP USER=====================
 		message_handlers.setup_user.handle_setup_user(bot, rtd)
@@ -118,11 +120,13 @@ while True:
 		message_handlers.message_not_understood.handle_message_not_understood(bot,rtd)
 
 
-		rtd.reset_all_states()
 		print("Press Ctrl+C to exit gently")
 		print("Bot Polling!!!")
 		bot.polling()	
 	except Exception as e:
+
+		rtd.reset_all_states_exception(bot)
+
 		try:
 			#bot.send_message(113538563,"Bot Crashed!!")
 			bot.send_message(359999978,"Bot Crashed!!")
@@ -135,7 +139,6 @@ while True:
    			myfile.write(datetime.datetime.now().strftime("%d/%m/%y %H:%M:%S") + "   " + str(e.__class__.__name__) + "\n")
 		print(e.__class__.__name__)
 		print("============================================================================\n\n\n\n")
-		sys.exit(0)
 		if str(e.__class__.__name__) == 'ConnectionError':
 			time.sleep(30)
 		elif str(e.__class__.__name__) == 'ReadTimeout':

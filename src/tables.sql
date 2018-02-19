@@ -1,13 +1,17 @@
 CREATE TABLE users(
 	id int primary key,
-	messages_per_day int DEFAULT 0,
+	cards_per_hour int DEFAULT 3,
+	review_cards_per_day int DEFAULT 40,
+	learning_words_per_day int DEFAULT 5, 
 	highest_word_id int DEFAULT 0,
 	highest_card_id int DEFAULT 0,
 	highest_archive_id int DEFAULT 0,
 	state1 int DEFAULT 0,
 	state2 int DEFAULT -1,
 	state3 int DEFAULT -1,
-	card_waiting int DEFAULT 0
+	card_waiting int DEFAULT 0,
+	card_waiting_type int DEFAULT 0,
+	grade_waiting_for_process int DEFAULT 0
 );
 
 CREATE TABLE languages(
@@ -49,7 +53,7 @@ CREATE TABLE cards(
 	type varchar(20),
 	
 	attempts int,
-	easiness_factor double precision DEFAULT 2.5,
+	easiness_factor double precision DEFAULT 1.3,
 	interval double precision,
 	next_date date,
 
@@ -64,7 +68,7 @@ CREATE TABLE archives(
 	user_card_id int,
 	counter int,
 	type varchar(20),
-	content_path varchar(50),
+	content_path varchar(100),
 
 	primary key (user_id, user_card_id, counter),
 	foreign key (user_id, user_card_id) references cards(user_id, user_card_id) ON DELETE CASCADE

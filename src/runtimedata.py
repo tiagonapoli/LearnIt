@@ -221,8 +221,49 @@ class User:
 	def working_hours(self, hour):
 		return (7 <= hour and hour <= 24) or (hour <= 1)
 
+	def get_grade_waiting(self):
+		return self.db.get_grade_waiting(self.user_id)
+
+	def set_grade_waiting(self, grade):
+		return self.db.set_grade_waiting(self.user_id, grade)
+
+	def get_card_waiting_type(self):
+		return self.db.get_card_waiting_type(self.user_id)
+
+	def set_card_waiting_type(self, card_waiting_type):
+		return self.db.set_card_waiting_type(self.user_id, card_waiting_type)
 
 
+	def get_cards_for_day(self, now, distinct_words, review_limit):
+		cards = self.get_cards_expired(now)
+
+		cards_to_review = []
+		cards_to_learn = []
+		words = set()
+
+		for card in cards:
+			if card.is_learning():
+				if len(words) < distinct_words:
+					cards_to_learn.append(card)
+					words.add(card.get_word_id())
+				elif len(words) == distinct_words and (card.get_word_id() in words):
+					cards_to_learn.append(card)
+			elif len(cards_to_review) < review_limit:
+				cards_to_review.append(card)
+
+		return cards_to_learn, cards_to_review
+
+	def get_learning_words_limit(self):
+		return self.db.get_learning_words_limit(self.user_id)
+
+	def get_review_cards_limit(self):
+		return self.db.get_review_cards_day_limit(self.user_id)
+
+	def check_card_existence(self, card):
+		return self.db.check_card_existence(self.user_id, card)
+
+	def get_cards_per_hour(self):
+		return self.db.get_cards_per_hour(self.user_id)
 
 
 class RuntimeData: 
@@ -264,6 +305,18 @@ class RuntimeData:
 		"""Sets the states of all users to the initial state"""
 		for user_id, user in self.users.items():
 			user.set_state(fsm.IDLE)
+			user.set_card_waiting(0)
+
+	def reset_all_states_exception(self, bot):
+		"""Sets the states of all users to the initial state"""
+		for user_id, user in self.users.items():
+			if user.get_state() == fsm.LOCKED:
+				try:
+					bot.send_message(user_id, "An error in the server ocurred, the operation was canceled")
+				except Exception as e:
+					print(e)
+				user.set_state(fsm.IDLE)
+				user.set_card_waiting(0)
 	
 
 	def add_user(self,user_id):

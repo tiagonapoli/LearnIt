@@ -16,7 +16,7 @@ class TimeControl(object):
 		next_date: date of the next attempt
 	"""
 
-	def __init__(self,_attempts=1, _ef=2.5,_interval=1,
+	def __init__(self,_attempts=1, _ef=1.3,_interval=1,
 			     _next_date = None):
 		self.attempts = _attempts
 		self.ef = _ef
@@ -28,7 +28,7 @@ class TimeControl(object):
 		if self.attempts == 1:
 			self.interval = 1
 		elif self.attempts == 2:
-			self.interval = 3
+			self.interval = 2
 		else:
 			self.interval = self.interval * self.ef
 		self.ef = self.ef-0.8+0.28*q-0.02*q*q
@@ -135,26 +135,26 @@ class Card(TimeControl, WordInfo):
 	def __init__(self,
 				user_id, word_id, language, topic, foreign_word,
 				card_id, content_type, 
-				attempts = 1, ef = 2.5, interval = 1,
+				attempts = 1, ef = 1.3, interval = 1,
 				next_date = None):
 		self.card_id = card_id
 		self.content_type = content_type
 		self.archives = []
 		if next_date == None:
-			next_date = datetime.datetime.now() + datetime.timedelta(days=1)
+			next_date = datetime.datetime.now() #+ datetime.timedelta(days=1)
 		WordInfo.__init__(self, user_id, word_id, language, topic, foreign_word)
 		TimeControl.__init__(self,attempts,ef,interval,next_date)
 	
 	def __str__(self):
-		text = "           --Card--\n" + "Word ID: {}\nCard ID: {}\nWord: {}\nContent Type: {}\nNext Date: {}\nArchives:\n".format(
-										self.word_id, self.card_id, self.foreign_word, self.content_type, str(self.get_next_date()))
+		text = "           --Card--\n" + "Word ID: {}\nCard ID: {}\nWord: {}\nContent Type: {}\nE.F: {}\nNext Date: {}\nArchives:\n".format(
+										self.word_id, self.card_id, self.foreign_word, self.content_type, self.ef, str(self.get_next_date()))
 		for archive in self.archives:
 			text += archive + "\n"
 		text += "\n"
 		return text
 
 	def __lt__(self,other):
-		return self.next_date > other.next_date
+		return self.next_date < other.next_date
 
 	def get_type(self):
 		return self.content_type
@@ -186,6 +186,9 @@ class Card(TimeControl, WordInfo):
 
 	def get_card_id(self):
 		return self.card_id
+
+	def is_learning(self):
+		return self.ef <= 1.5
 
 
 

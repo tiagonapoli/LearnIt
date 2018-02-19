@@ -40,7 +40,7 @@ class TopicOps():
 
 
 	def erase_topic_empty_words(self, user_id, language, topic):
-		self.cursor.execute("SELECT topic FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id,treat_str_SQL(language),treat_str_SQL(topic)))
+		self.cursor.execute("SELECT * FROM topics WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id,treat_str_SQL(language),treat_str_SQL(topic)))
 		rows = self.cursor.fetchall()
 
 		if len(rows) == 0:

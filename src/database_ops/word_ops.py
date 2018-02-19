@@ -5,7 +5,7 @@ import datetime
 import abc
 from flashcard import Word
 from flashcard import Card
-from database_ops.db_utils import treat_str_SQL
+from database_ops.db_utils import treat_str_SQL, create_card_with_row, create_word_with_row
 import database_ops.topic_ops
 import database_ops.card_ops
 
@@ -145,13 +145,11 @@ class WordOps():
 		cards_info = self.cursor.fetchall()
 
 		general_info = general_info[0]
-		word = Word(general_info[0], general_info[1], general_info[2], general_info[3], general_info[4])
+		word = create_word_with_row(general_info)
 
 
 		for card_info in cards_info:
-			card = Card(card_info[0], card_info[1], card_info[2], card_info[3], card_info[4],
-						card_info[5], card_info[6], 
-						card_info[7], card_info[8], card_info[9], card_info[10])
+			card = create_card_with_row(card_info)
 
 			card_id = card_info[5]
 			self.cursor.execute("SELECT content_path FROM archives WHERE user_id={} and user_card_id={};".format(user_id, card_id))
@@ -188,14 +186,14 @@ class WordOps():
 		
 		words = {}
 		for word in row:
-			words[word[1]] = Word(word[0], word[1], word[2], word[3], word[4])
+			words[word[1]] = create_word_with_row(word)
 
 		self.cursor.execute("SELECT * FROM cards WHERE user_id={};".format(user_id))
 		row = self.cursor.fetchall()
 
 		cards = {}
 		for card in row:
-			cards[card[5]] = Card(card[0], card[1], card[2], card[3], card[4], card[5], card[6], card[7], card[8], card[9], card[10])
+			cards[card[5]] = create_card_with_row(card)
 
 		self.cursor.execute("SELECT * FROM archives WHERE user_id={};".format(user_id))
 		row = self.cursor.fetchall()

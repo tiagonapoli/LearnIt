@@ -99,6 +99,36 @@ class Database():
 	def get_known_users(self):
 		return self.user_ops.get_known_users()
 
+	def get_learning_words_limit(self, user_id):
+		return self.user_ops.get_learning_words_limit(user_id)
+
+	def get_review_cards_day_limit(self, user_id):
+		return self.user_ops.get_review_cards_day_limit(user_id)
+
+	def get_grade_waiting(self, user_id):
+		return self.user_ops.get_grade_waiting(user_id)
+
+	def set_grade_waiting(self, user_id, grade):
+		return self.user_ops.set_grade_waiting(user_id, grade)
+
+	def set_card_waiting(self, user_id, card_id):
+		return self.user_ops.set_card_waiting(user_id, card_id)
+
+
+	def get_card_waiting(self, user_id):
+		return self.user_ops.get_card_waiting(user_id)
+
+	def get_card_waiting_type(self, user_id):
+		return self.user_ops.get_card_waiting_type(user_id)
+
+	def set_card_waiting_type(self, user_id, card_waiting_type):
+		return self.user_ops.set_card_waiting_type(user_id, card_waiting_type)
+
+	def get_cards_per_hour(self, user_id):
+		return self.user_ops.get_cards_per_hour(user_id)
+
+	def set_cards_per_hour(self, user_id, cards_per_hour):
+		return self.user_ops.set_cards_per_hour(user_id, cards_per_hour)
 
 	#==================TOPIC ops==================
 	def add_topic(self, user_id, language, topic):
@@ -132,20 +162,15 @@ class Database():
 	def set_supermemo_data(self, card):
 		return self.card_ops.set_supermemo_data(card)
 
-
-	def set_card_waiting(self, user_id, card_id):
-		return self.card_ops.set_card_waiting(user_id, card_id)
-
-
-	def get_card_waiting(self, user_id):
-		return self.card_ops.get_card_waiting(user_id)
-
 	def get_cards_on_topic(self, user_id, language, topic, get_default):
 		return self.card_ops.get_cards_on_topic(user_id, language, topic, get_default)
 
 	def get_all_cards(self, user_id):
 		return self.card_ops.get_all_cards(user_id)
 
+
+	def check_card_existence(self, user_id, card):
+		return self.card_ops.check_card_existence(user_id, card)
 
 	#==================ARCHIVE ops==================
 	def erase_archive(self, user_id, card_id, counter):

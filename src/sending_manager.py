@@ -7,10 +7,12 @@ import time
 import signal
 
 import fsm
-from collections import deque
+from queue import Queue
 from runtimedata import RuntimeData
 from flashcard import Card
-from utilities import utils
+from utilities import sending_utils
+
+
 
 def signal_handler(sign, frame):
 	"""
@@ -37,13 +39,26 @@ except Exception as e:
 rtd = RuntimeData()
 rtd.get_known_users()
 users = rtd.users
-cards_for_day = {}
-cards_quantity = {}
-cards_sent = {}
-daily_number = {}
+
+
+cards_review_for_day = {}
+grades_for_day = {}
+cards_learning_for_day = {}
+
+learning_cnt_day = {}
+learning_cnt_hourly = {}
+learning_total_hourly = {}
+
+review_cnt_day = {}
+review_cnt_hourly = {}
+review_total_hourly = {}
+
+sending_queue = {}
+initialized_for_day = {}
 
 now = datetime.datetime.now()
 last_hour = (now.hour - 1 + 24) % 24
+
 
 while True:
 	try:
@@ -52,64 +67,83 @@ while True:
 		now = datetime.datetime.now()
 		hour = now.hour 
 		rtd.get_known_users()
+
 		users = rtd.users
+
+		for user_id, user in users.items():
+			if (user_id in cards_review_for_day.keys()) and hour == 0 and initialized_for_day[user_id] == False:
+				sending_utils.process_end_day(user, 
+											  cards_learning_for_day[user_id], 
+											  grades_for_day[user_id])
+				sending_utils.init_user_day(user,
+										cards_review_for_day, cards_learning_for_day, grades_for_day,
+										learning_cnt_day, learning_cnt_hourly, learning_total_hourly,
+										review_cnt_day, review_cnt_hourly, review_total_hourly,
+										sending_queue,
+										now)
+				initialized_for_day[user_id] = True
+			
+			if (not (user_id in cards_review_for_day.keys())):
+				sending_utils.init_user(user,
+										cards_review_for_day, cards_learning_for_day, grades_for_day,
+										learning_cnt_day, learning_cnt_hourly, learning_total_hourly,
+										review_cnt_day, review_cnt_hourly, review_total_hourly,
+										sending_queue,
+										now)
+				sending_utils.hourly_init(user,
+									      learning_cnt_hourly, learning_total_hourly,
+										  review_cnt_hourly, review_total_hourly)
+				initialized_for_day[user_id] = True
+
+				print("--------------- {} REVIEW QTD {} ---------------".format(user_id, len(cards_review_for_day[user_id])))
+				#for card in cards_review_for_day[user_id]:
+				#	print(card)
+				
+				print("--------------- {} LEARNING QTD {} ---------------".format(user_id, len(cards_learning_for_day[user_id])))
+				#for card in cards_learning_for_day[user_id]:
+				#	print(card)
+
+			if hour != 0:
+				initialized_for_day[user_id] = False
+				
+
 
 		if last_hour != hour:
 			last_hour = hour
 			for user_id, user in users.items():
-				cards_quantity[user_id] = 5 + random.randint(1,1) 
-				cards_sent[user_id] = 0
-
-		for user_id, user in users.items():
-			if (not (user_id in cards_for_day.keys())) or hour == 0:
-				daily_number[user_id] = 0
-			cards_for_day[user_id] = user.get_cards_expired(now)
-			print("USER_ID {} cards_in_hour: {}  cards_for_day: {}".format(user_id, cards_quantity[user_id], len(cards_for_day[user_id])))
-
-		print("\n")
+				sending_utils.hourly_init(user,
+									      learning_cnt_hourly, learning_total_hourly,
+										  review_cnt_hourly, review_total_hourly)
 		
-		'''
-		for user_id, user in users.items():
-			print("USER CARDS {}  QTD: {}".format(user_id, len(cards_for_day[user_id])))
-			for card in cards_for_day[user_id]:
-				print(card)
-		'''
 
 		now = datetime.datetime.now()
 		minute = now.minute
+
 		for user_id, user in users.items():
-			user_id = user.get_id()
-			send_time_ini = int(60 * cards_sent[user_id]/cards_quantity[user_id])
-			send_time_next = int(60 * (cards_sent[user_id] + 1)/cards_quantity[user_id])
-			pos = daily_number[user_id]
+			sending_utils.prepare_queue(user,
+								  	    cards_review_for_day, cards_learning_for_day, grades_for_day,
+								  	    learning_cnt_day, learning_cnt_hourly, learning_total_hourly,
+								  	    review_cnt_day, review_cnt_hourly, review_total_hourly,
+								  	    sending_queue,
+								  	    hour, minute)
 
-			print("USER {} STATE {} TIME {} <= {} <= {}\nCARDS_SENT {}/{} FOR TODAY {}\n\n".format(
-					user_id, user.get_state(), send_time_ini, minute, send_time_next, cards_sent[user_id],
-					cards_quantity[user_id], len(cards_for_day[user_id])))
 
-			if (cards_sent[user_id] == cards_quantity[user_id] or 
-				user.working_hours(hour) == False):
-				continue
+			
 
-			if send_time_ini <= minute and minute <= send_time_next and user.get_state() == fsm.IDLE:
-				user.set_state(fsm.LOCKED)
-				print("SENDING CARD {}".format(user_id))
-				cards_sent[user_id] += 1
-				aux_card = cards_for_day[user_id].pop()
-				utils.send_review_card(bot, aux_card, user, daily_number[user_id])
-				if aux_card.get_type() == 'default':
-					user.set_state(fsm.next_state[fsm.IDLE]['card_remember'])
-				else:
-					user.set_state(fsm.next_state[fsm.IDLE]['card_query'])
-				daily_number[user_id] += 1
-			elif minute > send_time_next:
-				cards_sent[user_id] += 1
+		for user_id, user in users.items():
+			sending_utils.process_queue(bot, user,
+								  	    cards_review_for_day, cards_learning_for_day, grades_for_day,
+								  	    learning_cnt_day, learning_cnt_hourly, learning_total_hourly,
+								  	    review_cnt_day, review_cnt_hourly, review_total_hourly,
+								  	    sending_queue,
+								  	    hour)
 
-			print("\n")
+
 
 		sleep = 60
 		print("SLEEP {}\n\n".format(sleep))
 		time.sleep(sleep)
+
 	except Exception as e:
 		print("=====================An error ocurred with bot.polling======================")
 		with open("exceptions_sending_manager.txt", "a") as myfile:
@@ -122,5 +156,6 @@ while True:
 			bot.send_message(359999978,"{}".format(e))
 		except Exception as ee:
 			print(ee)
-		time.sleep(240)
+		time.sleep(60)
+
 	

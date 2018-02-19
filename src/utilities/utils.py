@@ -47,7 +47,7 @@ poll_text = ("*5* - _perfect response_\n" +
 			 "*0* - _complete blackout._")
 
 
-def send_review_card(bot, card, user, number = None):
+def send_review_card(bot, card, user, card_type = 'Review', number = None):
 		
 		if number == None:
 			number = ""
@@ -58,7 +58,7 @@ def send_review_card(bot, card, user, number = None):
 		user_id = user.get_id()
 
 		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id, "*Review card{}!*".format(number), parse_mode="Markdown", reply_markup=markup)
+		bot.send_message(user_id, "*{} card{}!*".format(card_type, number), parse_mode="Markdown", reply_markup=markup)
 		
 		user.set_card_waiting(card.card_id)
 		markup = telebot.types.ForceReply(selective = False)

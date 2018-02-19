@@ -1,11 +1,5 @@
 import psycopg2
 import os
-import time
-import datetime
-import abc
-from flashcard import Word
-from flashcard import Card
-
 
 class ArchiveOps():
 

@@ -1,11 +1,8 @@
 import psycopg2
-import os
 import time
 import datetime
-import abc
-from flashcard import Word
 from flashcard import Card
-from database_ops.db_utils import treat_str_SQL
+from database_ops.db_utils import treat_str_SQL, create_card_with_row
 import database_ops.archive_ops
 
 
@@ -72,7 +69,7 @@ class CardOps():
 			return None
 
 		row = row[0]
-		card = Card(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10])
+		card = create_card_with_row(row)
 
 		self.cursor.execute("SELECT content_path FROM archives WHERE user_id={} AND user_card_id={};".format(user_id, user_card_id))
 		rows = self.cursor.fetchall()
@@ -92,7 +89,7 @@ class CardOps():
 
 		cards = []
 		for row in rows:
-			card = Card(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10])
+			card = create_card_with_row(row)
 			if card.get_type() == 'default' and  get_default == False:
 					continue
 			user_card_id = card.get_card_id()
@@ -115,7 +112,7 @@ class CardOps():
 
 		cards = []
 		for row in rows:
-			card = Card(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10])
+			card = create_card_with_row(row)
 			user_card_id = card.get_card_id()
 			self.cursor.execute("SELECT content_path FROM archives WHERE user_id={} AND user_card_id={};".format(user_id, user_card_id))
 			archives = self.cursor.fetchall()
@@ -158,16 +155,11 @@ class CardOps():
 		self.conn.commit()
 
 
-	def set_card_waiting(self, user_id, card_id):
-		self.cursor.execute("UPDATE users SET card_waiting={} WHERE id={};".format(card_id, user_id))
-		self.conn.commit()
-
-
-	def get_card_waiting(self, user_id):
-		self.cursor.execute("SELECT card_waiting FROM users WHERE id={};".format(user_id))
+	def check_card_existence(self, user_id, card):
+		self.cursor.execute("SELECT user_card_id FROM cards WHERE user_id={} AND user_card_id={};".format(user_id, card.get_card_id()))
 		card = self.cursor.fetchall()
-		card = card[0][0]
-		return card
-
+		if len(card) == 0:
+			return False
+		return True
 
 
