@@ -19,7 +19,7 @@ if PATH[-1] == '/':
 data_path = PATH + '/data'
 tables_path = PATH + '/tables'
 
-os.system("cp -TRvf {} ../data/".format(data_path))
+os.system("cp -TRvf {} ../../data/".format(data_path))
 os.system("./users.py {}".format(tables_path))
 os.system("./languages.py {}".format(tables_path))
 os.system("./topics.py {}".format(tables_path))
