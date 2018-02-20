@@ -1,5 +1,6 @@
 import os
 import telebot
+import datetime
 from utilities import bot_utils
 
 def get_file_extension(filename):
@@ -20,7 +21,7 @@ def send_ans_card(bot, card, query_type):
 	user_id = card.get_user()
 	question = card.get_question()
 	content = card.get_type()
-	if content == query_type or content == 'default':
+	if content == query_type:
 		return
 
 	markup = bot_utils.keyboard_remove()
@@ -54,38 +55,38 @@ def send_review_card(bot, card, user, card_type = 'Review', number = None):
 		else:
 			number = " #" + str(number)
 
-		language = card.get_language()
-		user_id = user.get_id()
+		try:
 
-		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id, "*{} card{}!*".format(card_type, number), parse_mode="Markdown", reply_markup=markup)
-		
-		user.set_card_waiting(card.card_id)
-		markup = telebot.types.ForceReply(selective = False)
-		question = card.get_question()
-		content = card.get_type()
-		if content == 'image':
-			bot.send_message(user_id, "Relate the image to a word in _{}_".format(language), parse_mode="Markdown")
-			question = open(question,'rb')
-			bot.send_photo(user_id, question, reply_markup = markup)
-			question.close()
-		elif content == 'audio':
-			bot.send_message(user_id, "Transcribe the audio in _{}_".format(language), parse_mode="Markdown")
-			question = open(question,'rb')
-			bot.send_voice(user_id, question, reply_markup = markup)
-			question.close()
-		elif content == 'translation':
-			bot.send_message(user_id, "Translate the word to _{}_".format(language), parse_mode="Markdown")
-			bot.send_message(user_id, question, reply_markup = markup)
-		elif content == 'default':
-			bot.send_message(user_id, "Just remember the _usage_ and _meaning_ of the next word.".format(language), parse_mode="Markdown")
-			bot.send_message(user_id, question, reply_markup= markup)
-			text = poll_text
-			options = ['0', '1', '2', '3', '4', '5']
-			markup = bot_utils.create_keyboard(options, 6)
-			user.keyboard_options = options
-			bot.send_message(user_id,"_Please grade how difficult this word is for now_\n" + text,
-							reply_markup=markup, parse_mode="Markdown")
+			language = card.get_language()
+			user_id = user.get_id()
+
+			markup = bot_utils.keyboard_remove()
+			bot.send_message(user_id, "*{} card{}!*".format(card_type, number), parse_mode="Markdown", reply_markup=markup)
+			
+			user.set_card_waiting(card.card_id)
+			markup = telebot.types.ForceReply(selective = False)
+			question = card.get_question()
+			content = card.get_type()
+			if content == 'image':
+				bot.send_message(user_id, "Relate the image to a word in _{}_".format(language), parse_mode="Markdown")
+				question = open(question,'rb')
+				bot.send_photo(user_id, question, reply_markup = markup)
+				question.close()
+			elif content == 'audio':
+				bot.send_message(user_id, "Transcribe the audio in _{}_".format(language), parse_mode="Markdown")
+				question = open(question,'rb')
+				bot.send_voice(user_id, question, reply_markup = markup)
+				question.close()
+			elif content == 'translation':
+				bot.send_message(user_id, "Translate the word to _{}_".format(language), parse_mode="Markdown")
+				bot.send_message(user_id, question, reply_markup = markup)
+			
+			return True
+		except Exception as e:
+			print(e)
+			user.set_card_waiting(0)
+			bot.send_message(359999978,"send_review_card crashed")
+			return False
 
 
 
@@ -185,11 +186,16 @@ def save_voice(voice_msg, path, voice_name, bot):
 		print(e)
 		return None	
 
-def backup_data():
+def backup(db):
+	PATH =  "../backup/" + datetime.datetime.now().strftime("%d-%m-%Y.%H-%M") + "/"
+	if not os.path.exists('../backup/'):
+		os.mkdir('../backup')
+	print("BACKUP PATH= " + PATH)
 	try:
-		if not os.path.exists("../backup/"):
-			os.mkdir("../backup/")
-		os.system("cp -TRv ../data/ ../backup/data")
+		print(db.backup(PATH))
+		if not os.path.exists(PATH):
+			os.mkdir(PATH)
+		os.system("cp -TRv ../data/ {}data".format(PATH))
 		return "Data backup was successfull"
 	except Exception as e:
 		print(e);
@@ -201,6 +207,6 @@ def turn_off(db):
 	"""
 		Safely turns of LingoBot. Makes a backup of the data (future)
 	"""
-	print(backup_data())
-	print(db.backup())
+	print(backup(db))
+	
 	pass

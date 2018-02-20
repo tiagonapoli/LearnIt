@@ -63,7 +63,7 @@ while True:
 		bot = telebot.TeleBot(TOKEN)
 		print("Bot initialized successfully!")
 
-		
+
 
 		#=====================SETUP USER=====================
 		message_handlers.setup_user.handle_setup_user(bot, rtd)
@@ -127,6 +127,7 @@ while True:
 		print("Press Ctrl+C to exit gently")
 		print("Bot Polling!!!")
 		bot.polling()	
+
 	except Exception as e:
 
 		rtd.reset_all_states_exception(bot)
@@ -140,7 +141,7 @@ while True:
 
 		print("=====================An error ocurred with bot.polling======================")
 		with open("exceptions_lingbot.txt", "a") as myfile:
-   			myfile.write(datetime.datetime.now().strftime("%d/%m/%y %H:%M:%S") + "   " + str(e.__class__.__name__) + "\n")
+				myfile.write(datetime.datetime.now().strftime("%d/%m/%y %H:%M:%S") + "   " + str(e.__class__.__name__) + "\n")
 		print(e.__class__.__name__)
 		print("============================================================================\n\n\n\n")
 		if str(e.__class__.__name__) == 'ConnectionError':

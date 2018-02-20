@@ -85,7 +85,8 @@ def init_user_day(user,
 
 def hourly_init(user,
 				learning_cnt_hourly, learning_total_hourly,
-				review_cnt_hourly, review_total_hourly):
+				review_cnt_hourly, review_total_hourly,
+				hour):
 	if user.get_active() == 0:
 		return
 
@@ -94,11 +95,17 @@ def hourly_init(user,
 	review_cnt_hourly[user_id] = 0
 	
 	qtd = user.get_cards_per_hour()
-	if qtd < 2:
-		qtd = 2
-	learning_total_hourly[user_id] = int(0.5 * qtd)
-	remaining = qtd - learning_total_hourly[user_id]
-	review_total_hourly[user_id] = remaining
+	if qtd == 1:
+		if hour % 2 == 0:
+			learning_total_hourly[user_id] = 1
+		else:
+			learning_total_hourly[user_id] = 0
+		remaining = qtd - learning_total_hourly[user_id]
+		review_total_hourly[user_id] = remaining
+	else:
+		learning_total_hourly[user_id] = int(0.5 * qtd)
+		remaining = qtd - learning_total_hourly[user_id]
+		review_total_hourly[user_id] = remaining
 	print("--------------- {} HOURLY INIT l:{}  r:{} ---------------".format(user_id,
 																			 learning_total_hourly[user_id],
 										  									 review_total_hourly[user_id]))
@@ -127,11 +134,15 @@ def prepare_queue(user,
 	if (user.working_hours(hour) == False):
 		return
 
-	if send_time_ini <= minute and len(sending_queue[user_id]) < 4:
+	if send_time_ini <= minute and len(sending_queue[user_id]) < 2:
 		if (review_cnt_hourly[user_id] < review_total_hourly[user_id] and
-			  review_cnt_day[user_id] >= len(cards_review_for_day[user_id])):
+			  review_cnt_day[user_id] >= len(cards_review_for_day[user_id]) and
+			  len(cards_learning_for_day[user_id]) > 0):
 			learning_total_hourly[user_id] += 1
 			review_total_hourly[user_id] -= 1
+		elif len(cards_learning_for_day[user_id]) == 0:
+			learning_total_hourly[user_id] -= 1
+			review_total_hourly[user_id] += 1
 
 		if (learning_cnt_hourly[user_id] < learning_total_hourly[user_id] and
 			len(cards_learning_for_day[user_id]) > 0):
@@ -186,15 +197,15 @@ def send_card(bot, user, card, card_type, number):
 	user.set_card_waiting_type(card_type)
 	if card_type == LEARNING:
 		print("{} SENDING LEARNING CARD".format(user_id))
-		utils.send_review_card(bot, card, user, 'Learning', number)
+		success = utils.send_review_card(bot, card, user, 'Learning', number)
 	elif card_type == REVIEW:
 		print("{} SENDING REVIEW CARD".format(user_id))
-		utils.send_review_card(bot, card, user, 'Review', number)
+		success = utils.send_review_card(bot, card, user, 'Review', number)
 
-	if card.get_type() == 'default':
-		user.set_state(fsm.next_state[fsm.IDLE]['card_remember'])
-	else:
-		user.set_state(fsm.next_state[fsm.IDLE]['card_query'])
+	if success == False:
+		return
+
+	user.set_state(fsm.next_state[fsm.IDLE]['card_query'])
 
 def process_queue(bot, user,
 			  	  cards_review_for_day, cards_learning_for_day, grades_for_day,

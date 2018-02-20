@@ -16,7 +16,7 @@ class TimeControl(object):
 		next_date: date of the next attempt
 	"""
 
-	def __init__(self,_attempts=1, _ef=1.3,_interval=1,
+	def __init__(self,_attempts=1, _ef=1.5,_interval=1,
 			     _next_date = None):
 		self.attempts = _attempts
 		self.ef = _ef
@@ -135,7 +135,7 @@ class Card(TimeControl, WordInfo):
 	def __init__(self,
 				user_id, word_id, language, topic, foreign_word,
 				card_id, content_type, 
-				attempts = 1, ef = 1.3, interval = 1,
+				attempts = 1, ef = 1.5, interval = 1,
 				next_date = None):
 		self.card_id = card_id
 		self.content_type = content_type

@@ -144,9 +144,6 @@ def handle_add_word(bot, rtd):
 		user.temp_word.foreign_word = word_text
 
 		word = user.temp_word
-		default_card = Card(word.user_id, word.word_id, word.language, word.topic, word.foreign_word, user.get_highest_card_id() + 1, 'default')
-		default_card.add_archive(default_card.foreign_word)
-		word.set_card(default_card)
 
 		options = ['Send image', 'Send audio', 'Send translation']
 		btn = bot_utils.create_inline_keys_sequential(options)

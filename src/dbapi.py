@@ -196,18 +196,19 @@ class Database():
 		return self.language_ops.get_user_languages(user_id)
 
 
-	def backup(self):
+	def backup(self, PATH):
 		try:
-			if not os.path.exists("../backup/"):
-				os.mkdir("../backup/")
-			if not os.path.exists("../backup/tables/"):
-				os.mkdir("../backup/tables/")
-			os.system("psql -U {} -d {} -c \"Copy (Select * From users) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/users.csv".format(self.DB_USER_NAME, self.DB_NAME))
-			os.system("psql -U {} -d {} -c \"Copy (Select * From cards) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/cards.csv".format(self.DB_USER_NAME, self.DB_NAME))
-			os.system("psql -U {} -d {} -c \"Copy (Select * From languages) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/languages.csv".format(self.DB_USER_NAME, self.DB_NAME))
-			os.system("psql -U {} -d {} -c \"Copy (Select * From topics) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/topics.csv".format(self.DB_USER_NAME, self.DB_NAME))
-			os.system("psql -U {} -d {} -c \"Copy (Select * From words) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/words.csv".format(self.DB_USER_NAME, self.DB_NAME))
-			os.system("psql -U {} -d {} -c \"Copy (Select * From archives) To STDOUT With CSV HEADER DELIMITER ',';\" > ../backup/tables/archives.csv".format(self.DB_USER_NAME, self.DB_NAME))
+			if not os.path.exists(PATH):
+				os.mkdir(PATH)
+			if not os.path.exists(PATH + "/tables/"):
+				os.mkdir(PATH + "/tables/")
+			aux_path = PATH + "/tables"
+			os.system("psql -U {} -d {} -c \"Copy (Select * From users) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/users.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From cards) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/cards.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From languages) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/languages.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From topics) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/topics.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From words) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/words.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From archives) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/archives.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
 			return "Backup made successfully"
 		except Exception as e:
 			print(e);

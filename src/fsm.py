@@ -16,7 +16,6 @@ SEND_IMAGE = 9
 SEND_AUDIO = 11
 SEND_TRANSLATION = 13
 RELATE_MENU = 15
-WAITING_POLL_REMEMBER = 16
 LIST_WORDS = 17
 ERASE_WORDS = 18
 SELECT_WORDS = 19
@@ -40,7 +39,6 @@ next_state = {
 	IDLE:   {'card_query': WAITING_ANS,
       		 'add_word': (ADD_WORD, GET_LANGUAGE),
       		 'add_language': ADD_LANGUAGE,
-      		 'card_remember': WAITING_POLL_REMEMBER,
       		 'list_words': (LIST_WORDS, GET_LANGUAGE),
       		 'list_languages': IDLE,
       		 'erase_words': (ERASE_WORDS, GET_LANGUAGE),
@@ -55,8 +53,6 @@ next_state.update({
 	WAITING_ANS: WAITING_POLL_ANS,
 	WAITING_POLL_ANS: {'done': IDLE,
 					   'error': WAITING_POLL_ANS},
-	WAITING_POLL_REMEMBER: {'error': WAITING_POLL_REMEMBER,
-							'done': IDLE}
 })
 
 

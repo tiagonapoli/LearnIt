@@ -86,7 +86,8 @@ while True:
 										now)
 				initialized_for_day[user_id] = True
 			
-			if (not (user_id in cards_review_for_day.keys())):
+			if (not (user_id in cards_review_for_day.keys())) or (len(cards_review_for_day[user_id]) == 0 and
+																  len(cards_learning_for_day[user_id]) == 0):
 				sending_utils.init_user(user,
 										cards_review_for_day, cards_learning_for_day, grades_for_day,
 										learning_cnt_day, learning_cnt_hourly, learning_total_hourly,
@@ -95,7 +96,8 @@ while True:
 										now)
 				sending_utils.hourly_init(user,
 									      learning_cnt_hourly, learning_total_hourly,
-										  review_cnt_hourly, review_total_hourly)
+										  review_cnt_hourly, review_total_hourly,
+										  hour)
 				initialized_for_day[user_id] = True
 
 				print("--------------- {} REVIEW QTD {} ---------------".format(user_id, len(cards_review_for_day[user_id])))
@@ -119,7 +121,8 @@ while True:
 				
 				sending_utils.hourly_init(user,
 									      learning_cnt_hourly, learning_total_hourly,
-										  review_cnt_hourly, review_total_hourly)
+										  review_cnt_hourly, review_total_hourly,
+										  hour)
 		
 
 		now = datetime.datetime.now()

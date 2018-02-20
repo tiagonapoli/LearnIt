@@ -69,7 +69,7 @@ CREATE TABLE archives(
 	user_card_id int,
 	counter int,
 	type varchar(20),
-	content_path varchar(100),
+	content_path varchar(140),
 
 	primary key (user_id, user_card_id, counter),
 	foreign key (user_id, user_card_id) references cards(user_id, user_card_id) ON DELETE CASCADE

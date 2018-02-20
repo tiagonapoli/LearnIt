@@ -19,7 +19,6 @@ def handle_cancel(bot, rtd):
 		prev_state = user.get_state()
 		user.set_state(fsm.LOCKED)
 		if (prev_state == fsm.WAITING_ANS or
-			prev_state == fsm.WAITING_POLL_REMEMBER or
 			prev_state == fsm.WAITING_POLL_ANS):
 			user.set_card_waiting(0)
 			
