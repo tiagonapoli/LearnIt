@@ -20,6 +20,7 @@ class User:
 		self.receive_queue = None
 		self.cards_to_review = None
 		self.temp_language = None
+		self.temp_user = None
 		self.counter = None
 		self.review_card_number = None
 		self.pos = None
@@ -118,7 +119,7 @@ class User:
 			user_id: An integer representing the user's id.
 
 		Returns:
-			A list of tuples with the following information abot the languages added by the user:
+			A list of tuples with the following information about the languages added by the user:
 			- An integer representing the user's id.
 			- A string containing the name of the language.
 		"""
@@ -355,10 +356,29 @@ class RuntimeData:
 
 	def get_user_by_username(self, username):
 		user_id = self.db.get_id_by_username(username)	
-		return self.get_user(user_id)
+		if user_id == None:
+			return False, None		
+		return True, self.get_user(user_id)
 
 	def check_user_existence(self, user_id):
 		return (user_id in self.users.keys())
+
+
+	def copy_topic(user_dest, user_source, language, topic):
+		words = user_source.get_words_on_topic(language, topic)
+
+		cnt_word = user.get_highest_word_id() + 1
+		cnt_card = user.get_highest_card_id() + 1
+		for word in words:
+			word.user_id = user_dest.user_id
+			word.word_id = cnt
+			cnt_word += 1
+			for card i
+
+
+
+
+
 
 	def backup(self, PATH):
 		return self.db.backup(PATH)
