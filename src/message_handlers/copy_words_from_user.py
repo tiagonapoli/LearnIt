@@ -9,6 +9,7 @@ from flashcard import Word, Card
 from utilities.bot_utils import get_id
 from queue import Queue
 
+
 def handle_copy_words_from_user(bot, rtd):
 
 	#=====================ADD WORD=====================
@@ -91,7 +92,10 @@ def handle_copy_words_from_user(bot, rtd):
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_LANGUAGE)]['error'])
 			return
 
+<<<<<<< HEAD
 		user.temp_language = language
+=======
+>>>>>>> e01c431300833e0fd3de1c309dc05b51e9e2af11
 		markup = bot_utils.keyboard_remove()
 
 		topics = user.temp_user.get_all_topics(language)
@@ -139,7 +143,8 @@ def handle_copy_words_from_user(bot, rtd):
 			count = 0
 			for topic in selected_topics:
 				overwritten_words = rtd.copy_topic(user, user.temp_user, user.temp_language, topic)
-				 if len(overwritten_words) > 0:
+
+				if len(overwritten_words) > 0:
 				 	text += '*' + topic + ':*\n'
 				 	count += 1
 				 	for word in overwritten_words:

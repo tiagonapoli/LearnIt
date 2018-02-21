@@ -19,8 +19,7 @@ def handle_settings(bot, rtd):
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 
-		btns = []
-		btns.append('Cards per hour')
+		btns = ['Cards per hour', 'Set profile public', 'Set profile private']
 		
 		markup = bot_utils.create_keyboard(btns, 2)
 		text = "*Which settings do you want to change?*\n" + bot_utils.create_string_keyboard(btns)
@@ -59,6 +58,14 @@ def handle_settings(bot, rtd):
 			bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
 			user.keyboard_options = btns
 			user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.GET_OPTION)]['cards per hour'])
+		elif option == 'Set profile public':
+			user.set_public(1)
+			bot.send_message(user_id, 'Your profile is now public')
+			user.set_state(fsm.IDLE)
+		elif option == 'Set profile private':
+			user.set_public(0)
+			bot.send_message(user_id, 'Your profile is now private')
+			user.set_state(fsm.IDLE)
 
 
 	@bot.message_handler(func = lambda msg:
