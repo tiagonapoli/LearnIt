@@ -115,7 +115,7 @@ class User:
 			user_id: An integer representing the user's id.
 
 		Returns:
-			A list of tuples with the following information abot the languages added by the user:
+			A list of tuples with the following information about the languages added by the user:
 			- An integer representing the user's id.
 			- A string containing the name of the language.
 		"""

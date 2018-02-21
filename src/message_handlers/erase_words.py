@@ -107,7 +107,7 @@ def handle_erase_words(bot, rtd):
 
 
 	@bot.callback_query_handler(func=lambda call:
-							rtd.get_user(get_id(call.message)).get_state() == (fsm.ERASE_WORDS, fsm.SELECT_WORDS))
+							rtd.get_user(get_id(call.message)).get_state() == (fsm.COPY_WORDS, fsm.SELECT_TOPICS))
 
 	def callback_select_words(call):
 		user = rtd.get_user(get_id(call.message))

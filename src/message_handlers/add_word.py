@@ -161,17 +161,15 @@ def handle_add_word(bot, rtd):
 						reply_markup=markup, parse_mode="Markdown")	
 		user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)])
 
+	
+
 	@bot.callback_query_handler(func=lambda call:
-							rtd.get_user(get_id(call.message)).get_state() == (fsm.ADD_WORD, fsm.RELATE_MENU))
+							rtd.get_user(get_id(call.message)).get_state() == (fsm.ERASE_WORDS, fsm.SELECT_WORDS))
 
 	def callback_select_words(call):
-		""" 
-			Add word: Create relate menu 
-		"""
 		user = rtd.get_user(get_id(call.message))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-
 		print("CALLBACK TEXT: {}   DATA: {}".format(call.message.text,call.data))
 
 		btn_set = user.btn_set
@@ -179,35 +177,15 @@ def handle_add_word(bot, rtd):
 		btn = user.keyboard_options
 		
 		if done == True:
-			user.receive_queue = Queue()
+			bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
+			words = user.temp_words_list
+			text = "_Erased words:_\n"
 			for i in btn_set:
-				user.receive_queue.put(btn[i][0])
-
-			if user.receive_queue.empty() == True:
-				markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
-				try:
-					bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="Please, select *at least one way* to relate to the word: ", 
-							reply_markup=markup, parse_mode="Markdown")
-				except Exception as e:
-					print("CANT EDIT MESSAGE")
-				user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)]['continue'])
-			else:
-				bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
-				content_type = user.receive_queue.get()
-				prepare_to_receive(bot, user, content_type)
-				user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)][content_type])
+				print(user.erase_word(words[i].get_word_id()))
+				text += "*." + words[i].get_word() + "*\n"
+			bot.send_message(user_id, text, parse_mode="Markdown")
+			user.set_state(fsm.next_state[(fsm.ERASE_WORDS, fsm.SELECT_WORDS)]['done'])		
 		else:
 			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
-			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="_Select the ways you want to relate to the word (one or more):_", 
-							reply_markup=markup, parse_mode="Markdown")
-			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)]['continue'])
-
-
-	#=================GET AUDIO=================
-	message_handlers.add_word_audio.handle_add_word_audio(bot, rtd)
-
-	#=================GET TRANSLATION=================
-	message_handlers.add_word_translation.handle_add_word_translation(bot, rtd)
-
-	#=================GET IMAGES=================
-	message_handlers.add_word_images.handle_add_word_images(bot, rtd)
+			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="Select words to erase:", reply_markup=markup)
+			user.set_state(fsm.next_state[(fsm.ERASE_WORDS, fsm.SELECT_WORDS)]['continue'])
