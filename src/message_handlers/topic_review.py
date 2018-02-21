@@ -157,7 +157,7 @@ def handle_topic_review(bot, rtd):
 		user.review_card_number = 1
 		
 		shuffle(user.cards_to_review)
-		utils.send_review_card(bot, user.cards_to_review[0], user, user.review_card_number)
+		utils.send_review_card(bot, user.cards_to_review[0], user, "Review", user.review_card_number)
 		user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_NUMBER)]['done'])
 
 
@@ -183,6 +183,10 @@ def handle_topic_review(bot, rtd):
 		else:
 			bot.send_message(user_id, "There was a mistake :(")
 		bot.send_message(user_id, "*Answer:* " + "_" + card.foreign_word + "_", parse_mode="Markdown")
+
+		cards = user.get_cards_on_word(card.get_word_id())
+		for ans in cards:
+			utils.send_ans_card(bot, ans, card.get_type())
 		
 		user.counter -= 1
 		user.review_card_number += 1
@@ -193,7 +197,7 @@ def handle_topic_review(bot, rtd):
 			user.pos = 0
 
 		if user.counter > 0:
-			utils.send_review_card(bot, user.cards_to_review[user.pos], user, user.review_card_number)
+			utils.send_review_card(bot, user.cards_to_review[user.pos], user, "Review",  user.review_card_number)
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.WAITING_CARD_ANS)]['continue'])
 		else:
 			bot.send_message(user_id, "*Review session done!*", parse_mode="Markdown")

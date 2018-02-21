@@ -10,6 +10,9 @@ def get_id(msg):
 	"""
 	return msg.chat.id
 
+def get_username(msg):
+	return msg.from_user.username
+
 def create_key_button(text):
 	"""
 		Creates a key button to add to a telegram custom keyboard.

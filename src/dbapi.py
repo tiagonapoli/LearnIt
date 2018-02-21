@@ -93,8 +93,8 @@ class Database():
 		return self.user_ops.set_state(user_id, state1, state2, state3)
 
 	
-	def add_user(self, user_id):
-		return self.user_ops.add_user(user_id)
+	def add_user(self, user_id, username):
+		return self.user_ops.add_user(user_id, username)
 
 	def get_known_users(self):
 		return self.user_ops.get_known_users()
@@ -136,7 +136,14 @@ class Database():
 	def set_active(self, user_id, active):
 		return self.user_ops.set_active(user_id, active)
 
+	def get_id_by_username(self, username):
+		return self.user_ops.get_id_username(username)	
 
+	def get_public(self, user_id):
+		return self.user_ops.get_public(user_id)
+
+	def set_public(self, user_id, public):
+		return self.user_ops.set_public(user_id, public)
 
 	#==================TOPIC ops==================
 	def add_topic(self, user_id, language, topic):

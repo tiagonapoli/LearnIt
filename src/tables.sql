@@ -12,7 +12,9 @@ CREATE TABLE users(
 	state3 int DEFAULT -1,
 	card_waiting int DEFAULT 0,
 	card_waiting_type int DEFAULT 0,
-	grade_waiting_for_process int DEFAULT 0
+	grade_waiting_for_process int DEFAULT 0,
+	username varchar(30),
+	public int DEFAULT 0
 );
 
 CREATE TABLE languages(

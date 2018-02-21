@@ -24,6 +24,8 @@ def prepare_to_receive(bot, user, content_type):
 	bot.send_message(user_id,"Send {} *{}*:".format(article, content_type_aux), parse_mode="Markdown")
 	if content_type_aux == 'image':
 		bot.send_message(user_id, "_Use_ @pic _<image_\__name> or_ @bing _<image_\__name> to select an image_", parse_mode="Markdown")
+	if content_type_aux == 'audio':
+		bot.send_message(user_id, "_Hint: You can download pronunciations on forvo.com and then send them to me. This process is way easier on PC (Telegram Desktop)_", parse_mode="Markdown")
 
 def save_word(bot, user):
 	word = user.temp_word
@@ -56,6 +58,8 @@ def handle_add_word(bot, rtd):
 			return 	
 
 		markup = bot_utils.create_keyboard(known_languages, 2)
+
+		bot.send_message(user_id, "_Hint: The process to add a word is way easier on Telegram Desktop_", parse_mode="Markdown")
 
 		text = "*Please select the word's language:*\n" + bot_utils.create_string_keyboard(known_languages)
 

@@ -219,7 +219,7 @@ class User:
 		return ret
 
 	def working_hours(self, hour):
-		return (7 <= hour and hour <= 24) or (hour <= 1)
+		return True
 
 	def get_grade_waiting(self):
 		return self.db.get_grade_waiting(self.user_id)
@@ -273,6 +273,12 @@ class User:
 
 	def set_active(self, active):
 		return self.db.set_active(self.user_id, active)
+
+	def get_public(self):
+		return self.db.get_public(self.user_id)
+
+	def set_public(self, public):
+		return self.db.set_public(self.user_id, public)
 
 
 class RuntimeData: 
@@ -328,7 +334,7 @@ class RuntimeData:
 				user.set_card_waiting(0)
 	
 
-	def add_user(self,user_id):
+	def add_user(self,user_id, username):
 		"""Register a new user.
 
 		Args:
@@ -341,15 +347,16 @@ class RuntimeData:
 		"""
 		if not user_id in self.users.keys():
 			self.users[user_id] = User(user_id, self.db)
-			return self.db.add_user(user_id)
+			return self.db.add_user(user_id, username)
 		return "User already exists."
 
+	def get_user_by_username(self, username):
+		user_id = self.db.get_id_by_username(username)	
+		return self.get_user(user_id)
 
 	def check_user_existence(self, user_id):
 		return (user_id in self.users.keys())
 
-
-	
 	def backup(self, PATH):
 		return self.db.backup(PATH)
 
