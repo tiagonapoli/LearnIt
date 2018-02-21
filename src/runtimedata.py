@@ -11,6 +11,7 @@ class User:
 	def __init__(self, user_id, database_reference):
 		self.db = database_reference
 		self.user_id = user_id
+		self.username = db.get_username(self.user_id)
 		self.temp_word = None
 		self.temp_card = None
 		self.temp_words_list = None
@@ -23,6 +24,8 @@ class User:
 		self.review_card_number = None
 		self.pos = None
 
+	def get_username(self):
+		return self.username
 
 	def get_state(self):
 		"""Gets the primary state of the user.
