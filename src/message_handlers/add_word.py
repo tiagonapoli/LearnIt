@@ -149,6 +149,12 @@ def handle_add_word(bot, rtd):
 
 		word = user.temp_word
 
+		exist, aux_word_id = user.check_word_existence(word.language, word.topic, word.foreign_word)
+		if exist == True:
+			bot.send_message(user_id, "This word is already registered, if you want to add it anyway, please, erase it first")
+			fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)]['error']
+
+
 		options = ['Send image', 'Send audio', 'Send translation']
 		btn = bot_utils.create_inline_keys_sequential(options)
 		btn_set = set()
