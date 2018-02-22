@@ -51,8 +51,8 @@ class WordOps():
 		topic = word.get_topic()
 		cards = word.cards 
 
-		self.cursor.execute("SELECT foreign_word FROM words WHERE user_id={} AND language='{}' AND foreign_word='{}';"
-			.format(user_id, treat_str_SQL(language), treat_str_SQL(foreign_word)))
+		self.cursor.execute("SELECT foreign_word FROM words WHERE user_id={} AND language='{}' AND topic='{}' AND foreign_word='{}';"
+			.format(user_id, treat_str_SQL(language), treat_str_SQL(topic) ,treat_str_SQL(foreign_word)))
 		rows = self.cursor.fetchall()
 		if(len(rows) > 0):
 			return "{} is already in your words".format(word.get_word())
@@ -75,6 +75,13 @@ class WordOps():
 
 		return "Word '{}' and content added successfully!".format(foreign_word)
 
+	def check_word_existence(self, user_id, language, topic, foreign_word):
+		self.cursor.execute("SELECT user_word_id FROM words WHERE user_id={} AND language='{}' AND topic='{}' AND foreign_word='{}';"
+			.format(user_id, treat_str_SQL(language), treat_str_SQL(topic) ,treat_str_SQL(foreign_word)))
+		rows = self.cursor.fetchall()
+		if len(rows) > 0:
+			return True, rows[0][0]
+		return False, -1
 
 	def erase_word(self, user_id, word_id):
 		"""Erases a word from the database.
@@ -116,6 +123,14 @@ class WordOps():
 
 		if len(rows) == 0:
 			self.topic_ops.erase_topic_empty_words(user_id, language, topic)
+
+		if os.path.exists('../data/{}/{}'.format(user_id, word_id)):
+				try:
+					os.rmdir('../data/{}/{}'.format(user_id, word_id))
+					print("Erased directory {}".format('../data/{}/{}'.format(user_id, word_id)))
+				except Exception as e:
+					print("ERROR in erase_word - directory {}".format('../data/{}/{}'.format(user_id, word_id)))
+					print(e)
 
 		return "Word {} erased successfully!".format(word_text)
 

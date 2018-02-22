@@ -48,6 +48,7 @@ class UserOps():
 		return []
 
 
+
 	def set_state(self, user_id, state1, state2, state3):
 		"""Updates on the database the state information about the user
 			
@@ -76,7 +77,7 @@ class UserOps():
 		Returns:
 			A string containing a message to the user. This string can be:
 			- "Welcome to LingBot", if the user was not registered.
-			- "Welcome back to LingoBot", if the user was already registered.
+			- "Welcome back to LearnIt", if the user was already registered.
 		"""
 		tries = 20
 		while tries > 0:
@@ -85,11 +86,11 @@ class UserOps():
 				self.cursor.execute("SELECT id from users WHERE id={};".format(user_id))
 				rows = self.cursor.fetchall()
 				if(len(rows) > 0):
-					return "Welcome back to LingoBot!"
+					return "Welcome back to LearnIt!"
 
 				self.cursor.execute("INSERT INTO users VALUES ({}, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, '{}', DEFAULT);".format(user_id, treat_str_SQL(username)))
 				self.conn.commit()
-				return "Welcome to LingoBot!\n" + "Use the command /add_language to add the languages you are interested in learning and then use the command /add_word to add words you are interested in memorizing.\n"
+				return "Welcome to LearnIt!\n" + "Use the command /add_language to add the languages you are interested in learning and then use the command /add_word to add words you are interested in memorizing.\n"
 			except psycopg2.ProgrammingError as e:
 				handle_exception(e, cmd)
 		return "Error"
@@ -316,11 +317,11 @@ class UserOps():
 				self.cursor.execute(cmd)
 				rows = self.cursor.fetchall()
 				if(len(rows) == 0):
-					return 0
+					return None
 				return rows[0][0]
 			except psycopg2.ProgrammingError as e:
 				handle_exception(e, cmd)
-		return 0
+		return None
 			
 
 	def get_public(self, user_id):
@@ -328,6 +329,21 @@ class UserOps():
 		while tries > 0:
 			tries -= 1
 			cmd = "SELECT public from users WHERE id={};".format(user_id)
+			try:
+				self.cursor.execute(cmd)
+				rows = self.cursor.fetchall()
+				if(len(rows) == 0):
+					return 0
+				return rows[0][0]
+			except psycopg2.ProgrammingError as e:
+				handle_exception(e, cmd)
+		return 0
+
+	def get_username(self, user_id):
+		tries = 5
+		while tries > 0:
+			tries -= 1
+			cmd = "SELECT username from users WHERE id={};".format(user_id)
 			try:
 				self.cursor.execute(cmd)
 				rows = self.cursor.fetchall()

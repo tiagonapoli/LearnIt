@@ -1,6 +1,7 @@
 -----Commands-----
 cancel - Cancel any existing process
 add_word - Adds a word into a language vocabulary
+copy_words - Select topics from other user to use in your training
 list_words - List all registered words
 erase_words - Erases selected words
 review - Select some topics to review

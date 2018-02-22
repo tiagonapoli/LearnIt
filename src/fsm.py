@@ -28,6 +28,9 @@ WAITING_CARD_ANS = 25
 SETTINGS = 26
 GET_OPTION = 27
 CARDS_PER_HOUR = 28
+COPY_WORDS = 29
+GET_USER = 30
+SELECT_TOPICS = 31
 
 
 
@@ -44,7 +47,8 @@ next_state = {
       		 'erase_words': (ERASE_WORDS, GET_LANGUAGE),
       		 'erase_languages': (ERASE_LANGUAGES, SELECT_LANGUAGES),
       		 'review' : (REVIEW, GET_LANGUAGE),
-      		 'settings' : (SETTINGS, GET_OPTION)}
+      		 'settings' : (SETTINGS, GET_OPTION),
+      		 'copy_words': (COPY_WORDS, GET_USER)}
 }
 
 
@@ -61,7 +65,8 @@ next_state.update({
 	(ADD_WORD, GET_LANGUAGE): {'done': (ADD_WORD, GET_TOPIC),
 							   'error': (ADD_WORD, GET_LANGUAGE)},
 	(ADD_WORD, GET_TOPIC): (ADD_WORD, GET_WORD),
-	(ADD_WORD, GET_WORD): (ADD_WORD, RELATE_MENU),
+	(ADD_WORD, GET_WORD): {'done': (ADD_WORD, RELATE_MENU),
+						   'error': IDLE},
 	(ADD_WORD, RELATE_MENU): {'Send audio': (ADD_WORD, SEND_AUDIO),
 							  'Send image': (ADD_WORD, SEND_IMAGE),
 							  'Send translation': (ADD_WORD, SEND_TRANSLATION),
@@ -132,4 +137,16 @@ next_state.update({
 							  'cards per hour' : (SETTINGS, CARDS_PER_HOUR)},
 	(SETTINGS, CARDS_PER_HOUR) : {'error' : (SETTINGS, CARDS_PER_HOUR),
 								  'done' : IDLE}
+})
+
+#=====================COPY WORDS=====================
+next_state.update({
+	(COPY_WORDS, GET_USER): {'done': (COPY_WORDS, GET_LANGUAGE),
+							 'error': IDLE},
+	(COPY_WORDS, GET_LANGUAGE): {'done': (COPY_WORDS, SELECT_TOPICS),
+							   	 'error': (COPY_WORDS, GET_LANGUAGE),
+							   	 'no topics': IDLE},
+	(COPY_WORDS, SELECT_TOPICS): {'done': IDLE,
+						   		  'continue': (COPY_WORDS, SELECT_TOPICS)},
+	
 })

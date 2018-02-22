@@ -12,6 +12,7 @@ import message_handlers.cancel
 import message_handlers.error_handling
 
 import message_handlers.add_word
+import message_handlers.copy_words
 import message_handlers.list_words
 import message_handlers.erase_words
 
@@ -96,6 +97,8 @@ while True:
 		#=====================ADD WORD=====================
 		message_handlers.add_word.handle_add_word(bot,rtd)
 
+		#=====================COPY WORDS=====================
+		message_handlers.copy_words.handle_copy_words(bot,rtd)
 
 		#=====================LIST WORDS=====================
 		message_handlers.list_words.handle_list_words(bot,rtd)

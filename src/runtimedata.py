@@ -1,9 +1,11 @@
 from dbapi import Database
-from datetime import datetime
+import datetime
 from flashcard import Word,Card
 import fsm
-import abc
+import os
+from utilities import utils
 from random import shuffle
+
 
 
 class User:
@@ -11,7 +13,7 @@ class User:
 	def __init__(self, user_id, database_reference):
 		self.db = database_reference
 		self.user_id = user_id
-		self.username = db.get_username(self.user_id)
+		self.username = self.db.get_username(self.user_id)
 		self.temp_word = None
 		self.temp_card = None
 		self.temp_words_list = None
@@ -284,6 +286,9 @@ class User:
 	def set_public(self, public):
 		return self.db.set_public(self.user_id, public)
 
+	def check_word_existence(self, language, topic, foreign_word):
+		return self.db.check_word_existence(self.user_id, language, topic, foreign_word)
+
 
 class RuntimeData: 
 	"""Class that do all the runtime data management.
@@ -364,16 +369,49 @@ class RuntimeData:
 		return (user_id in self.users.keys())
 
 
-	def copy_topic(user_dest, user_source, language, topic):
+	def copy_topic(self, user_dest, user_source, language, topic):
+		ret = []
 		words = user_source.get_words_on_topic(language, topic)
+		user_id = user_dest.get_id()
 
-		cnt_word = user.get_highest_word_id() + 1
-		cnt_card = user.get_highest_card_id() + 1
+		cnt_word = user_dest.get_highest_word_id() + 1
+		cnt_card = user_dest.get_highest_card_id() + 1
 		for word in words:
+			language = word.get_language()
+			user_dest.add_language(language)
+			#RESETAR NEXT DATE
 			word.user_id = user_dest.user_id
-			word.word_id = cnt
+			word.word_id = cnt_word
 			cnt_word += 1
-			for card i
+			for content, card in word.cards.items():
+				card.user_id = user_dest.get_id()
+				card.card_id = cnt_card
+				card.word_id = word.word_id
+
+				card.attempts = 1  
+				card.ef = 1.5  
+				card.interval = 1
+				card.next_date = datetime.datetime.now()
+
+
+				cnt_card += 1
+				for i in range(0, len(card.archives)):
+					archive = card.archives[i]
+					if card.get_type() == 'translation':
+						break
+					prev_path = archive
+					next_path = '../data/{}/{}/{}'.format(user_id, word.word_id, card.card_id) + utils.get_file_extension(archive)
+					card.archives[i] = next_path
+					utils.create_dir_card_archive(user_id, word.word_id)
+					os.system("cp -TRv {} {}".format(prev_path, next_path))
+			exist, aux_word_id = user_dest.check_word_existence(word.language, word.topic, word.foreign_word)
+			if exist == True:
+				ret.append(word.get_word())
+				user_dest.erase_word(aux_word_id)
+			user_dest.add_word(word)
+		return ret
+
+
 
 
 

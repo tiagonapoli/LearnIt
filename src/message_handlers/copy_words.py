@@ -10,7 +10,7 @@ from utilities.bot_utils import get_id
 from queue import Queue
 
 
-def handle_copy_words_from_user(bot, rtd):
+def handle_copy_words(bot, rtd):
 
 	#=====================ADD WORD=====================
 	@bot.message_handler(func = lambda msg:
@@ -25,7 +25,7 @@ def handle_copy_words_from_user(bot, rtd):
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 
-		bot.send_message(user_id, 'Please, send the Telegram username of the user you want to copy some words from, in the formar @username')
+		bot.send_message(user_id, 'Please, send the Telegram username of the user you want to copy some words from, in the format @username (or just username)')
 		user.set_state(fsm.next_state[fsm.IDLE]['copy_words'])
 
 
@@ -47,14 +47,19 @@ def handle_copy_words_from_user(bot, rtd):
 		user.temp_user = user2
 
 		if valid == False:
-			bot.reply_to(msg, "Invalid username")
+			bot.reply_to(msg, "Invalid username. Please, if you still want to copy from a user, send /copy_words again.")
+			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_USER)]['error'])
+			return
+
+		if username == user.get_username():
+			bot.reply_to(msg, "You can't copy from yourself! Please, if you still want to copy from a user, send /copy_words again.")
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_USER)]['error'])
 			return
 
 		public = user2.get_public()
 
 		if public == False:
-			bot.reply_to(msg, "This user is not public")
+			bot.reply_to(msg, "This user is not public. Please, if you still want to copy from a user, send /copy_words again.")
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_USER)]['error'])
 			return
 
@@ -92,10 +97,9 @@ def handle_copy_words_from_user(bot, rtd):
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_LANGUAGE)]['error'])
 			return
 
-<<<<<<< HEAD
+
 		user.temp_language = language
-=======
->>>>>>> e01c431300833e0fd3de1c309dc05b51e9e2af11
+
 		markup = bot_utils.keyboard_remove()
 
 		topics = user.temp_user.get_all_topics(language)

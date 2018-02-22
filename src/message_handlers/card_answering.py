@@ -29,9 +29,9 @@ def handle_card_answer(bot, rtd):
 
 		user.temp_card = card
 		if res == card.foreign_word.lower():
-			bot.send_message(user_id, "That was correct!")
+			bot.send_message(user_id, "Your answer was correct!")
 		else:
-			bot.send_message(user_id, "There was a mistake :(")
+			bot.send_message(user_id, "There was a mistake in your answer :(")
 		bot.send_message(user_id, "*Answer:*" + card.foreign_word, parse_mode="Markdown")
 
 		cards = user.get_cards_on_word(card.get_word_id())

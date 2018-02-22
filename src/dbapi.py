@@ -83,6 +83,9 @@ class Database():
 	def get_words_on_topic(self, user_id, language, topic):
 		return self.word_ops.get_words_on_topic(user_id, language, topic)
 
+	def check_word_existence(self, user_id, language, topic, foreign_word):
+		return self.word_ops.check_word_existence(user_id, language, topic, foreign_word)
+
 
 
 	#==================USER ops==================
@@ -137,13 +140,16 @@ class Database():
 		return self.user_ops.set_active(user_id, active)
 
 	def get_id_by_username(self, username):
-		return self.user_ops.get_id_username(username)	
+		return self.user_ops.get_id_by_username(username)	
 
 	def get_public(self, user_id):
 		return self.user_ops.get_public(user_id)
 
 	def set_public(self, user_id, public):
 		return self.user_ops.set_public(user_id, public)
+
+	def get_username(self, user_id):
+		return self.user_ops.get_username(user_id)
 
 	#==================TOPIC ops==================
 	def add_topic(self, user_id, language, topic):

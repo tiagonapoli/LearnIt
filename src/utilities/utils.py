@@ -7,7 +7,19 @@ def get_file_extension(filename):
 	path, extension = os.path.splitext(filename)
 	return extension 
 
+def create_dir_card_archive(user_id, word_id):
+	if not os.path.exists('../data/'):
+		os.mkdir('../data')
+	if not os.path.exists('../data/{}'.format(user_id)):
+		os.mkdir('../data/{}'.format(user_id))
+	if not os.path.exists('../data/{}/{}'.format(user_id, word_id)):
+		os.mkdir('../data/{}/{}'.format(user_id, word_id))
 
+
+def treat_username_str(username):
+	if username[0] == '@':
+		return username[1:]
+	return username
 
 def words_to_string_list(words):
 	ret = []

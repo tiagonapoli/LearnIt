@@ -60,11 +60,13 @@ def handle_settings(bot, rtd):
 			user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.GET_OPTION)]['cards per hour'])
 		elif option == 'Set profile public':
 			user.set_public(1)
-			bot.send_message(user_id, 'Your profile is now public')
+			markup = bot_utils.keyboard_remove()
+			bot.send_message(user_id, 'Your profile is now public', reply_markup=markup)
 			user.set_state(fsm.IDLE)
 		elif option == 'Set profile private':
 			user.set_public(0)
-			bot.send_message(user_id, 'Your profile is now private')
+			markup = bot_utils.keyboard_remove()
+			bot.send_message(user_id, 'Your profile is now private', reply_markup=markup)
 			user.set_state(fsm.IDLE)
 
 
