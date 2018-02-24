@@ -32,7 +32,7 @@ def handle_card_answer(bot, rtd):
 			bot.send_message(user_id, "Your answer was correct!")
 		else:
 			bot.send_message(user_id, "There was a mistake in your answer :(")
-		bot.send_message(user_id, "*Answer:*" + card.foreign_word, parse_mode="Markdown")
+		bot.send_message(user_id, "*Answer:* " + card.foreign_word, parse_mode="Markdown")
 
 		cards = user.get_cards_on_word(card.get_word_id())
 		for ans in cards:

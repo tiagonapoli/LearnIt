@@ -7,6 +7,7 @@ import signal
 import time
 import fsm
 import datetime
+import logging
 
 import message_handlers.cancel
 import message_handlers.error_handling
@@ -30,19 +31,23 @@ import message_handlers.card_answering
 import message_handlers.message_not_understood
 
 from runtimedata import RuntimeData
-from utilities import utils
-from utilities import bot_utils
+from utilities import utils, bot_utils, logging_utils
 
 
 """
 	Bot message handlers source file
 """
 
+logger = logging.getLogger(__name__)
+logging_utils.setup_logger_learnit_bot(logger)
+bot = bot_utils.open_bot(logger)
+logging_utils.add_bot_handler(logger, bot)
+
 def signal_handler(sign, frame):
 	"""
 		Handles CTRL+C signal that exits gently the bot
 	"""
-	bot.send_message(359999978,"Bot turned off")
+	logger.critical("Bot turned off")
 	sending_manager.send_signal(signal.SIGINT)
 	utils.turn_off(rtd)
 	print("Exiting bot...")
@@ -51,20 +56,13 @@ def signal_handler(sign, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 sending_manager = subprocess.Popen("gnome-terminal -x ./sending_manager.py", stdout=subprocess.PIPE, shell=True) 
-
 rtd = RuntimeData()
 rtd.reset_all_states()
 
 while True:
 	try:
 
-		arq = open("../credentials/bot_token.txt", "r")
-		TOKEN = (arq.read().splitlines())[0]
-		arq.close()
-		bot = telebot.TeleBot(TOKEN)
-		print("Bot initialized successfully!")
-
-
+		bot = bot_utils.open_bot(logger)
 
 		#=====================SETUP USER=====================
 		message_handlers.setup_user.handle_setup_user(bot, rtd)
@@ -128,33 +126,20 @@ while True:
 
 
 		print("Press Ctrl+C to exit gently")
-		print("Bot Polling!!!")
+
 		bot.polling()	
 
 	except Exception as e:
 
 		rtd.reset_all_states_exception(bot)
 
-		try:
-			#bot.send_message(113538563,"Bot Crashed!!")
-			bot.send_message(359999978,"Bot Crashed!!")
-			bot.send_message(359999978,"{}".format(str(e.__class__.__name__)))
-		except Exception as ee:
-			print(ee)
-
-		print("=====================An error ocurred with bot.polling======================")
-		with open("exceptions_lingbot.txt", "a") as myfile:
-				myfile.write(datetime.datetime.now().strftime("%d/%m/%y %H:%M:%S") + "   " + str(e.__class__.__name__) + "\n")
-		print(e.__class__.__name__)
-		print("============================================================================\n\n\n\n")
+		logger.error("Bot Crashed", exc_info=True)
 		if str(e.__class__.__name__) == 'ConnectionError':
 			time.sleep(30)
 		elif str(e.__class__.__name__) == 'ReadTimeout':
 			time.sleep(15)
 		elif str(e).find("502") != -1:
-		#	print(e)
-			print("CONECTION LOST -> HTTP 502")
+			logger.error("Connection Lost -> HTTP 502")
 			time.sleep(120)
 		else:	
-		#	print(e)
 			time.sleep(5)	

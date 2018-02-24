@@ -239,26 +239,6 @@ class User:
 	def set_card_waiting_type(self, card_waiting_type):
 		return self.db.set_card_waiting_type(self.user_id, card_waiting_type)
 
-
-	def get_cards_for_day(self, now, distinct_words, review_limit):
-		cards = self.get_cards_expired(now)
-
-		cards_to_review = []
-		cards_to_learn = []
-		words = set()
-
-		for card in cards:
-			if card.is_learning():
-				if len(words) < distinct_words:
-					cards_to_learn.append(card)
-					words.add(card.get_word_id())
-				elif len(words) == distinct_words and (card.get_word_id() in words):
-					cards_to_learn.append(card)
-			elif len(cards_to_review) < review_limit:
-				cards_to_review.append(card)
-
-		return cards_to_learn, cards_to_review
-
 	def get_learning_words_limit(self):
 		return self.db.get_learning_words_limit(self.user_id)
 
@@ -410,12 +390,6 @@ class RuntimeData:
 				user_dest.erase_word(aux_word_id)
 			user_dest.add_word(word)
 		return ret
-
-
-
-
-
-
 
 
 	def backup(self, PATH):

@@ -154,7 +154,7 @@ class Card(TimeControl, WordInfo):
 		return text
 
 	def __lt__(self,other):
-		return self.next_date < other.next_date
+		return self.next_date > other.next_date
 
 	def get_type(self):
 		return self.content_type

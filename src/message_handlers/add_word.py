@@ -165,7 +165,7 @@ def handle_add_word(bot, rtd):
 
 		bot.send_message(user_id, "_Select the ways you want to relate to the word (one or more):_",
 						reply_markup=markup, parse_mode="Markdown")	
-		user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)])
+		user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)]['done'])
 
 	@bot.callback_query_handler(func=lambda call:
 							rtd.get_user(get_id(call.message)).get_state() == (fsm.ADD_WORD, fsm.RELATE_MENU))

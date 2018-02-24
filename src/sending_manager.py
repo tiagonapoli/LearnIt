@@ -2,67 +2,53 @@
 import sys
 import datetime
 import telebot
-import random
 import time
 import signal
+import os
 
-import fsm
-from queue import Queue
 from runtimedata import RuntimeData
-from flashcard import Card
-from utilities import sending_utils
+from UserCardQueue import UserCardQueue
+from utilities import utils, logging_utils, bot_utils
+import logging
 
+logger = logging.getLogger(__name__)
+logging_utils.setup_logger_sending_manager(logger)
 
 
 def signal_handler(sign, frame):
 	"""
 		Handles CTRL+C signal that exits gently the bot
 	"""
-	bot.send_message(359999978,"Sending manager turned off")
-	print("Exiting sending manager...")
+	logger.critical("Sending manager turned off")
+	for user_id, user in users.items():
+		if user.get_active() == 0:
+			continue
+		user_queues[user_id].logger.info("Exiting sending manager")
 	sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
 
-
-try:
-	arq = open("../credentials/bot_token.txt", "r")
-	TOKEN = (arq.read().splitlines())[0]
-	arq.close()
-	bot = telebot.TeleBot(TOKEN)
-	print("Bot initialized successfully!")
-except Exception as e:
-	print("Can't retrieve the bot token or couldn't initialize bot")
-	print(e)
-	sys.exit(0)
+bot = bot_utils.open_bot(logger)
+logging_utils.add_bot_handler(logger, bot)
 
 rtd = RuntimeData()
 rtd.get_known_users()
 users = rtd.users
 
-
-cards_review_for_day = {}
-grades_for_day = {}
-cards_learning_for_day = {}
-
-learning_cnt_day = {}
-learning_cnt_hourly = {}
-learning_total_hourly = {}
-
-review_cnt_day = {}
-review_cnt_hourly = {}
-review_total_hourly = {}
-
-sending_queue = {}
-initialized_for_day = {}
+user_queues = {}
 
 now = datetime.datetime.now()
 last_hour = (now.hour - 1 + 24) % 24
+cycles = 0
+#rtd.reset_all_states()
 
+
+logger.info("Starting sending manager")
 
 while True:
 	try:
-		print("WOKE UP")
+		logger.info("Woke Up - Cycles: {}".format(cycles))
+		cycles += 1
 
 		now = datetime.datetime.now()
 		hour = now.hour 
@@ -74,103 +60,63 @@ while True:
 			if user.get_active() == 0:
 				continue
 
-			if (user_id in cards_review_for_day.keys()) and hour == 0 and initialized_for_day[user_id] == False:
-				sending_utils.process_end_day(user, 
-											  cards_learning_for_day[user_id], 
-											  grades_for_day[user_id])
-				sending_utils.init_user_day(user,
-										cards_review_for_day, cards_learning_for_day, grades_for_day,
-										learning_cnt_day, learning_cnt_hourly, learning_total_hourly,
-										review_cnt_day, review_cnt_hourly, review_total_hourly,
-										sending_queue,
-										now)
-				initialized_for_day[user_id] = True
-			
-			if (not (user_id in cards_review_for_day.keys())) or (len(cards_review_for_day[user_id]) == 0 and
-																  len(cards_learning_for_day[user_id]) == 0):
-				sending_utils.init_user(user,
-										cards_review_for_day, cards_learning_for_day, grades_for_day,
-										learning_cnt_day, learning_cnt_hourly, learning_total_hourly,
-										review_cnt_day, review_cnt_hourly, review_total_hourly,
-										sending_queue,
-										now)
-				sending_utils.hourly_init(user,
-									      learning_cnt_hourly, learning_total_hourly,
-										  review_cnt_hourly, review_total_hourly,
-										  hour)
-				initialized_for_day[user_id] = True
+			if ((user_id in user_queues.keys()) and 
+					hour == 0 and 
+					user_queues[user_id].get_initialized() == False):
+				user_queues[user_id].process_end_day()
+				user_queues[user_id].init_day()
 
-				print("--------------- {} REVIEW QTD {} ---------------".format(user_id, len(cards_review_for_day[user_id])))
-				#for card in cards_review_for_day[user_id]:
-				#	print(card)
-				
-				print("--------------- {} LEARNING QTD {} ---------------".format(user_id, len(cards_learning_for_day[user_id])))
-				#for card in cards_learning_for_day[user_id]:
-				#	print(card)
+			if not (user_id in user_queues.keys()):
+				user_queues[user_id] = UserCardQueue(user, bot)
+
+			if  cycles % 5 == 0:
+				user_queues[user_id].upd_cards_expired() 				
+
+			user_queues[user_id].add_learning_cards()
 
 			if hour != 0:
-				initialized_for_day[user_id] = False
+				user_queues[user_id].reset_initialized()
 				
-
 
 		if last_hour != hour:
 			last_hour = hour
 			for user_id, user in users.items():
 				if user.get_active() == 0:
 					continue
+				user_queues[user_id].hourly_init()
 				
-				sending_utils.hourly_init(user,
-									      learning_cnt_hourly, learning_total_hourly,
-										  review_cnt_hourly, review_total_hourly,
-										  hour)
-		
-
-		now = datetime.datetime.now()
-		minute = now.minute
 
 		for user_id, user in users.items():
 			if user.get_active() == 0:
 				continue
-
-			sending_utils.prepare_queue(user,
-								  	    cards_review_for_day, cards_learning_for_day, grades_for_day,
-								  	    learning_cnt_day, learning_cnt_hourly, learning_total_hourly,
-								  	    review_cnt_day, review_cnt_hourly, review_total_hourly,
-								  	    sending_queue,
-								  	    hour, minute)
+			user_queues[user_id].prepare_queue()
 
 
-			
-
+		restart = False
 		for user_id, user in users.items():
 			if user.get_active() == 0:
 				continue
-			
-			sending_utils.process_queue(bot, user,
-								  	    cards_review_for_day, cards_learning_for_day, grades_for_day,
-								  	    learning_cnt_day, learning_cnt_hourly, learning_total_hourly,
-								  	    review_cnt_day, review_cnt_hourly, review_total_hourly,
-								  	    sending_queue,
-								  	    hour)
+			sucess = user_queues[user_id].process_queue(bot)
+			if sucess == False:
+				restart = True
 
 
+		if restart == True:
 
-		sleep = 60
-		print("SLEEP {}\n\n".format(sleep))
+			rtd.reset_all_states_exception(bot)
+			log = open('sending_manager_log.txt', 'a')
+			logger.error("Had to restart bot")
+			arq = open("../credentials/bot_token.txt", "r")
+			TOKEN = (arq.read().splitlines())[0]
+			arq.close()
+			bot = telebot.TeleBot(TOKEN)
+			logger.info("Bot initialized successfully")
+
+		sleep = 5
+		logger.info("Sleep {}".format(sleep))
 		time.sleep(sleep)
 
-	except Exception as e:
-		print("=====================An error ocurred with bot.polling======================")
-		with open("exceptions_sending_manager.txt", "a") as myfile:
-				myfile.write(datetime.datetime.now().strftime("%d/%m/%y %H:%M:%S") + "   " + str(e.__class__.__name__) + "\n")
-		print(e.__class__.__name__)
-		print(e)
-		print("============================================================================")
-		try:
-			bot.send_message(359999978,"Sending manager crashed")
-			bot.send_message(359999978,"{}".format(e))
-		except Exception as ee:
-			print(ee)
-		time.sleep(60)
 
-	
+	except Exception as e:
+		logger.error("EXCEPTION on sending manager", exc_info=True)
+		time.sleep(120)

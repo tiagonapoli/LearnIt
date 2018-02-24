@@ -2,10 +2,38 @@ import os
 import telebot
 import datetime
 from utilities import bot_utils
+import signal
+import time
+
+class SendTimeoutException(Exception):   # custom exception
+    
+    def __str__(self):
+    	return "TimeoutException do Teagao"
+
+    pass
+
+def timeout_handler(signum, frame):   # raises exception when signal sent
+    raise SendTimeoutException
+
+# Makes it so that when SIGALRM signal sent, it calls the function timeout_handler, which raises your exception
+signal.signal(signal.SIGALRM, timeout_handler)
+
+
+def open_bot(logger):
+	arq = open("../credentials/bot_token.txt", "r")
+	TOKEN = (arq.read().splitlines())[0]
+	arq.close()
+	bot_aux = telebot.TeleBot(TOKEN)
+	logger.info("Bot initialized successfully")
+	return bot_aux
 
 def get_file_extension(filename):
 	path, extension = os.path.splitext(filename)
 	return extension 
+
+def create_log_dir():
+	if not os.path.exists('../logs'):
+		os.mkdir('../logs')
 
 def create_dir_card_archive(user_id, word_id):
 	if not os.path.exists('../data/'):
@@ -29,13 +57,14 @@ def words_to_string_list(words):
 
 
 
-def send_ans_card(bot, card, query_type):
+def send_ans_card(bot, card, query_type, logger=None):
 	user_id = card.get_user()
 	question = card.get_question()
 	content = card.get_type()
 	if content == query_type:
 		return
 
+	signal.alarm(20)
 	markup = bot_utils.keyboard_remove()
 	if content == 'image':
 		bot.send_message(user_id, "*Image answer:*",reply_markup = markup, parse_mode="Markdown")
@@ -50,6 +79,7 @@ def send_ans_card(bot, card, query_type):
 	elif content == 'translation':
 		bot.send_message(user_id, "*Translation:*",reply_markup = markup, parse_mode="Markdown")
 		bot.send_message(user_id, question, reply_markup = markup)
+	signal.alarm(0)
 	
 
 poll_text = ("*5* - _perfect response_\n" +
@@ -60,14 +90,20 @@ poll_text = ("*5* - _perfect response_\n" +
 			 "*0* - _complete blackout._")
 
 
-def send_review_card(bot, card, user, card_type = 'Review', number = None):
+def send_review_card(bot, card, user, card_type = 'Review', number = None, logger=None):
 		
 		if number == None:
 			number = ""
 		else:
 			number = " #" + str(number)
 
+
+		
+		# Start the timer. Once 20 seconds are over, a SIGALRM signal is sent.
+		signal.alarm(20)
 		try:
+			if logger:
+				logger.info("Send Review Card - Utils - {} {}".format(card.get_card_id(), card.get_question()))
 
 			language = card.get_language()
 			user_id = user.get_id()
@@ -82,22 +118,28 @@ def send_review_card(bot, card, user, card_type = 'Review', number = None):
 			if content == 'image':
 				bot.send_message(user_id, "Relate the image to a word in _{}_".format(language), parse_mode="Markdown")
 				question = open(question,'rb')
+				print("Send photo {}".format(card.get_question()))
 				bot.send_photo(user_id, question, reply_markup = markup)
 				question.close()
 			elif content == 'audio':
 				bot.send_message(user_id, "Transcribe the audio in _{}_".format(language), parse_mode="Markdown")
 				question = open(question,'rb')
+				print("Send voice {}".format(card.get_question()))
 				bot.send_voice(user_id, question, reply_markup = markup)
 				question.close()
 			elif content == 'translation':
 				bot.send_message(user_id, "Translate the word to _{}_".format(language), parse_mode="Markdown")
+				print("Send translation {}".format(card.get_question()))
 				bot.send_message(user_id, question, reply_markup = markup)
 			
+			signal.alarm(0)
 			return True
 		except Exception as e:
-			print(e)
+			if logger:
+				logger.error("EXCEPTION ON SEND REVIEW CARD", exc_info=True)
 			user.set_card_waiting(0)
-			bot.send_message(359999978,"send_review_card crashed")
+			bot.send_message(359999978,"send_review_card crashed {}".format(str(e.__class__.__name__)))
+			signal.alarm(0)
 			return False
 
 

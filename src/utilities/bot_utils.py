@@ -2,6 +2,16 @@ import telebot
 from utilities import utils
 import sys
 
+
+def open_bot(logger = None):
+	arq = open("../credentials/bot_token.txt", "r")
+	TOKEN = (arq.read().splitlines())[0]
+	arq.close()
+	bot_aux = telebot.TeleBot(TOKEN)
+	if logger:
+		logger.info("Bot initialized successfully")
+	return bot_aux
+
 def get_id(msg):
 	"""
 		Gets message user ID

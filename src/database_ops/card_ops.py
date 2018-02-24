@@ -150,9 +150,10 @@ class CardOps():
 		Args:
 		word: A Word instance.
 		"""
-		self.cursor.execute("UPDATE cards SET attempts={}, easiness_factor={}, interval={}, next_date='{}' WHERE user_id={} AND user_card_id={};"
-		.format(card.attempts, card.ef, card.interval, card.next_date.strftime('%Y-%m-%d'), card.get_user(), card.card_id))
-		self.conn.commit()
+		if self.check_card_existence(card.get_user(), card):
+			self.cursor.execute("UPDATE cards SET attempts={}, easiness_factor={}, interval={}, next_date='{}' WHERE user_id={} AND user_card_id={};"
+			.format(card.attempts, card.ef, card.interval, card.next_date.strftime('%Y-%m-%d'), card.get_user(), card.card_id))
+			self.conn.commit()
 
 
 	def check_card_existence(self, user_id, card):
