@@ -168,9 +168,10 @@ def handle_add_word(bot, rtd):
 		if exist == True:
 			bot.send_message(user_id, "This word is already registered, if you want to add it anyway, please, erase it first.")
 			fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)]['error_idle']
+			return
 
 
-		options = ['Send image', 'Send audio', 'Send translation']
+		options = ['Send image', 'Send audio', 'Send text']
 		btn = bot_utils.create_inline_keys_sequential(options)
 		btn_set = set()
 		markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ('End selection', 'DONE'))
@@ -203,7 +204,7 @@ def handle_add_word(bot, rtd):
 
 		user.temp_word.foreign_word = '&img ' + path
 
-		options = ['Send translation']
+		options = ['Send text']
 		btn = bot_utils.create_inline_keys_sequential(options)
 		btn_set = set()
 		markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ('End selection', 'DONE'))
@@ -245,6 +246,7 @@ def handle_add_word(bot, rtd):
 							reply_markup=markup, parse_mode="Markdown")
 				except Exception as e:
 					print("CANT EDIT MESSAGE")
+					
 				user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.RELATE_MENU)]['continue'])
 			else:
 				bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
@@ -266,3 +268,34 @@ def handle_add_word(bot, rtd):
 
 	#=================GET IMAGES=================
 	message_handlers.add_word_images.handle_add_word_images(bot, rtd)
+	
+	
+	@bot.message_handler(func = lambda msg:
+					rtd.get_user(get_id(msg)).get_state() == (fsm.ADD_WORD, fsm.GET_CONTINUE), 
+					content_types=['text'])
+	def add_word5(msg):
+
+		user = rtd.get_user(get_id(msg))
+		user_id = user.get_id()
+		user.set_state(fsm.LOCKED)
+
+		valid, should_continue = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
+		if valid == False:
+			bot.reply_to(msg, "Please choose from keyboard")
+			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_CONTINUE)]['error'])
+			return
+			
+		if should_continue == 'No':
+			bot.send_message(user.get_id(), "_OK!_", parse_mode="Markdown")
+			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_CONTINUE)]['done'])
+			return
+
+		word =	user.temp_word
+		language = word.get_language()
+		topic = word.get_topic()
+		
+		user.temp_word = Word(user_id, user.get_highest_word_id() + 1)
+		user.temp_word.language = language
+		user.temp_word.topic = topic
+		
+		user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_CONTINUE)]['continue'])

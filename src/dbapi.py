@@ -31,9 +31,13 @@ class Database():
 		cursor: Allows python code to execute Postgres command in a database session.
 	"""
 
-	def __init__(self):
+	def __init__(self, debug_mode):
 		#try:
-		arq = open("../credentials/connect_str.txt", "r")
+		arq = None
+		if debug_mode:
+			arq = open("../credentials/connect_str_debug.txt", "r")
+		else:
+			arq = open("../credentials/connect_str.txt", "r")
 		connect_str = arq.read()
 		self.DB_NAME = connect_str.split()[0][7:]
 		self.DB_USER_NAME = connect_str.split()[1][5:]

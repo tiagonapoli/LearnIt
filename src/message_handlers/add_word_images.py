@@ -41,6 +41,16 @@ def handle_add_word_images(bot, rtd):
 
 		if user.receive_queue.empty():
 			message_handlers.add_word.save_word(bot, user)
+			
+			language = user.temp_word.get_language() 
+			topic = user.temp_word.get_topic()
+			
+			options = ['Yes', 'No']
+			markup = bot_utils.create_keyboard(topics, 2)
+			text = "_Would you like to add more words in_ *{}*_, in topic_ *{}*_?_\n".format(
+						treat_msg_to_send(language, "*"), treat_msg_to_send(topic, "*")) + bot_utils.create_string_keyboard(options)
+			bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")		
+			
 			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.SEND_IMAGE)]['done'])
 		else:
 			content_type = user.receive_queue.get()

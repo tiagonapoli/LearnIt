@@ -286,8 +286,8 @@ class RuntimeData:
 			counter_user: An auxiliary dictionary struct to some bot message handlers. 
 	"""
 
-	def __init__(self):
-		self.db = Database()
+	def __init__(self, debug_mode):
+		self.db = Database(debug_mode)
 		known_users = self.db.get_known_users()
 		self.users = {}
 		for user_id in known_users:

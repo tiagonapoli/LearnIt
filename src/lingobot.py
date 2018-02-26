@@ -38,9 +38,16 @@ from utilities import utils, bot_utils, logging_utils
 	Bot message handlers source file
 """
 
+args = sys.argv
+args = args[1:]
+if len(args) > 0 and args[1] == '-debug':
+	debug_mode = True
+debug_mode = False
+
+
 logger = logging.getLogger(__name__)
-logging_utils.setup_logger_learnit_bot(logger)
-bot = bot_utils.open_bot(logger)
+logging_utils.setup_logger_learnit_bot(logger, debug_mode)
+bot = bot_utils.open_bot(debug_mode, logger)
 logging_utils.add_bot_handler(logger, bot)
 
 def signal_handler(sign, frame):
@@ -49,20 +56,24 @@ def signal_handler(sign, frame):
 	"""
 	logger.warning("Bot turned off")
 	sending_manager.send_signal(signal.SIGINT)
-	utils.turn_off(rtd)
+	utils.turn_off(rtd, debug_mode)
 	print("Exiting bot...")
 	sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
 
-sending_manager = subprocess.Popen("gnome-terminal -x ./sending_manager.py", stdout=subprocess.PIPE, shell=True) 
-rtd = RuntimeData()
+if debug_mode:
+	sending_manager = subprocess.Popen("gnome-terminal -x ./sending_manager.py -debug", stdout=subprocess.PIPE, shell=True) 		
+else:
+	sending_manager = subprocess.Popen("gnome-terminal -x ./sending_manager.py", stdout=subprocess.PIPE, shell=True)
+	 
+rtd = RuntimeData(debug_mode)
 rtd.reset_all_states()
 
 while True:
 	try:
 
-		bot = bot_utils.open_bot(logger)
+		bot = bot_utils.open_bot(debug_mode, logger)
 
 		#=====================SETUP USER=====================
 		message_handlers.setup_user.handle_setup_user(bot, rtd)

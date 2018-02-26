@@ -52,17 +52,10 @@ def get_file_extension(filename):
 	path, extension = os.path.splitext(filename)
 	return extension 
 
-def create_log_dir():
-	if not os.path.exists('../logs'):
-		os.mkdir('../logs')
 
 def create_dir_card_archive(user_id, word_id):
-	if not os.path.exists('../data/'):
-		os.mkdir('../data')
-	if not os.path.exists('../data/{}'.format(user_id)):
-		os.mkdir('../data/{}'.format(user_id))
 	if not os.path.exists('../data/{}/{}'.format(user_id, word_id)):
-		os.mkdir('../data/{}/{}'.format(user_id, word_id))
+		os.makedirs('../data/{}/{}'.format(user_id, word_id))
 
 
 def treat_username_str(username):
@@ -120,7 +113,7 @@ def send_ans_card(bot, card, query_type, logger=None):
 		bot.send_voice(user_id, question, reply_markup = markup)
 		question.close()
 	elif content == 'translation':
-		bot.send_message(user_id, "*Translation:*",reply_markup = markup, parse_mode="Markdown")
+		bot.send_message(user_id, "*Text answer:*",reply_markup = markup, parse_mode="Markdown")
 		bot.send_message(user_id, question, reply_markup = markup)
 	signal.alarm(0)
 	
@@ -133,7 +126,7 @@ poll_text = ("*5* - _perfect response, without any hesitation_\n" +
 			 "*0* - _complete blackout._")
 
 
-def send_review_card(bot, card, user, card_type = 'Review', number = None, logger=None):
+def send_review_card(bot, card, user, card_type = 'Review', number = None, logger=None, set_card_db = True):
 		
 		if number == None:
 			number = ""
@@ -155,7 +148,9 @@ def send_review_card(bot, card, user, card_type = 'Review', number = None, logge
 			markup = bot_utils.keyboard_remove()
 			bot.send_message(user_id, "*{} card{}!*".format(card_type, number), parse_mode="Markdown", reply_markup=markup)
 			
-			user.set_card_waiting(card.get_card_id())
+			if set_card_db == True:
+				user.set_card_waiting(card.get_card_id())
+				
 			if logger:
 				logger.debug("Send Review Card -> Set card waiting {}".format(card.get_card_id()))
 			markup = telebot.types.ForceReply(selective = False)
@@ -174,21 +169,21 @@ def send_review_card(bot, card, user, card_type = 'Review', number = None, logge
 
 			if content == 'image':
 				if special_word == False:
-					bot.send_message(user_id, "Relate the image to a word in _{}_".format(treat_msg_to_send(language, "_")), parse_mode="Markdown")
+					bot.send_message(user_id, "Relate the image to a word in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
 				question = open(question,'rb')
 				print("Send photo {}".format(card.get_question()))
 				bot.send_photo(user_id, question, reply_markup = markup)
 				question.close()
 			elif content == 'audio':
 				if special_word == False:
-					bot.send_message(user_id, "Transcribe the audio in _{}_".format(treat_msg_to_send(language, "_")), parse_mode="Markdown")
+					bot.send_message(user_id, "Transcribe the audio in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
 				question = open(question,'rb')
 				print("Send voice {}".format(card.get_question()))
 				bot.send_voice(user_id, question, reply_markup = markup)
 				question.close()
 			elif content == 'translation':
 				if special_word == False:
-					bot.send_message(user_id, "Translate the word to _{}_".format(treat_msg_to_send(language, "_")), parse_mode="Markdown")
+					bot.send_message(user_id, "Relate the text to a word in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
 				print("Send translation {}".format(card.get_question()))
 				bot.send_message(user_id, question, reply_markup = markup)
 			
@@ -301,15 +296,16 @@ def save_voice(voice_msg, path, voice_name, bot):
 		print(e)
 		return None	
 
-def backup(db):
-	PATH =  "../backup/" + datetime.datetime.now().strftime("%d-%m-%Y.%H-%M") + "/"
-	if not os.path.exists('../backup/'):
-		os.mkdir('../backup')
+def backup(db, debug_mode):
+	if debug_mode:
+		PATH =  "../debug_backup/" + datetime.datetime.now().strftime("%d-%m-%Y.%H-%M") + "/"
+	else:
+		PATH =  "../backup/" + datetime.datetime.now().strftime("%d-%m-%Y.%H-%M") + "/"
+	if not os.path.exists(PATH):
+		os.makedirs(PATH)
 	print("BACKUP PATH= " + PATH)
 	try:
 		print(db.backup(PATH))
-		if not os.path.exists(PATH):
-			os.mkdir(PATH)
 		os.system("cp -TRv ../data/ {}data".format(PATH))
 		return "Data backup was successfull"
 	except Exception as e:
@@ -318,10 +314,10 @@ def backup(db):
 
 
 
-def turn_off(db):
+def turn_off(db, debug_mode):
 	"""
 		Safely turns of LingoBot. Makes a backup of the data (future)
 	"""
-	print(backup(db))
+	print(backup(db, debug_mode))
 	
 	pass

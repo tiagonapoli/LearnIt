@@ -11,6 +11,12 @@ from UserCardQueue import UserCardQueue
 from utilities import utils, logging_utils, bot_utils
 import logging
 
+args = sys.argv
+args = args[1:]
+if len(args) > 0 and args[1] == '-debug':
+	debug_mode = True
+debug_mode = False
+
 logger = logging.getLogger(__name__)
 logging_utils.setup_logger_sending_manager(logger)
 
@@ -28,10 +34,10 @@ def signal_handler(sign, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-bot = bot_utils.open_bot(logger)
+bot = bot_utils.open_bot(debug_mode, logger)
 logging_utils.add_bot_handler(logger, bot)
 
-rtd = RuntimeData()
+rtd = RuntimeData(debug_mode)
 rtd.get_known_users()
 users = rtd.users
 
@@ -102,20 +108,20 @@ while True:
 
 
 		if restart == True:
-
 			rtd.reset_all_states_exception(bot)
 			logger.error("Had to restart bot")
-			arq = open("../credentials/bot_token.txt", "r")
-			TOKEN = (arq.read().splitlines())[0]
-			arq.close()
-			bot = telebot.TeleBot(TOKEN)
-			logger.info("Bot initialized successfully")
-
-		sleep = 600
+			bot = bot_utils.open_bot(debug_mode, logger)
+			
+		sleep = 300
+		if debug_mode:
+			sleep = 10
 		logger.info("Sleep {}".format(sleep))
 		time.sleep(sleep)
 
 
 	except Exception as e:
 		logger.error("EXCEPTION on sending manager", exc_info=True)
+		sleep = 300
+		if debug_mode:
+			sleep = 10
 		time.sleep(600)

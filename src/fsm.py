@@ -32,7 +32,7 @@ GET_USER = 30
 SELECT_TOPICS = 31
 GET_IMAGE = 32
 GET_OVERWRITE = 33
-
+GET_CONTINUE = 34
 
 
 '''FSM'''
@@ -75,16 +75,19 @@ next_state.update({
 							  'Send image': (ADD_WORD, SEND_IMAGE),
 							  'Send translation': (ADD_WORD, SEND_TRANSLATION),
 			  				  'continue': (ADD_WORD, RELATE_MENU),
-			  				  'done': IDLE},
+			  				  'done': (ADD_WORD, GET_CONTINUE)},
 	(ADD_WORD, SEND_IMAGE): {'Send audio': (ADD_WORD, SEND_AUDIO),
 							  'Send translation': (ADD_WORD, SEND_TRANSLATION),
-			  				  'done': IDLE},
+			  				  'done': (ADD_WORD, GET_CONTINUE),
 	(ADD_WORD, SEND_AUDIO): {'Send image': (ADD_WORD, SEND_IMAGE),
 							 'Send translation': (ADD_WORD, SEND_TRANSLATION),
-			  				 'done': IDLE},
+			  				 'done': (ADD_WORD, GET_CONTINUE)},
 	(ADD_WORD, SEND_TRANSLATION): {'Send image': (ADD_WORD, SEND_IMAGE),
 							  	   'Send audio': (ADD_WORD, SEND_AUDIO),
-			  				  	   'done': IDLE}
+			  				  	   'done': (ADD_WORD, GET_CONTINUE)},
+	(ADD_WORD, GET_CONTINUE): {'done': IDLE,
+							   'error': (ADD_WORD, GET_CONTINUE),
+							   'continue': (ADD_WORD, GET_WORD)}
 })
 
 

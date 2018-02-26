@@ -50,8 +50,20 @@ class BotHandler(logging.Handler): # Inherit from logging.Handler
 
 
 def setup_logger_default(logger, path, bot=None):
-	utils.create_log_dir()
-	handler_file = logging.FileHandler(path, mode='w')
+	PATH = path
+	
+	pos = PATH.rfind('/')
+	filename = PATH[pos+1:]
+	PATH = PATH[:pos+1]
+	print("setup_logger_defaul {} {}".format(PATH, filename))
+	print(filename)
+	
+	if not os.path.exists(PATH):
+		os.makedirs(PATH)
+	
+	PATH += filename
+		
+	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s  %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
 	handler_file.setFormatter(formatter)
@@ -71,11 +83,17 @@ def setup_logger_default(logger, path, bot=None):
 	return logger
 
 
-def setup_logger_sending_manager(logger):
-	utils.create_log_dir()
-	if not os.path.exists('../logs/sending_manager/'):
-		os.mkdir('../logs/sending_manager/')
-	handler_file = logging.FileHandler('../logs/sending_manager/sending_manager.log', mode='w')
+def setup_logger_sending_manager(logger, debug_mode):
+	PATH = '../logs/sending_manager/'
+	if debug_mode:
+		PATH = '../logs_debug_mode/sending_manager/'
+	
+	if not os.path.exists(PATH):
+		os.makedirs(PATH)
+		
+	PATH += 'sending_manager.log'
+	
+	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s  %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
 	handler_file.setFormatter(formatter)
@@ -90,10 +108,17 @@ def setup_logger_sending_manager(logger):
 	logger.addHandler(handler_stream)
 	logger.setLevel(logging.DEBUG)
 
-def setup_logger_learnit_bot(logger):
-	utils.create_log_dir()
-
-	handler_file = logging.FileHandler('../logs/learnit.log', mode='w')
+def setup_logger_learnit_bot(logger, debug_mode):
+	PATH = '../logs/'
+	if debug_mode:
+		PATH = '../logs_debug_mode/'
+	
+	if not os.path.exists(PATH):
+		os.makedirs(PATH)
+		
+	PATH += learnit.log
+	
+	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s  %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
 	handler_file.setFormatter(formatter)
@@ -119,11 +144,16 @@ def add_bot_handler(logger, bot):
 
 
 def setup_logger_UserCardQueue(logger, user_id):
-	utils.create_log_dir()
-	if not os.path.exists('../logs/sending_manager/'):
-		os.mkdir('../logs/sending_manager/')
+	PATH = '../logs/sending_manager/'
+	if debug_mode:
+		PATH = '../logs_debug_mode/sending_manager/'.format(user_id)
+	
+	if not os.path.exists(PATH):
+		os.makedirs(PATH)
 		
-	handler_file = logging.FileHandler('../logs/sending_manager/UserCardQueue_{}.log'.format(user_id), mode='w')
+	PATH += 'UserCardQueue_{}.log'.format(user_id)
+		
+	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s  %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
 	handler_file.setFormatter(formatter)
