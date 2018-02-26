@@ -67,6 +67,8 @@ def setup_logger_default(logger, path, bot=None):
 	logger.setLevel(logging.DEBUG)
 	if bot != None:
 		add_bot_handler(logger,bot)
+		
+	return logger
 
 
 def setup_logger_sending_manager(logger):

@@ -7,19 +7,17 @@ from flashcard import Word
 from flashcard import Card
 from database_ops.db_utils import treat_str_SQL
 
-def handle_exception(e, text):
-	log = open('user_ops_log.txt', 'a')
-	log.write(datetime.datetime.now().strftime("%d/%m/%y %H:%M:%S") 
-				 + "   " + 
-				 str(e.__class__.__name__) + 
-				 "  " + text + "\n")
-	log.close()
-	time.sleep(1)
+def check_logger(user_id, logger):
+	if (not user_id in logger.keys()):
+		logger[user_id] = logging.getLogger(__name__)
+		logger[user_id] = logging_utils.setup_logger_default(logger[user_id], '../logs/user_ops{}.log'.format(user_id)) 
+	
 
 
 class UserOps():
 
 	def __init__(self, conn, cursor):
+		self.logger = {}
 		self.conn = conn
 		self.cursor = cursor
 
@@ -42,9 +40,10 @@ class UserOps():
 				if len(row) == 0:
 					return "User doesn't exist"
 				return (row[0][0], row[0][1], row[0][2])
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
-
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error get_state", exc_info=True)
+				time.sleep(1)
 		return []
 
 
@@ -65,9 +64,11 @@ class UserOps():
 				self.cursor.execute(cmd)
 				self.conn.commit()
 				return
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
-
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error set_state", exc_info=True)
+				time.sleep(1)
+				
 	def add_user(self, user_id, username):
 		"""Adds a new user to the database.
 
@@ -90,8 +91,11 @@ class UserOps():
 				self.cursor.execute("INSERT INTO users VALUES ({}, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, '{}', DEFAULT);".format(user_id, treat_str_SQL(username)))
 				self.conn.commit()
 				return True
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error add_user", exc_info=True)
+				time.sleep(1)
+				
 		return False
 
 	def get_known_users(self):
@@ -115,8 +119,11 @@ class UserOps():
 				for row in rows:
 					known.add(row[0])
 				return known
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error get_known_users", exc_info=True)
+				time.sleep(1)
+				
 		return set()
 
 		
@@ -132,8 +139,10 @@ class UserOps():
 				if(len(rows) == 0):
 					return 0
 				return rows[0][0]
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error get_learning_words_limit", exc_info=True)
+				time.sleep(1)
 		return 0
 
 
@@ -148,8 +157,10 @@ class UserOps():
 				if(len(rows) == 0):
 					return 0
 				return rows[0][0]
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error get_review_cards", exc_info=True)
+				time.sleep(1)
 		return 0
 
 
@@ -162,8 +173,10 @@ class UserOps():
 				self.cursor.execute(cmd)
 				self.conn.commit()
 				return
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error set_card_waiting", exc_info=True)
+				time.sleep(1)
 		return None
 
 		
@@ -180,8 +193,11 @@ class UserOps():
 				if(len(card) == 0):
 					return 0
 				return card[0][0]
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error get_card_waiting", exc_info=True)
+				time.sleep(1)
+
 		return 0
 
 	def get_grade_waiting(self, user_id):
@@ -195,8 +211,10 @@ class UserOps():
 				if(len(rows) == 0):
 					return None
 				return rows[0][0]
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error get_grade_waiting", exc_info=True)
+				time.sleep(1)
 		return None
 
 
@@ -211,8 +229,10 @@ class UserOps():
 				self.cursor.execute(cmd)
 				self.conn.commit()
 				return
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error set_grade_waiting", exc_info=True)
+				time.sleep(1)
 		return None
 
 
@@ -229,8 +249,11 @@ class UserOps():
 				if(len(rows) == 0):
 					return 0
 				return rows[0][0]
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error get_card_waiting_type", exc_info=True)
+				time.sleep(1)
+
 		return None
 
 		
@@ -244,8 +267,10 @@ class UserOps():
 				self.cursor.execute(cmd)
 				self.conn.commit()
 				return 
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error set_card_waiting_type", exc_info=True)
+				time.sleep(1)
 		return None
 
 	def get_cards_per_hour(self, user_id):
@@ -259,8 +284,11 @@ class UserOps():
 				if(len(rows) == 0):
 					return 0
 				return rows[0][0]
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error get_cards_per_hour", exc_info=True)
+				time.sleep(1)
+
 		return None
 
 		
@@ -274,8 +302,10 @@ class UserOps():
 				self.cursor.execute(cmd)
 				self.conn.commit()
 				return 
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error set_cards_per_hour", exc_info=True)
+				time.sleep(1)
 		return None
 
 	def get_active(self, user_id):
@@ -289,8 +319,10 @@ class UserOps():
 				if(len(rows) == 0):
 					return 0
 				return rows[0][0]
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error get_active", exc_info=True)
+				time.sleep(1)
 		return None
 
 	def set_active(self, user_id, active):
@@ -302,8 +334,10 @@ class UserOps():
 				self.cursor.execute(cmd)
 				self.conn.commit()
 				return 
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error set_active", exc_info=True)
+				time.sleep(1)
 		return None
 
 	def get_id_by_username(self, username):
@@ -317,8 +351,10 @@ class UserOps():
 				if(len(rows) == 0):
 					return None
 				return rows[0][0]
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error get_id_by_username", exc_info=True)
+				time.sleep(1)
 		return None
 			
 
@@ -333,8 +369,10 @@ class UserOps():
 				if(len(rows) == 0):
 					return 0
 				return rows[0][0]
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error get_public", exc_info=True)
+				time.sleep(1)
 		return 0
 
 	def get_username(self, user_id):
@@ -348,8 +386,10 @@ class UserOps():
 				if(len(rows) == 0):
 					return 0
 				return rows[0][0]
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error get_username", exc_info=True)
+				time.sleep(1)
 		return 0
 
 
@@ -362,8 +402,10 @@ class UserOps():
 				self.cursor.execute(cmd)
 				self.conn.commit()
 				return 
-			except psycopg2.ProgrammingError as e:
-				handle_exception(e, cmd)
+			except:
+				check_logger(user_id, self.logger)
+				self.logger[user_id].error("Error set_public", exc_info=True)
+				time.sleep(1)
 		return None
 
 
