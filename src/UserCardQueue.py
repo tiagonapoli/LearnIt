@@ -147,9 +147,12 @@ class UserCardQueue():
 		self.logger.info("Add review cards")
 		cards = self.cards_expired
 		review_limit = self.user.get_review_cards_limit()
+		added = 0
 		for card in cards:
 			if (not card.is_learning()) and len(self.now_review_stack) < review_limit:
+				added += 1
 				self.now_review_stack.append(card)
+		self.logger.debug('Added {} review cards'.format(added))
 		self.logger.info("End add review cards")
 
 
@@ -192,9 +195,7 @@ class UserCardQueue():
 		self.learn_cnt_hourly = 0
 		self.review_cnt_hourly = 0
 		
-		#aaaaaaaaaaa
-		#qtd = self.user.get_cards_per_hour()
-		qtd = 400
+		qtd = self.user.get_cards_per_hour()
 		if qtd == 1:
 			if hour % 2 == 0:
 				self.learn_total_hourly = 1
@@ -222,14 +223,12 @@ class UserCardQueue():
 		hour = now.hour
 		minute = now.minute
 
-		#aaaaaaaaaaaa
-		minute = 59
-
 		total = self.learn_total_hourly + self.review_total_hourly
 		total_sent = self.learn_cnt_hourly + self.review_cnt_hourly
 		send_time_ini = int(60 * total_sent/total)
 
 		self.logger.info("Hourly process: {}/{}".format(total_sent, total))
+		self.logger.debug("Remaining cards: L={}  R={}".format(self.get_remaining_learn_cards(), len(self.now_review_stack)))
 		self.logger.debug("Queue: " + sending_queue_to_str(self.sending_queue))
 		self.logger.debug("min: {}  send_time_ini: {}".format(minute, send_time_ini))
 
@@ -277,8 +276,8 @@ class UserCardQueue():
 				
 				if self.user.check_card_existence(aux_card):
 					self.sending_queue.append((self.review_cnt_day + 1, REVIEW, aux_card))
-					review_cnt_hourly += 1
-					review_cnt_day += 1
+					self.review_cnt_hourly += 1
+					self.review_cnt_day += 1
 		self.logger.info("End prepare queue")
 
 
@@ -298,7 +297,9 @@ class UserCardQueue():
 		return True
 
 
-	def check_card_finished(self, card):
+	def check_card_finished(self, card, card_type):
+		if card_type == REVIEW:
+			return False
 		if card.get_card_id() in self.grades_for_day.keys():
 			return False
 		return True
@@ -312,13 +313,14 @@ class UserCardQueue():
 		if (self.user.working_hours(hour) == False):
 			return True
 
+		self.logger.debug("Process queue -> User State = {}".format(self.user.get_state()))
 		if len(self.sending_queue) != 0 and self.user.get_state() == fsm.IDLE:
 			self.user.set_state(fsm.LOCKED)
 			self.do_grading(True)
 			self.logger.info("Process Queue")
 			number, waiting_type, aux_card = self.sending_queue.popleft()
 			self.logger.debug("Card id {}".format(aux_card.get_card_id()))
-			if self.user.check_card_existence(aux_card) and self.check_card_finished(aux_card) == False:
+			if self.user.check_card_existence(aux_card) and self.check_card_finished(aux_card, waiting_type) == False:
 				return self.send_card(bot, aux_card, waiting_type, number)
 			else:
 				self.user.set_state(fsm.IDLE)
@@ -353,9 +355,11 @@ class UserCardQueue():
 	def do_grading(self, green_light = False):
 		if green_light == False and self.user.get_state() != fsm.IDLE:
 			return
+
 		
 		user_id = self.user_id
 		waiting = self.user.get_card_waiting()
+		self.logger.debug("Do Grading - get card waiting {}".format(waiting))
 		self.user.set_card_waiting(0)
 		waiting_type = self.user.get_card_waiting_type()
 		grade = self.user.get_grade_waiting()
@@ -375,18 +379,19 @@ class UserCardQueue():
 				self.logger.debug(debug_txt)
 
 
-				if len(self.grades_for_day[aux_card.get_card_id()]) >= self.NUMBER_OF_LAST_CARDS:
+				if len(self.grades_for_day[aux_card.get_card_id()]) >= 1:
 					cnt = 0
 					tot = 0
+					last = self.grades_for_day[aux_card.get_card_id()][-1]
 					for i in reversed(self.grades_for_day[aux_card.get_card_id()]):
 						tot += 1
 						cnt += i
-						if tot >= 2:
+						if tot >= self.NUMBER_OF_LAST_CARDS:
 							break;
 
-					self.logger.debug("Tentar eliminar card {} -> Media= {}".format(aux_card.get_card_id(), cnt / tot))
-					if tot >= 2 and (cnt / tot) > 4.0:
-						self.logger.debug("Card Eliinada {}".format(aux_card.get_card_id()))
+					self.logger.debug("Tentar eliminar card {} -> Media= {} tot= {} Last= {}".format(aux_card.get_card_id(), cnt / tot, tot, last))
+					if (tot >= self.NUMBER_OF_LAST_CARDS and (cnt / tot) >= 4.0) or last == 5:
+						self.logger.debug("Card Eliminada {}".format(aux_card.get_card_id()))
 						self.finish_process_learn_card(aux_card)
 				self.logger.info("End Do Grading Learning Card {} = {}".format(aux_card.get_card_id(), grade))
 
@@ -394,14 +399,14 @@ class UserCardQueue():
 			elif waiting_type == REVIEW:
 				self.logger.info("Do Grading Review Card {} = {}".format(aux_card.get_card_id(), grade))
 				aux_card.calc_next_date(grade)
-				self.logger.debug("grade = {}  next_date = {}".format(grade, card.next_date))
+				self.logger.debug("grade = {}  next_date = {}".format(grade, aux_card.next_date))
 				self.user.set_supermemo_data(aux_card)
 				self.logger.info("End Do Grading Review Card {} = {}".format(aux_card.get_card_id(), grade))
 
 
 
 
-	def process_end_day():
+	def process_end_day(self):
 		self.logger.info("Process End Day")
 
 		for card in self.now_learn_stack:

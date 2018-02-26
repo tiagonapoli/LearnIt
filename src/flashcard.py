@@ -25,9 +25,7 @@ class TimeControl(object):
 
 	def go_next_state(self,q):
 		self.attempts += 1
-		if self.attempts == 1:
-			self.interval = 1
-		elif self.attempts == 2:
+		if self.attempts == 2:
 			self.interval = 2
 		else:
 			self.interval = self.interval * self.ef
@@ -43,7 +41,7 @@ class TimeControl(object):
 				quality_answer: Grade user gave to his answer
 		"""
 		self.go_next_state(quality_answer)
-		end_date = self.next_date + datetime.timedelta(days=int(self.interval))
+		end_date = datetime.datetime.now() + datetime.timedelta(days=int(self.interval))
 		self.next_date = end_date
 	
 	def get_next_date(self):

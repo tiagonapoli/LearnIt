@@ -21,7 +21,7 @@ def handle_add_word_translation(bot, rtd):
 		user.set_state(fsm.LOCKED)
 
 		
-		translation = utils.treat_special_chars(msg.text)
+		translation = msg.text.strip()
 		print(translation)
 
 		word = user.temp_word

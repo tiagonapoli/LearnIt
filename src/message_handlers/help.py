@@ -3,7 +3,9 @@ import fsm
 from flashcard import Word, Card
 from utilities.bot_utils import get_id, create_key_button
 
-help_msg = ("NOT YET IMPLEMENTED.\n" +
+help_msg = ("Use the command /add\_language to add the languages you are interested in learning and then use the command /add\_word to add words you are interested in memorizing, " + 
+			"or just use the command /copy\_words to copy words from other users. " +
+			"During any process you can use /cancel to cancel the ongoing events, if you made a mistake, for example.\n" +
 		   "If you have questions or want to support the project, please contact one of the developers:" +
 		   "\n*Tiago Napoli*\nTelegram: t.me/tiagonapoli\nEmail: napoli.tiago@hotmail.com\n" + 
 		   "\n*Gabriel Camargo*\nTelegram: t.me/gabriel\_camargo\nEmail: gacamargo1.000@gmail.com\n")

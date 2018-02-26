@@ -14,7 +14,7 @@ start - Sign in to use the bot
 stop - Stop the bot
 
 -----Description-----
-A bot to help you learn languages or anything you can put into flashcards! You can add subjects or languages you are learning by using /add_language. Then you can add flashcards to help you learn using /add_word. You can create audio, image or text flashcards. The bot will send these flashcards in the best learning intervals for you to answer! 
+A bot to help you learn languages or anything you can put into flashcards! You can add subjects or languages you are learning by using /add_language. Then you can add flashcards to help you learn using /add_word, or copy flashcards from other users, using /copy_words. You can create audio, image or text flashcards. The bot will send these flashcards in the best learning intervals for you to answer! 
 
 
 -----About-----

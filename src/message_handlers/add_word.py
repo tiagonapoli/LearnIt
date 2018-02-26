@@ -89,7 +89,7 @@ def handle_add_word(bot, rtd):
 			return
 
 		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id, "*Send the word's topic*. You can send a *new topic* or *select from existing*".format(language),
+		bot.send_message(user_id, "*Send the word's topic*. You can send a *new topic* or *select from existing*",
 						reply_markup=markup, parse_mode="Markdown")
 		topics = user.get_all_topics(language)
 		topics.sort()
@@ -123,12 +123,17 @@ def handle_add_word(bot, rtd):
 		language = user.temp_word.get_language()
 		
 		valid, topic = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
+		if len(topic) == 0:
+			bot.send_message(user_id, "Please, don't user / or \ or _ or *. Send the topic again:")
+			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_TOPIC)]['error'])
+			return
+
 
 		markup = bot_utils.keyboard_remove()
 		user.temp_word.topic = topic
-		bot.send_message(user_id, "Word's topic: *{}*".format(topic), parse_mode="Markdown")
-		bot.send_message(user_id, "*Send word to add* (in _{}_)".format(language), reply_markup=markup, parse_mode="Markdown")
-		user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_TOPIC)])
+		bot.send_message(user_id, "Word's topic: *{}*".format(utils.treat_msg_to_send(topic, "*")), parse_mode="Markdown")
+		bot.send_message(user_id, "*Send word to add* (in _{}_)".format(utils.treat_msg_to_send(language, "_")), reply_markup=markup, parse_mode="Markdown")
+		user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_TOPIC)]['done'])
 
 
 
@@ -145,14 +150,24 @@ def handle_add_word(bot, rtd):
 		user.set_state(fsm.LOCKED)
 
 		word_text = utils.treat_special_chars(msg.text)
+		if len(word_text) == 0:
+			bot.send_message(user_id, "Please, don't user / or \ or _ or *. Send the word again:")
+			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)]['error'])
+			return
+
+		if word_text == "&img":
+			bot.send_message(user_id, "_Please,_ *send an image* _to use instead of a word:_", parse_mode="Markdown")
+			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)]['word img'])
+			return
+
 		user.temp_word.foreign_word = word_text
 
 		word = user.temp_word
 
 		exist, aux_word_id = user.check_word_existence(word.language, word.topic, word.foreign_word)
 		if exist == True:
-			bot.send_message(user_id, "This word is already registered, if you want to add it anyway, please, erase it first")
-			fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)]['error']
+			bot.send_message(user_id, "This word is already registered, if you want to add it anyway, please, erase it first.")
+			fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)]['error_idle']
 
 
 		options = ['Send image', 'Send audio', 'Send translation']
@@ -166,6 +181,40 @@ def handle_add_word(bot, rtd):
 		bot.send_message(user_id, "_Select the ways you want to relate to the word (one or more):_",
 						reply_markup=markup, parse_mode="Markdown")	
 		user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)]['done'])
+
+
+	@bot.message_handler(func = lambda msg:
+					rtd.get_user(get_id(msg)).get_state() == (fsm.ADD_WORD, fsm.GET_IMAGE), 
+					content_types=['photo'])
+	def add_word4(msg):
+		"""
+			Add word: Get foreign word
+		"""
+		user = rtd.get_user(get_id(msg))
+		user_id = user.get_id()
+		user.set_state(fsm.LOCKED)
+		word = user.temp_word
+
+		filename = "{}_{}".format(user_id, word.get_word_id())
+		path = utils.save_image(msg,
+								"../data/special/", 
+								filename, 
+								bot)
+
+		user.temp_word.foreign_word = '&img ' + path
+
+		options = ['Send translation']
+		btn = bot_utils.create_inline_keys_sequential(options)
+		btn_set = set()
+		markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ('End selection', 'DONE'))
+
+		user.btn_set = btn_set
+		user.keyboard_options = btn
+
+		bot.send_message(user_id, "_Select the ways you want to relate to the word (one or more):_",
+						reply_markup=markup, parse_mode="Markdown")	
+		user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_IMAGE)]['done'])
+
 
 	@bot.callback_query_handler(func=lambda call:
 							rtd.get_user(get_id(call.message)).get_state() == (fsm.ADD_WORD, fsm.RELATE_MENU))

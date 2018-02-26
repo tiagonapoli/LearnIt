@@ -39,11 +39,17 @@ CREATE TABLE words(
 	user_word_id int,
 	language varchar(50),
 	topic varchar(50),
-	foreign_word varchar(50),
+	foreign_word varchar(200),
 
 	UNIQUE(user_id, language, topic, foreign_word),
 	primary key (user_id, user_word_id),
 	foreign key (user_id, language, topic) references topics(user_id, language, topic) ON DELETE CASCADE
+);
+
+CREATE TABLE specialwords(
+	users_using int DEFAULT 1,
+	archive varchar(200),
+	primary key (archive)
 );
 
 CREATE TABLE cards(

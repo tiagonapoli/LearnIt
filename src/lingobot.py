@@ -47,7 +47,7 @@ def signal_handler(sign, frame):
 	"""
 		Handles CTRL+C signal that exits gently the bot
 	"""
-	logger.critical("Bot turned off")
+	logger.warning("Bot turned off")
 	sending_manager.send_signal(signal.SIGINT)
 	utils.turn_off(rtd)
 	print("Exiting bot...")
@@ -123,17 +123,15 @@ while True:
 
 		#=====================MESSAGE NOT UNDERSTOOD=====================
 		message_handlers.message_not_understood.handle_message_not_understood(bot,rtd)
-
-
+		
 		print("Press Ctrl+C to exit gently")
-
 		bot.polling()	
 
 	except Exception as e:
 
 		rtd.reset_all_states_exception(bot)
 
-		logger.error("Bot Crashed", exc_info=True)
+		logger.error("Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
 		if str(e.__class__.__name__) == 'ConnectionError':
 			time.sleep(30)
 		elif str(e.__class__.__name__) == 'ReadTimeout':

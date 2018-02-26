@@ -17,6 +17,7 @@ class User:
 		self.temp_word = None
 		self.temp_card = None
 		self.temp_words_list = None
+		self.temp_topics_list = None
 		self.btn_set = None
 		self.keyboard_options = None
 		self.receive_queue = None
@@ -349,7 +350,7 @@ class RuntimeData:
 		return (user_id in self.users.keys())
 
 
-	def copy_topic(self, user_dest, user_source, language, topic):
+	def copy_topic(self, user_dest, user_source, language, topic, overwrite):
 		ret = []
 		words = user_source.get_words_on_topic(language, topic)
 		user_id = user_dest.get_id()
@@ -385,10 +386,16 @@ class RuntimeData:
 					utils.create_dir_card_archive(user_id, word.word_id)
 					os.system("cp -TRv {} {}".format(prev_path, next_path))
 			exist, aux_word_id = user_dest.check_word_existence(word.language, word.topic, word.foreign_word)
-			if exist == True:
-				ret.append(word.get_word())
+			if exist == True and overwrite == True:
+				if utils.check_special_word(word.get_word()):
+					ret.append(word.cards['translation'].get_question())
+				else:
+					ret.append(word.get_word())
 				user_dest.erase_word(aux_word_id)
-			user_dest.add_word(word)
+				user_dest.add_word(word)
+			elif exist == False:
+				user_dest.add_word(word)
+
 		return ret
 
 

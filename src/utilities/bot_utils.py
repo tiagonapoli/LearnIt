@@ -48,9 +48,9 @@ def create_string_keyboard(keys):
 	cnt = 1
 	for key in keys:
 		if type(key) == "tuple":
-			text += "/{}. ".format(cnt) + key[0] + "\n"
+			text += "/{}. ".format(cnt) + utils.treat_msg_to_send(key[0]) + "\n"
 		else:
-			text += "/{}. ".format(cnt) + key + "\n"
+			text += "/{}. ".format(cnt) + utils.treat_msg_to_send(key) + "\n"
 		cnt += 1
 	return text
 
@@ -67,10 +67,10 @@ def parse_string_keyboard_ans(ans, keys):
 		for key in keys:
 			if type(key) == "tuple":
 				if ans == key[0]:
-					return True, ans
+					return True, key[0]
 			else:
 				if ans == key:
-					return True, ans
+					return True, key
 		return False, ans
 		 
 	ans = ans[1:]

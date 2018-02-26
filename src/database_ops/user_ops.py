@@ -86,14 +86,13 @@ class UserOps():
 				self.cursor.execute("SELECT id from users WHERE id={};".format(user_id))
 				rows = self.cursor.fetchall()
 				if(len(rows) > 0):
-					return "Welcome back to LearnIt!"
-
+					return True
 				self.cursor.execute("INSERT INTO users VALUES ({}, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, '{}', DEFAULT);".format(user_id, treat_str_SQL(username)))
 				self.conn.commit()
-				return "Welcome to LearnIt!\n" + "Use the command /add_language to add the languages you are interested in learning and then use the command /add_word to add words you are interested in memorizing.\n"
+				return True
 			except psycopg2.ProgrammingError as e:
 				handle_exception(e, cmd)
-		return "Error"
+		return False
 
 	def get_known_users(self):
 		"""Gets all the columns of all users in the database
@@ -155,7 +154,7 @@ class UserOps():
 
 
 	def set_card_waiting(self, user_id, card_id):
-		tries = 5
+		tries = 20
 		while tries > 0:
 			tries -= 1
 			cmd = "UPDATE users SET card_waiting={} WHERE id={};".format(card_id, user_id)
@@ -171,7 +170,7 @@ class UserOps():
 
 
 	def get_card_waiting(self, user_id):
-		tries = 5
+		tries = 20
 		while tries > 0:
 			tries -= 1
 			cmd = "SELECT card_waiting FROM users WHERE id={};".format(user_id)
@@ -180,8 +179,7 @@ class UserOps():
 				card = self.cursor.fetchall()
 				if(len(card) == 0):
 					return 0
-				card = card[0][0]
-				return card
+				return card[0][0]
 			except psycopg2.ProgrammingError as e:
 				handle_exception(e, cmd)
 		return 0

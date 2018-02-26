@@ -36,6 +36,11 @@ def handle_add_language(bot, rtd):
 		user.set_state(fsm.LOCKED)
 
 		language = utils.treat_special_chars(msg.text)
+		if len(language) == 0:
+			bot.send_message(user_id, "Please, don't user / or \ or _ or *. Send the language again:")
+			user.set_state(fsm.next_state[fsm.ADD_LANGUAGE]['error'])
+			return
+
 		print(language)
-		bot.send_message(user_id, user.add_language(language))
-		user.set_state(fsm.next_state[fsm.ADD_LANGUAGE])
+		bot.send_message(user_id, utils.treat_msg_to_send(user.add_language(language)), parse_mode="Markdown")
+		user.set_state(fsm.next_state[fsm.ADD_LANGUAGE]['done'])

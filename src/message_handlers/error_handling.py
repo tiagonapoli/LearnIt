@@ -10,7 +10,7 @@ def handle_user_dont_exist(bot, rtd):
 	def user_existence(msg):
 		user_id = get_id(msg)
 		error_msg = ("LearnIt is under development, so sometimes we have to do some experiments and reset some things" +
-			   ", maybe because of this your user isn't in our database. To fix this, please send a /start.")
+			   ", maybe because of this, your user isn't in our database. To fix this, please send a /start.")
 		bot.send_message(user_id, error_msg)
 
 	#=====================USER DOESN'T EXIST - CALLBACK=====================
@@ -18,7 +18,7 @@ def handle_user_dont_exist(bot, rtd):
 	def callback_user_existence(call):
 		user_id = get_id(call.message)
 		error_msg = ("LearnIt is under development, so sometimes we have to do some experiments and reset some things" +
-			   ", maybe because of this your user isn't in our database. To fix this, please send a /start.")
+			   ", maybe because of this, your user isn't in our database. To fix this, please send a /start.")
 		bot.send_message(user_id, error_msg)
 
 

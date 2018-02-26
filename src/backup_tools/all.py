@@ -24,6 +24,7 @@ os.system("./users.py {}".format(tables_path))
 os.system("./languages.py {}".format(tables_path))
 os.system("./topics.py {}".format(tables_path))
 os.system("./words.py {}".format(tables_path))
+os.system("./specialwords.py {}".format(tables_path))
 os.system("./cards.py {}".format(tables_path))
 os.system("./archives.py {}".format(tables_path))
 

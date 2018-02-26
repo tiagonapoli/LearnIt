@@ -19,7 +19,7 @@ def signal_handler(sign, frame):
 	"""
 		Handles CTRL+C signal that exits gently the bot
 	"""
-	logger.critical("Sending manager turned off")
+	logger.warning("Sending manager turned off")
 	for user_id, user in users.items():
 		if user.get_active() == 0:
 			continue
@@ -69,7 +69,7 @@ while True:
 			if not (user_id in user_queues.keys()):
 				user_queues[user_id] = UserCardQueue(user, bot)
 
-			if  cycles % 5 == 0:
+			if  cycles % 2 == 0:
 				user_queues[user_id].upd_cards_expired() 				
 
 			user_queues[user_id].add_learning_cards()
@@ -104,7 +104,6 @@ while True:
 		if restart == True:
 
 			rtd.reset_all_states_exception(bot)
-			log = open('sending_manager_log.txt', 'a')
 			logger.error("Had to restart bot")
 			arq = open("../credentials/bot_token.txt", "r")
 			TOKEN = (arq.read().splitlines())[0]
@@ -112,11 +111,11 @@ while True:
 			bot = telebot.TeleBot(TOKEN)
 			logger.info("Bot initialized successfully")
 
-		sleep = 5
+		sleep = 600
 		logger.info("Sleep {}".format(sleep))
 		time.sleep(sleep)
 
 
 	except Exception as e:
 		logger.error("EXCEPTION on sending manager", exc_info=True)
-		time.sleep(120)
+		time.sleep(600)

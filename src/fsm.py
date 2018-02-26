@@ -30,7 +30,8 @@ CARDS_PER_HOUR = 28
 COPY_WORDS = 29
 GET_USER = 30
 SELECT_TOPICS = 31
-
+GET_IMAGE = 32
+GET_OVERWRITE = 33
 
 
 
@@ -63,9 +64,13 @@ next_state.update({
 next_state.update({
 	(ADD_WORD, GET_LANGUAGE): {'done': (ADD_WORD, GET_TOPIC),
 							   'error': (ADD_WORD, GET_LANGUAGE)},
-	(ADD_WORD, GET_TOPIC): (ADD_WORD, GET_WORD),
+	(ADD_WORD, GET_TOPIC): {'done': (ADD_WORD, GET_WORD),
+							'error': (ADD_WORD, GET_TOPIC)},
 	(ADD_WORD, GET_WORD): {'done': (ADD_WORD, RELATE_MENU),
-						   'error': IDLE},
+						   'error_idle': IDLE,
+						   'word img': (ADD_WORD, GET_IMAGE),
+						   'error': (ADD_WORD, GET_WORD)},
+	(ADD_WORD, GET_IMAGE): {'done': (ADD_WORD, RELATE_MENU)},
 	(ADD_WORD, RELATE_MENU): {'Send audio': (ADD_WORD, SEND_AUDIO),
 							  'Send image': (ADD_WORD, SEND_IMAGE),
 							  'Send translation': (ADD_WORD, SEND_TRANSLATION),
@@ -85,7 +90,8 @@ next_state.update({
 
 #=====================ADD LANGUAGE=====================
 next_state.update({
-	ADD_LANGUAGE: IDLE
+	ADD_LANGUAGE: {'done': IDLE,
+				   'error': ADD_LANGUAGE}
 })
 
 
@@ -145,7 +151,8 @@ next_state.update({
 	(COPY_WORDS, GET_LANGUAGE): {'done': (COPY_WORDS, SELECT_TOPICS),
 							   	 'error': (COPY_WORDS, GET_LANGUAGE),
 							   	 'no topics': IDLE},
-	(COPY_WORDS, SELECT_TOPICS): {'done': IDLE,
+	(COPY_WORDS, SELECT_TOPICS): {'done': (COPY_WORDS, GET_OVERWRITE),
 						   		  'continue': (COPY_WORDS, SELECT_TOPICS)},
-	
+	(COPY_WORDS, GET_OVERWRITE): {'done': IDLE,
+						   		  'error': (COPY_WORDS, GET_OVERWRITE)}	
 })

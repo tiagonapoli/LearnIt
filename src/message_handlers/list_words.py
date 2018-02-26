@@ -95,9 +95,13 @@ def handle_list_words(bot, rtd):
 			return	
 		
 		words = user.get_words_on_topic(language, topic)
-		text = "_Language:_ *{}*\n_Topic:_ *{}*\n_Words:_\n".format(language,topic)
+		text = "_Language:_ *{}*\n_Topic:_ *{}*\n_Words:_\n".format(utils.treat_msg_to_send(language, "*"),utils.treat_msg_to_send(topic, "*"))
 		for word in words:
-			text += "*." + word.get_word() + "*\n"
+			string_lst = word.get_word().split()
+			if string_lst[0] == '&img':
+				text += "*." + utils.treat_msg_to_send(word.cards['translation'].get_question(), "*") + "*\n"
+			else:
+				text += "*." + utils.treat_msg_to_send(word.get_word(), "*") + "*\n"
 
 		markup = bot_utils.keyboard_remove()
 		bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")

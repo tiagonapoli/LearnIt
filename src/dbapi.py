@@ -12,6 +12,7 @@ import database_ops.topic_ops
 import database_ops.language_ops
 import database_ops.card_ops
 import database_ops.archive_ops
+import database_ops.specialword_ops
 
 
 
@@ -52,11 +53,7 @@ class Database():
 		self.topic_ops = database_ops.topic_ops.TopicOps(self.conn, self.cursor)
 		self.language_ops = database_ops.language_ops.LanguageOps(self.conn, self.cursor)
 		self.card_ops = database_ops.card_ops.CardOps(self.conn, self.cursor)
-		'''
-	except Exception as e:
-		print("Uh oh, can't connect. Invalid dbname, user or password?")
-		print("Exception: {}".format(e))
-		'''
+		self.specialword_ops = database_ops.specialword_ops.SpecialWordOps(self.conn, self.cursor)
 
 
 	def __del__(self):
@@ -86,6 +83,12 @@ class Database():
 	def check_word_existence(self, user_id, language, topic, foreign_word):
 		return self.word_ops.check_word_existence(user_id, language, topic, foreign_word)
 
+	#==================SPECIALWORD ops==================
+	def erase_specialword(self, word):
+		return self.specialword_ops.erase_specialword(word)
+
+	def add_specialword(self, word):
+		return self.specialword_ops.add_specialword(word)
 
 
 	#==================USER ops==================
@@ -222,6 +225,7 @@ class Database():
 			os.system("psql -U {} -d {} -c \"Copy (Select * From topics) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/topics.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
 			os.system("psql -U {} -d {} -c \"Copy (Select * From words) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/words.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
 			os.system("psql -U {} -d {} -c \"Copy (Select * From archives) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/archives.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From specialwords) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/specialwords.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
 			return "Backup made successfully"
 		except Exception as e:
 			print(e);

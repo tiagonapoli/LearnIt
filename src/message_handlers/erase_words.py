@@ -88,7 +88,7 @@ def handle_erase_words(bot, rtd):
 		valid, topic = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 		if valid == False:
 			bot.reply_to(msg, "_Please choose from options._", parse_mode="Markdown")
-			user.set_state(user_id, fsm.next_state[(fsm.ERASE_WORDS, fsm.GET_TOPIC)]['error'])
+			user.set_state(fsm.next_state[(fsm.ERASE_WORDS, fsm.GET_TOPIC)]['error'])
 			return			
 
 		words = user.get_words_on_topic(language, topic)
@@ -125,7 +125,7 @@ def handle_erase_words(bot, rtd):
 			text = "_Erased words:_\n"
 			for i in btn_set:
 				print(user.erase_word(words[i].get_word_id()))
-				text += "*." + words[i].get_word() + "*\n"
+				text += "*." + utils.treat_msg_to_send(utils.get_foreign_word(words[i]), "*") + "*\n"
 			bot.send_message(user_id, text, parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.ERASE_WORDS, fsm.SELECT_WORDS)]['done'])		
 		else:

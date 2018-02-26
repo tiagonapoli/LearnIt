@@ -178,11 +178,14 @@ def handle_topic_review(bot, rtd):
 		res = utils.treat_special_chars(msg.text.lower())
 		
 		user.temp_card = card
-		if res == card.foreign_word.lower():
-			bot.send_message(user_id, "That was correct!")
-		else:
-			bot.send_message(user_id, "There was a mistake :(")
-		bot.send_message(user_id, "*Answer:* " + "_" + card.foreign_word + "_", parse_mode="Markdown")
+		string_lst = card.get_word().split()
+		if string_lst[0] != '&img':
+			if res == card.foreign_word.lower():
+				bot.send_message(user_id, "That was correct!")
+			else:
+				bot.send_message(user_id, "There was a mistake :(")
+
+		utils.send_foreign_word_ans(bot, card)
 
 		cards = user.get_cards_on_word(card.get_word_id())
 		for ans in cards:

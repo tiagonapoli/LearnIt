@@ -18,6 +18,27 @@ def timeout_handler(signum, frame):   # raises exception when signal sent
 # Makes it so that when SIGALRM signal sent, it calls the function timeout_handler, which raises your exception
 signal.signal(signal.SIGALRM, timeout_handler)
 
+def treat_msg_to_send(text, inside=""):
+	if inside == "" or inside == '_':
+		text = text.replace('_', inside + '\_' + inside)
+	if inside == "" or inside == '*':
+		text = text.replace('*', inside + '\*' + inside)
+	if inside == "" or inside == '`':
+		text = text.replace('`', inside + '\`' + inside)	
+	
+	if inside == "" or inside == '[':
+		text = text.replace('[', inside + '\[' + inside)	
+	if inside == "" or inside == ']':
+		text = text.replace(']', inside + '\]' + inside)	
+	
+	return text
+
+
+def check_special_word(word_text):
+	string_lst = word_text.split()
+	if string_lst[0] == '&img':
+		return True
+	return False
 
 def open_bot(logger):
 	arq = open("../credentials/bot_token.txt", "r")
@@ -49,11 +70,33 @@ def treat_username_str(username):
 		return username[1:]
 	return username
 
+def get_foreign_word(word):
+	string_lst = word.get_word().split()
+	print(word.get_word())
+	if string_lst[0] == '&img':
+		return word.cards['translation'].get_question()
+	return word.get_word()
+
 def words_to_string_list(words):
 	ret = []
 	for word in words:
-		ret.append(word.get_word())
+		ret.append(get_foreign_word(word))
 	return ret
+
+
+def send_foreign_word_ans(bot, card):
+	user_id = card.get_user()
+	string_lst = card.foreign_word.split()
+	if string_lst[0] == '&img':
+		bot.send_message(user_id, "*Answer:* ", parse_mode="Markdown")
+		try:
+			question = open(string_lst[1],'rb')
+			bot.send_photo(user_id, question)
+			question.close()
+		except:
+			pass
+	else:
+		bot.send_message(user_id, "*Answer:* " + '_' + treat_msg_to_send(card.foreign_word, "_") + '_', parse_mode="Markdown")
 
 
 
@@ -82,7 +125,7 @@ def send_ans_card(bot, card, query_type, logger=None):
 	signal.alarm(0)
 	
 
-poll_text = ("*5* - _perfect response_\n" +
+poll_text = ("*5* - _perfect response, without any hesitation_\n" +
 			 "*4* - _correct response after a hesitation_\n" +
 			 "*3* - _correct response recalled with difficulty_\n" + 
 			 "*2* - _incorrect response; where the correct one seemed easy to recall_\n" + 
@@ -106,29 +149,46 @@ def send_review_card(bot, card, user, card_type = 'Review', number = None, logge
 				logger.info("Send Review Card - Utils - {} {}".format(card.get_card_id(), card.get_question()))
 
 			language = card.get_language()
+			topic = card.get_topic()
 			user_id = user.get_id()
 
 			markup = bot_utils.keyboard_remove()
 			bot.send_message(user_id, "*{} card{}!*".format(card_type, number), parse_mode="Markdown", reply_markup=markup)
 			
-			user.set_card_waiting(card.card_id)
+			user.set_card_waiting(card.get_card_id())
+			if logger:
+				logger.debug("Send Review Card -> Set card waiting {}".format(card.get_card_id()))
 			markup = telebot.types.ForceReply(selective = False)
 			question = card.get_question()
 			content = card.get_type()
+
+			special_word = False
+			string_lst = card.foreign_word.split()
+			if string_lst[0] == '&img':
+				special_word = True
+
+			if special_word == True:
+				bot.send_message(user_id, "Try to relate the next message to something you know in *{}/{}*. When you remeber or when you are ready, *send me any message*"
+									.format(treat_msg_to_send(language, "*"), treat_msg_to_send(topic, "*")), parse_mode="Markdown")
+
+
 			if content == 'image':
-				bot.send_message(user_id, "Relate the image to a word in _{}_".format(language), parse_mode="Markdown")
+				if special_word == False:
+					bot.send_message(user_id, "Relate the image to a word in _{}_".format(treat_msg_to_send(language, "_")), parse_mode="Markdown")
 				question = open(question,'rb')
 				print("Send photo {}".format(card.get_question()))
 				bot.send_photo(user_id, question, reply_markup = markup)
 				question.close()
 			elif content == 'audio':
-				bot.send_message(user_id, "Transcribe the audio in _{}_".format(language), parse_mode="Markdown")
+				if special_word == False:
+					bot.send_message(user_id, "Transcribe the audio in _{}_".format(treat_msg_to_send(language, "_")), parse_mode="Markdown")
 				question = open(question,'rb')
 				print("Send voice {}".format(card.get_question()))
 				bot.send_voice(user_id, question, reply_markup = markup)
 				question.close()
 			elif content == 'translation':
-				bot.send_message(user_id, "Translate the word to _{}_".format(language), parse_mode="Markdown")
+				if special_word == False:
+					bot.send_message(user_id, "Translate the word to _{}_".format(treat_msg_to_send(language, "_")), parse_mode="Markdown")
 				print("Send translation {}".format(card.get_question()))
 				bot.send_message(user_id, question, reply_markup = markup)
 			
@@ -147,9 +207,10 @@ def send_review_card(bot, card, user, card_type = 'Review', number = None, logge
 def treat_special_chars(text):
 	ant = text 
 	text = text.strip()
-	text = text.replace('_', ' ')
-	text = text.replace('/', '')
-	text = text.replace('\\', '')
+	#text = text.replace('/', '')
+	text = text.replace('[', '')
+	text = text.replace(']', '')
+	#text = text.replace('\\', '')
 	text = text.strip()
 	text = text.replace('\n', '')
 	print("{} -> treated -> {}".format(ant,text))

@@ -6,11 +6,10 @@ import abc
 from flashcard import Word
 from flashcard import Card
 from database_ops.db_utils import treat_str_SQL, create_card_with_row, create_word_with_row
+from utilities import utils
 import database_ops.topic_ops
 import database_ops.card_ops
-
-
-
+import database_ops.specialword_ops
 
 
 class WordOps():
@@ -20,7 +19,7 @@ class WordOps():
 		self.cursor = cursor
 		self.topic_ops = database_ops.topic_ops.TopicOps(conn,cursor)
 		self.card_ops = database_ops.card_ops.CardOps(conn,cursor)
-
+		self.specialword_ops = database_ops.specialword_ops.SpecialWordOps(self.conn, self.cursor)
 
 
 	def get_highest_word_id(self, user_id):
@@ -65,13 +64,15 @@ class WordOps():
 		self.cursor.execute("INSERT INTO words VALUES ({}, {}, '{}', '{}', '{}')"
 			.format(user_id, word_id, treat_str_SQL(language), treat_str_SQL(topic), treat_str_SQL(foreign_word)))
 
-
 		self.conn.commit()
 		
 		for ctype, card in word.cards.items():
 			if card == None:
 				continue
 			self.card_ops.add_card(card)
+
+		if utils.check_special_word(word.get_word()):
+			self.specialword_ops.add_specialword(word)
 
 		return "Word '{}' and content added successfully!".format(foreign_word)
 
@@ -116,6 +117,9 @@ class WordOps():
 		# erasing the word from the database
 		self.cursor.execute("DELETE FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
 		self.conn.commit()
+
+		if utils.check_special_word(word_text):
+			self.specialword_ops.erase_specialword(word_text)
 
 		#maybe erase topic
 		self.cursor.execute("SELECT topic FROM words WHERE user_id={} AND language='{}' AND topic='{}';".format(user_id, treat_str_SQL(language), treat_str_SQL(topic)))

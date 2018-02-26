@@ -1,6 +1,6 @@
 import telebot
 import fsm
-from utilities import bot_utils
+from utilities import bot_utils, utils
 from flashcard import Word, Card
 from utilities.bot_utils import get_id
 
@@ -51,7 +51,7 @@ def handle_erase_languages(bot, rtd):
 			text = "_Erased languages:_\n"
 			for i in btn_set:
 				print(user.erase_language(btn[i][0]))
-				text += "*." + btn[i][0] + "*\n"
+				text += "*." + utils.treat_msg_to_send(btn[i][0], "*") + "*\n"
 			bot.send_message(user_id, text, parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.ERASE_LANGUAGES, fsm.SELECT_LANGUAGES)]['done'])
 		
