@@ -40,10 +40,9 @@ from utilities import utils, bot_utils, logging_utils
 
 args = sys.argv
 args = args[1:]
-if len(args) > 0 and args[1] == '-debug':
-	debug_mode = True
 debug_mode = False
-
+if len(args) > 0 and args[0] == '-debug':
+	debug_mode = True
 
 logger = logging.getLogger(__name__)
 logging_utils.setup_logger_learnit_bot(logger, debug_mode)
@@ -62,11 +61,14 @@ def signal_handler(sign, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
+
 if debug_mode:
 	sending_manager = subprocess.Popen("gnome-terminal -x ./sending_manager.py -debug", stdout=subprocess.PIPE, shell=True) 		
 else:
 	sending_manager = subprocess.Popen("gnome-terminal -x ./sending_manager.py", stdout=subprocess.PIPE, shell=True)
-	 
+
+
+print(debug_mode) 
 rtd = RuntimeData(debug_mode)
 rtd.reset_all_states()
 
@@ -76,7 +78,7 @@ while True:
 		bot = bot_utils.open_bot(debug_mode, logger)
 
 		#=====================SETUP USER=====================
-		message_handlers.setup_user.handle_setup_user(bot, rtd)
+		message_handlers.setup_user.handle_setup_user(bot, rtd, debug_mode)
 
 
 		#=====================USER DOESN'T EXIST=====================
@@ -104,7 +106,7 @@ while True:
 
 
 		#=====================ADD WORD=====================
-		message_handlers.add_word.handle_add_word(bot,rtd)
+		message_handlers.add_word.handle_add_word(bot,rtd, debug_mode)
 
 		#=====================COPY WORDS=====================
 		message_handlers.copy_words.handle_copy_words(bot,rtd)
@@ -114,7 +116,7 @@ while True:
 
 
 		#=====================ERASE WORD=====================
-		message_handlers.erase_words.handle_erase_words(bot,rtd)
+		message_handlers.erase_words.handle_erase_words(bot,rtd, debug_mode)
 
 
 		#=====================TOPIC REVIEW=====================

@@ -10,9 +10,13 @@ import os
 
 class SpecialWordOps():
 
-	def __init__(self, conn, cursor):
+	def __init__(self, conn, cursor, debug_mode):
+		self.debug_mode = debug_mode
 		self.logger = logging.getLogger(__name__)
-		logging_utils.setup_logger_default(self.logger, '../logs/specialwords_ops.log')
+		path = '../logs/specialwords_ops.log'
+		if debug_mode:
+			path = '../logs_debug/specialwords_ops.log'
+		logging_utils.setup_logger_default(self.logger, path)
 		self.conn = conn
 		self.cursor = cursor
 

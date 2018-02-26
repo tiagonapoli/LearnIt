@@ -14,12 +14,13 @@ import database_ops.specialword_ops
 
 class WordOps():
 
-	def __init__(self, conn, cursor):
+	def __init__(self, conn, cursor, debug_mode):
+		self.debug_mode = debug_mode
 		self.conn = conn
 		self.cursor = cursor
-		self.topic_ops = database_ops.topic_ops.TopicOps(conn,cursor)
-		self.card_ops = database_ops.card_ops.CardOps(conn,cursor)
-		self.specialword_ops = database_ops.specialword_ops.SpecialWordOps(self.conn, self.cursor)
+		self.topic_ops = database_ops.topic_ops.TopicOps(conn,cursor, debug_mode)
+		self.card_ops = database_ops.card_ops.CardOps(conn,cursor, debug_mode)
+		self.specialword_ops = database_ops.specialword_ops.SpecialWordOps(self.conn, self.cursor, debug_mode)
 
 
 	def get_highest_word_id(self, user_id):
@@ -30,19 +31,6 @@ class WordOps():
 		return row[0][0]
 
 	def add_word(self, word):
-		"""Adds a new word to the database.
-		
-		Args:
-			user_id: An integer representing the user's id.
-			lst: A list containing: language, word in foreign language, word in english, path to content 1,
-				path to content 2, ..., path to content n
-
-		Returns:
-			A string containing a message to the user. This string can be:
-			- "Word and content added successfully!", if the operation succeeds.
-			- "{} is already in your words".
-			In the above example, {} means the word which is beeing added.
-		"""
 		user_id = word.get_user()
 		word_id = word.get_word_id()
 		language = word.get_language()
@@ -85,18 +73,6 @@ class WordOps():
 		return False, -1
 
 	def erase_word(self, user_id, word_id):
-		"""Erases a word from the database.
-
-		Args:
-			user_id: An integer representing the user's id.
-			word_id: An integer representing the word's id between all the user's words.
-
-		Returns:
-			A string containing a message to the user. This string can be:
-			- "Word erased successfully!", if the operation succeeds.
-			- "Invalid word", if the operation fails.
-		"""
-
 		self.cursor.execute("SELECT language,topic,foreign_word FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
 		rows = self.cursor.fetchall()
 
@@ -128,7 +104,16 @@ class WordOps():
 		if len(rows) == 0:
 			self.topic_ops.erase_topic_empty_words(user_id, language, topic)
 
-		if os.path.exists('../data/{}/{}'.format(user_id, word_id)):
+		if self.debug_mode:
+			if os.path.exists('../data_debug/{}/{}'.format(user_id, word_id)):
+				try:
+					os.rmdir('../data_debug/{}/{}'.format(user_id, word_id))
+					print("Erased directory {}".format('../data_debug/{}/{}'.format(user_id, word_id)))
+				except Exception as e:
+					print("ERROR in erase_word - directory {}".format('../data_debug/{}/{}'.format(user_id, word_id)))
+					print(e)
+		else:
+			if os.path.exists('../data/{}/{}'.format(user_id, word_id)):
 				try:
 					os.rmdir('../data/{}/{}'.format(user_id, word_id))
 					print("Erased directory {}".format('../data/{}/{}'.format(user_id, word_id)))
@@ -140,24 +125,6 @@ class WordOps():
 
 
 	def get_word(self, user_id, word_id):
-		"""Gets all the information about the select word of the user.
-		
-		Args:
-			user_id: An integer representing the user's id.
-			word_id: An integer representing the word's id between the user's words.
-
-		Returns:
-			A tuble with the following information:
-			- An integer representing the user's id.
-			- A string containing the language that the word belongs.
-			- A string containing the word in the foreign language.
-			- A string containing the translation in english of the word.
-			- An integer representing the id of the word between the user's words.
-			- An integer containing the number of attempts the user did for this word.
-			- A real number representing the current easiness factor of the word.
-			- A real number representing the interval time between consecutive send of the word.
-			- A string representing the date of the next send of the word, in the form yyyy-mm-dd.
-		"""
 		self.cursor.execute("SELECT * FROM words WHERE user_id={} AND user_word_id={};".format(user_id, word_id))
 		general_info = self.cursor.fetchall()
 		self.cursor.execute("SELECT * FROM cards WHERE user_id={} and user_word_id={};".format(user_id, word_id))
@@ -183,23 +150,6 @@ class WordOps():
 
 
 	def get_all_words(self, user_id):
-		"""Gets all the information about all the words of the user
-
-		Args:
-			user_id: An integer representing the user's id.
-
-		Returns:
-			A list of tuples with the following information about the words:
-			- An integer representing the user's id.
-			- A string containing the language that the word belongs.
-			- A string containing the word in the foreign language.
-			- A string containing the translation in english of the word.
-			- An integer representing the id of the word between the user's words.
-			- An integer containing the number of attempts the user did for this word.
-			- A real number representing the current easiness factor of the word.
-			- A real number representing the interval time between consecutive send of the word.
-			- A string representing the date of the next send of the word, in the form yyyy-mm-dd.
-		"""
 		self.cursor.execute("SELECT * FROM words WHERE user_id={};".format(user_id))
 		row = self.cursor.fetchall()
 		

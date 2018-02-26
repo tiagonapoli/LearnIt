@@ -13,7 +13,7 @@ GET_TOPIC = 7
 GET_WORD = 8
 SEND_IMAGE = 9
 SEND_AUDIO = 11
-SEND_TRANSLATION = 13
+SEND_TEXT = 13
 RELATE_MENU = 15
 LIST_WORDS = 17
 ERASE_WORDS = 18
@@ -73,16 +73,16 @@ next_state.update({
 	(ADD_WORD, GET_IMAGE): {'done': (ADD_WORD, RELATE_MENU)},
 	(ADD_WORD, RELATE_MENU): {'Send audio': (ADD_WORD, SEND_AUDIO),
 							  'Send image': (ADD_WORD, SEND_IMAGE),
-							  'Send translation': (ADD_WORD, SEND_TRANSLATION),
+							  'Send text': (ADD_WORD, SEND_TEXT),
 			  				  'continue': (ADD_WORD, RELATE_MENU),
 			  				  'done': (ADD_WORD, GET_CONTINUE)},
 	(ADD_WORD, SEND_IMAGE): {'Send audio': (ADD_WORD, SEND_AUDIO),
-							  'Send translation': (ADD_WORD, SEND_TRANSLATION),
-			  				  'done': (ADD_WORD, GET_CONTINUE),
+							  'Send text': (ADD_WORD, SEND_TEXT),
+			  				  'done': (ADD_WORD, GET_CONTINUE)},
 	(ADD_WORD, SEND_AUDIO): {'Send image': (ADD_WORD, SEND_IMAGE),
-							 'Send translation': (ADD_WORD, SEND_TRANSLATION),
+							 'Send text': (ADD_WORD, SEND_TEXT),
 			  				 'done': (ADD_WORD, GET_CONTINUE)},
-	(ADD_WORD, SEND_TRANSLATION): {'Send image': (ADD_WORD, SEND_IMAGE),
+	(ADD_WORD, SEND_TEXT): {'Send image': (ADD_WORD, SEND_IMAGE),
 							  	   'Send audio': (ADD_WORD, SEND_AUDIO),
 			  				  	   'done': (ADD_WORD, GET_CONTINUE)},
 	(ADD_WORD, GET_CONTINUE): {'done': IDLE,

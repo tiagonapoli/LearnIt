@@ -99,7 +99,7 @@ def handle_list_words(bot, rtd):
 		for word in words:
 			string_lst = word.get_word().split()
 			if string_lst[0] == '&img':
-				text += "*." + utils.treat_msg_to_send(word.cards['translation'].get_question(), "*") + "*\n"
+				text += "*." + utils.treat_msg_to_send(word.cards['text'].get_question(), "*") + "*\n"
 			else:
 				text += "*." + utils.treat_msg_to_send(word.get_word(), "*") + "*\n"
 

@@ -51,13 +51,13 @@ class Database():
 		self.cursor = self.conn.cursor()
 		print("Connected with database!")
 		
-		self.word_ops = database_ops.word_ops.WordOps(self.conn, self.cursor)
-		self.archive_ops = database_ops.archive_ops.ArchiveOps(self.conn, self.cursor)
-		self.user_ops = database_ops.user_ops.UserOps(self.conn, self.cursor)
-		self.topic_ops = database_ops.topic_ops.TopicOps(self.conn, self.cursor)
-		self.language_ops = database_ops.language_ops.LanguageOps(self.conn, self.cursor)
-		self.card_ops = database_ops.card_ops.CardOps(self.conn, self.cursor)
-		self.specialword_ops = database_ops.specialword_ops.SpecialWordOps(self.conn, self.cursor)
+		self.word_ops = database_ops.word_ops.WordOps(self.conn, self.cursor, debug_mode)
+		self.archive_ops = database_ops.archive_ops.ArchiveOps(self.conn, self.cursor, debug_mode)
+		self.user_ops = database_ops.user_ops.UserOps(self.conn, self.cursor, debug_mode)
+		self.topic_ops = database_ops.topic_ops.TopicOps(self.conn, self.cursor, debug_mode)
+		self.language_ops = database_ops.language_ops.LanguageOps(self.conn, self.cursor, debug_mode)
+		self.card_ops = database_ops.card_ops.CardOps(self.conn, self.cursor, debug_mode)
+		self.specialword_ops = database_ops.specialword_ops.SpecialWordOps(self.conn, self.cursor, debug_mode)
 
 
 	def __del__(self):

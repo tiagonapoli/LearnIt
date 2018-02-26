@@ -6,7 +6,7 @@ from flashcard import Word, Card
 from utilities.bot_utils import get_id
 
 
-def handle_erase_words(bot, rtd):	
+def handle_erase_words(bot, rtd, debug_mode):	
 
 	#=====================ERASE WORDS=====================
 	@bot.message_handler(func = lambda msg:

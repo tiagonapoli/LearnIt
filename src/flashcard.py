@@ -164,7 +164,7 @@ class Card(TimeControl, WordInfo):
 		self.archives.append(archive)
 
 	def erase_all_archives_local(self):
-		if self.content_type != 'translation' and self.content_type != 'default':
+		if self.content_type != 'text' and self.content_type != 'default':
 			for archive in self.archives:
 				try:
 					os.remove(archive)
@@ -174,11 +174,6 @@ class Card(TimeControl, WordInfo):
 		self.archives = []
 
 	def get_question(self):
-		"""
-			Returns path to the image or audio if the question
-			is that. Returns english translation if the question
-			is the english translation
-		"""
 		rand = randint(0,len(self.archives)-1)
 		return self.archives[rand]
 

@@ -287,6 +287,7 @@ class RuntimeData:
 	"""
 
 	def __init__(self, debug_mode):
+		self.debug_mode = debug_mode
 		self.db = Database(debug_mode)
 		known_users = self.db.get_known_users()
 		self.users = {}
@@ -378,17 +379,20 @@ class RuntimeData:
 				cnt_card += 1
 				for i in range(0, len(card.archives)):
 					archive = card.archives[i]
-					if card.get_type() == 'translation':
+					if card.get_type() == 'text':
 						break
 					prev_path = archive
 					next_path = '../data/{}/{}/{}'.format(user_id, word.word_id, card.card_id) + utils.get_file_extension(archive)
+					if self.debug_mode:
+						next_path = '../data_debug/{}/{}/{}'.format(user_id, word.word_id, card.card_id) + utils.get_file_extension(archive)
+						
 					card.archives[i] = next_path
-					utils.create_dir_card_archive(user_id, word.word_id)
+					utils.create_dir_card_archive(user_id, word.word_id, self.debug_mode)
 					os.system("cp -TRv {} {}".format(prev_path, next_path))
 			exist, aux_word_id = user_dest.check_word_existence(word.language, word.topic, word.foreign_word)
 			if exist == True and overwrite == True:
 				if utils.check_special_word(word.get_word()):
-					ret.append(word.cards['translation'].get_question())
+					ret.append(word.cards['text'].get_question())
 				else:
 					ret.append(word.get_word())
 				user_dest.erase_word(aux_word_id)

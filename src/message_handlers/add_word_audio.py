@@ -6,7 +6,7 @@ from utilities import bot_utils
 from flashcard import Word, Card
 from utilities.bot_utils import get_id
 
-def handle_add_word_audio(bot, rtd):
+def handle_add_word_audio(bot, rtd, debug_mode):
 
 	@bot.message_handler(func = lambda msg: rtd.get_user(get_id(msg)).get_state() == (fsm.ADD_WORD, fsm.SEND_AUDIO),
 						 content_types=['audio', 'voice'])
@@ -25,15 +25,19 @@ def handle_add_word_audio(bot, rtd):
 					card_id, 'audio')
 		
 		filename = card_id
+		data_path = "../data/{}/{}/".format(user_id, word.get_word_id())
+		if debug_mode:
+			data_path = "../data_debug/{}/{}/".format(user_id, word.get_word_id())
+
 		path = ""
 		if msg.audio != None:
 			path = utils.save_audio(msg,
-								"../data/{}/{}/".format(user_id, word.get_word_id()), 
+								data_path, 
 								"{}".format(filename), 
 								bot)
 		elif msg.voice != None:
 			path = utils.save_voice(msg,
-								"../data/{}/{}/".format(user_id, word.get_word_id()), 
+								data_path, 
 								"{}".format(filename), 
 								bot)
 
@@ -51,9 +55,10 @@ def handle_add_word_audio(bot, rtd):
 			topic = user.temp_word.get_topic()
 			
 			options = ['Yes', 'No']
-			markup = bot_utils.create_keyboard(topics, 2)
+			user.keyboard_options = options
+			markup = bot_utils.create_keyboard(options, 2)
 			text = "_Would you like to add more words in_ *{}*_, in topic_ *{}*_?_\n".format(
-						treat_msg_to_send(language, "*"), treat_msg_to_send(topic, "*")) + bot_utils.create_string_keyboard(options)
+						utils.treat_msg_to_send(language, "*"), utils.treat_msg_to_send(topic, "*")) + bot_utils.create_string_keyboard(options)
 			bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")		
 			
 			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.SEND_AUDIO)]['done'])

@@ -9,10 +9,11 @@ import database_ops.archive_ops
 
 class CardOps():
 
-	def __init__(self, conn, cursor):
+	def __init__(self, conn, cursor, debug_mode):
+		self.debug_mode = debug_mode
 		self.conn = conn
 		self.cursor = cursor
-		self.archive_ops = database_ops.archive_ops.ArchiveOps(conn,cursor)
+		self.archive_ops = database_ops.archive_ops.ArchiveOps(conn,cursor, debug_mode)
 
 	def get_highest_card_id(self, user_id):
 		self.cursor.execute("SELECT highest_card_id FROM users WHERE id={}".format(user_id))

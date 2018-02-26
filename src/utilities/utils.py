@@ -53,10 +53,13 @@ def get_file_extension(filename):
 	return extension 
 
 
-def create_dir_card_archive(user_id, word_id):
-	if not os.path.exists('../data/{}/{}'.format(user_id, word_id)):
-		os.makedirs('../data/{}/{}'.format(user_id, word_id))
-
+def create_dir_card_archive(user_id, word_id, debug_mode):
+	if debug_mode:
+		if not os.path.exists('../data_debug/{}/{}'.format(user_id, word_id)):
+			os.makedirs('../data_debug/{}/{}'.format(user_id, word_id))
+	else:
+		if not os.path.exists('../data/{}/{}'.format(user_id, word_id)):	
+					os.makedirs('../data/{}/{}'.format(user_id, word_id))
 
 def treat_username_str(username):
 	if username[0] == '@':
@@ -67,7 +70,7 @@ def get_foreign_word(word):
 	string_lst = word.get_word().split()
 	print(word.get_word())
 	if string_lst[0] == '&img':
-		return word.cards['translation'].get_question()
+		return word.cards['text'].get_question()
 	return word.get_word()
 
 def words_to_string_list(words):
@@ -112,7 +115,7 @@ def send_ans_card(bot, card, query_type, logger=None):
 		question = open(question,'rb')
 		bot.send_voice(user_id, question, reply_markup = markup)
 		question.close()
-	elif content == 'translation':
+	elif content == 'text':
 		bot.send_message(user_id, "*Text answer:*",reply_markup = markup, parse_mode="Markdown")
 		bot.send_message(user_id, question, reply_markup = markup)
 	signal.alarm(0)
@@ -165,27 +168,26 @@ def send_review_card(bot, card, user, card_type = 'Review', number = None, logge
 			if special_word == True:
 				bot.send_message(user_id, "Try to relate the next message to something you know in *{}/{}*. When you remeber or when you are ready, *send me any message*"
 									.format(treat_msg_to_send(language, "*"), treat_msg_to_send(topic, "*")), parse_mode="Markdown")
-
-
-			if content == 'image':
-				if special_word == False:
-					bot.send_message(user_id, "Relate the image to a word in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
-				question = open(question,'rb')
-				print("Send photo {}".format(card.get_question()))
-				bot.send_photo(user_id, question, reply_markup = markup)
-				question.close()
-			elif content == 'audio':
-				if special_word == False:
-					bot.send_message(user_id, "Transcribe the audio in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
-				question = open(question,'rb')
-				print("Send voice {}".format(card.get_question()))
-				bot.send_voice(user_id, question, reply_markup = markup)
-				question.close()
-			elif content == 'translation':
-				if special_word == False:
-					bot.send_message(user_id, "Relate the text to a word in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
-				print("Send translation {}".format(card.get_question()))
-				bot.send_message(user_id, question, reply_markup = markup)
+			else:
+				if content == 'image':
+					if special_word == False:
+						bot.send_message(user_id, "Relate the image to a word in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
+					question = open(question,'rb')
+					print("Send photo {}".format(card.get_question()))
+					bot.send_photo(user_id, question, reply_markup = markup)
+					question.close()
+				elif content == 'audio':
+					if special_word == False:
+						bot.send_message(user_id, "Transcribe the audio in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
+					question = open(question,'rb')
+					print("Send voice {}".format(card.get_question()))
+					bot.send_voice(user_id, question, reply_markup = markup)
+					question.close()
+				elif content == 'text':
+					if special_word == False:
+						bot.send_message(user_id, "Relate the text to a word in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
+					print("Send text {}".format(card.get_question()))
+					bot.send_message(user_id, question, reply_markup = markup)
 			
 			signal.alarm(0)
 			return True
@@ -306,7 +308,10 @@ def backup(db, debug_mode):
 	print("BACKUP PATH= " + PATH)
 	try:
 		print(db.backup(PATH))
-		os.system("cp -TRv ../data/ {}data".format(PATH))
+		if debug_mode:
+			os.system("cp -TRv ../data_debug/ {}data".format(PATH))
+		else:
+			os.system("cp -TRv ../data/ {}data".format(PATH))
 		return "Data backup was successfull"
 	except Exception as e:
 		print(e);

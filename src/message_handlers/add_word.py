@@ -1,7 +1,7 @@
 import telebot
 import fsm
 import message_handlers.add_word_audio
-import message_handlers.add_word_translation
+import message_handlers.add_word_text
 import message_handlers.add_word_images
 from utilities import utils
 from utilities import bot_utils
@@ -18,7 +18,7 @@ def prepare_to_receive(bot, user, content_type):
 	print("content type = {}".format(content_type_aux))
 
 	article = 'an'
-	if content_type_aux == 'translation':
+	if content_type_aux == 'text':
 		article = 'a'
 
 	bot.send_message(user_id,"Send {} *{}*:".format(article, content_type_aux), parse_mode="Markdown")
@@ -32,7 +32,7 @@ def save_word(bot, user):
 	user.add_word(word)
 	bot.send_message(user.get_id(), "_Successfully done!_", parse_mode="Markdown")
 
-def handle_add_word(bot, rtd):
+def handle_add_word(bot, rtd, debug_mode):
 
 
 
@@ -166,8 +166,8 @@ def handle_add_word(bot, rtd):
 
 		exist, aux_word_id = user.check_word_existence(word.language, word.topic, word.foreign_word)
 		if exist == True:
-			bot.send_message(user_id, "This word is already registered, if you want to add it anyway, please, erase it first.")
-			fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)]['error_idle']
+			bot.send_message(user_id, "This word is already registered, if you want to add it anyway, please, erase it first. The process will be canceled")
+			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)]['error_idle'])
 			return
 
 
@@ -261,13 +261,13 @@ def handle_add_word(bot, rtd):
 
 
 	#=================GET AUDIO=================
-	message_handlers.add_word_audio.handle_add_word_audio(bot, rtd)
+	message_handlers.add_word_audio.handle_add_word_audio(bot, rtd, debug_mode)
 
-	#=================GET TRANSLATION=================
-	message_handlers.add_word_translation.handle_add_word_translation(bot, rtd)
+	#=================GET TEXT=================
+	message_handlers.add_word_text.handle_add_word_text(bot, rtd)
 
 	#=================GET IMAGES=================
-	message_handlers.add_word_images.handle_add_word_images(bot, rtd)
+	message_handlers.add_word_images.handle_add_word_images(bot, rtd, debug_mode)
 	
 	
 	@bot.message_handler(func = lambda msg:
@@ -286,14 +286,19 @@ def handle_add_word(bot, rtd):
 			return
 			
 		if should_continue == 'No':
-			bot.send_message(user.get_id(), "_OK!_", parse_mode="Markdown")
+			markup = bot_utils.keyboard_remove()
+			bot.send_message(user.get_id(), "_OK!_",reply_markup=markup, parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_CONTINUE)]['done'])
 			return
 
 		word =	user.temp_word
 		language = word.get_language()
 		topic = word.get_topic()
-		
+
+		markup = bot_utils.keyboard_remove()
+		bot.send_message(user_id, "Word's topic: *{}*".format(utils.treat_msg_to_send(topic, "*")), reply_markup=markup, parse_mode="Markdown")
+		bot.send_message(user_id, "*Send word to add* (in _{}_)".format(utils.treat_msg_to_send(language, "_")), parse_mode="Markdown")
+
 		user.temp_word = Word(user_id, user.get_highest_word_id() + 1)
 		user.temp_word.language = language
 		user.temp_word.topic = topic

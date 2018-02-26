@@ -38,11 +38,11 @@ def stack_to_str(stack):
 
 class UserCardQueue():
 
-	def __init__(self, user, bot):
+	def __init__(self, user, bot, debug_mode):
 		self.user = user
 		self.user_id = self.user.get_id()
 		self.logger = logging.getLogger(__name__ + str(self.user_id))
-		logging_utils.setup_logger_UserCardQueue(self.logger, self.user_id)
+		logging_utils.setup_logger_UserCardQueue(self.logger, self.user_id, debug_mode)
 		logging_utils.add_bot_handler(self.logger, bot)
 
 		

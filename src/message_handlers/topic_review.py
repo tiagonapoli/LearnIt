@@ -1,8 +1,5 @@
 import telebot
 import fsm
-import message_handlers.add_word_audio
-import message_handlers.add_word_translation
-import message_handlers.add_word_images
 from flashcard import Word, Card
 from utilities.bot_utils import get_id
 from random import shuffle
@@ -158,6 +155,7 @@ def handle_topic_review(bot, rtd):
 		
 		shuffle(user.cards_to_review)
 		utils.send_review_card(bot, user.cards_to_review[0], user, "Review", user.review_card_number, set_card_db=False)
+		user.temp_card = user.cards_to_review[0]
 		user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_NUMBER)]['done'])
 
 
@@ -173,11 +171,9 @@ def handle_topic_review(bot, rtd):
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 
-		card_id = user.get_card_waiting()
-		card = user.get_card(card_id)
+		card = user.temp_card
 		res = utils.treat_special_chars(msg.text.lower())
 		
-		user.temp_card = card
 		string_lst = card.get_word().split()
 		if string_lst[0] != '&img':
 			if res == card.foreign_word.lower():
@@ -201,6 +197,7 @@ def handle_topic_review(bot, rtd):
 
 		if user.counter > 0:
 			utils.send_review_card(bot, user.cards_to_review[user.pos], user, "Review",  user.review_card_number, set_card_db=False)
+			user.temp_card = user.cards_to_review[user.pos]
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.WAITING_CARD_ANS)]['continue'])
 		else:
 			bot.send_message(user_id, "*Review session done!*", parse_mode="Markdown")

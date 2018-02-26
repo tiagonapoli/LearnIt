@@ -7,4 +7,6 @@ src/database_ops/__pycache__/*
 src/backup_tools/__pycache__/*
 src/utilities/__pycache__/*
 data/*
+data_debug/*
 backup/*
+backup_debug/*

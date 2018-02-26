@@ -13,12 +13,12 @@ import logging
 
 args = sys.argv
 args = args[1:]
-if len(args) > 0 and args[1] == '-debug':
-	debug_mode = True
 debug_mode = False
+if len(args) > 0 and args[0] == '-debug':
+	debug_mode = True
 
 logger = logging.getLogger(__name__)
-logging_utils.setup_logger_sending_manager(logger)
+logging_utils.setup_logger_sending_manager(logger, debug_mode)
 
 
 def signal_handler(sign, frame):
@@ -73,7 +73,7 @@ while True:
 				user_queues[user_id].init_day()
 
 			if not (user_id in user_queues.keys()):
-				user_queues[user_id] = UserCardQueue(user, bot)
+				user_queues[user_id] = UserCardQueue(user, bot, debug_mode)
 
 			if  cycles % 2 == 0:
 				user_queues[user_id].upd_cards_expired() 				
@@ -114,7 +114,7 @@ while True:
 			
 		sleep = 300
 		if debug_mode:
-			sleep = 10
+			sleep = 4
 		logger.info("Sleep {}".format(sleep))
 		time.sleep(sleep)
 

@@ -6,10 +6,13 @@ from utilities import logging_utils
 
 logger = None
 
-def handle_setup_user(bot, rtd):
+def handle_setup_user(bot, rtd, debug_mode):
 
 	logger = logging.getLogger(__name__)
-	logging_utils.setup_logger_default(logger, '../logs/setup_user.log', bot)
+	path = '../logs/setup_user.log'
+	if debug_mode:
+		path = '../logs_debug/setup_user.log'
+	logging_utils.setup_logger_default(logger, path, bot)
 
 	welcome = ("Use the command /add_language to add the languages you are interested in learning and then use the command /add_word to add words you are interested in memorizing, " +
 			"or just use the command /copy_words to copy words from other users. During any process you can use /cancel to cancel the ongoing events, if you made a mistake, for example.")

@@ -11,10 +11,11 @@ import database_ops.word_ops
 
 class LanguageOps():
 
-	def __init__(self, conn, cursor):
+	def __init__(self, conn, cursor, debug_mode):
+		self.debug_mode = debug_mode
 		self.conn = conn
 		self.cursor = cursor
-		self.word_ops = database_ops.word_ops.WordOps(conn,cursor)
+		self.word_ops = database_ops.word_ops.WordOps(conn,cursor, debug_mode)
 
 
 	def add_language(self, user_id, language):

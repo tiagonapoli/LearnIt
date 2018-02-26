@@ -3,7 +3,8 @@ import os
 
 class ArchiveOps():
 
-	def __init__(self, conn, cursor):
+	def __init__(self, conn, cursor, debug_mode):
+		self.debug_mode = debug_mode
 		self.conn = conn
 		self.cursor = cursor
 

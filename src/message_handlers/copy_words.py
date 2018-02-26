@@ -1,8 +1,5 @@
 import telebot
 import fsm
-import message_handlers.add_word_audio
-import message_handlers.add_word_translation
-import message_handlers.add_word_images
 from utilities import utils
 from utilities import bot_utils
 from flashcard import Word, Card
@@ -42,7 +39,7 @@ def handle_copy_words(bot, rtd):
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 
-		username = utils.treat_username_str(msg.text)
+		username = msg.text
 		valid, user2 = rtd.get_user_by_username(username)
 		user.temp_user = user2
 
@@ -51,7 +48,7 @@ def handle_copy_words(bot, rtd):
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_USER)]['error'])
 			return
 
-		if username == user.get_username():
+		if user.get_id() == user2.get_id():
 			bot.reply_to(msg, "You can't copy from yourself! Please, if you still want to copy from a user, send /copy_words again.")
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_USER)]['error'])
 			return

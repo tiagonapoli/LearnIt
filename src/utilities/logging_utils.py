@@ -55,8 +55,7 @@ def setup_logger_default(logger, path, bot=None):
 	pos = PATH.rfind('/')
 	filename = PATH[pos+1:]
 	PATH = PATH[:pos+1]
-	print("setup_logger_defaul {} {}".format(PATH, filename))
-	print(filename)
+
 	
 	if not os.path.exists(PATH):
 		os.makedirs(PATH)
@@ -86,7 +85,7 @@ def setup_logger_default(logger, path, bot=None):
 def setup_logger_sending_manager(logger, debug_mode):
 	PATH = '../logs/sending_manager/'
 	if debug_mode:
-		PATH = '../logs_debug_mode/sending_manager/'
+		PATH = '../logs_debug/sending_manager/'
 	
 	if not os.path.exists(PATH):
 		os.makedirs(PATH)
@@ -111,12 +110,12 @@ def setup_logger_sending_manager(logger, debug_mode):
 def setup_logger_learnit_bot(logger, debug_mode):
 	PATH = '../logs/'
 	if debug_mode:
-		PATH = '../logs_debug_mode/'
+		PATH = '../logs_debug/'
 	
 	if not os.path.exists(PATH):
 		os.makedirs(PATH)
 		
-	PATH += learnit.log
+	PATH += 'learnit.log'
 	
 	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s  %(levelname)-8s %(message)s\n',
@@ -143,10 +142,10 @@ def add_bot_handler(logger, bot):
 	logger.addHandler(handler_bot)
 
 
-def setup_logger_UserCardQueue(logger, user_id):
+def setup_logger_UserCardQueue(logger, user_id, debug_mode):
 	PATH = '../logs/sending_manager/'
 	if debug_mode:
-		PATH = '../logs_debug_mode/sending_manager/'.format(user_id)
+		PATH = '../logs_debug/sending_manager/'.format(user_id)
 	
 	if not os.path.exists(PATH):
 		os.makedirs(PATH)
