@@ -13,7 +13,7 @@ def handle_list_words(bot, rtd):
 					(rtd.get_user(get_id(msg)).get_state() == fsm.IDLE and
 					 rtd.get_user(get_id(msg)).get_active() == 1), 
 					commands = ['list_words'])
-	def erase_words(msg):
+	def list_words(msg):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
@@ -23,7 +23,7 @@ def handle_list_words(bot, rtd):
 		if len(known_languages) == 0:
 			bot.send_message(user_id, "_Please, add a language first._", parse_mode="Markdown")
 			user.set_state(fsm.IDLE)
-			return 	
+			return
 
 		markup = bot_utils.create_keyboard(known_languages, 2)
 		text = "*Please select the language:*\n" + bot_utils.create_string_keyboard(known_languages)
@@ -38,7 +38,7 @@ def handle_list_words(bot, rtd):
 	@bot.message_handler(func = lambda msg:
 					rtd.get_user(get_id(msg)).get_state() == (fsm.LIST_WORDS, fsm.GET_LANGUAGE),
 					content_types=['text'])
-	def erase_words1(msg):
+	def list_words1(msg):
 		"""
 			Get word's language
 		"""
@@ -93,17 +93,48 @@ def handle_list_words(bot, rtd):
 			bot.reply_to(msg, "*Please choose from options.*", parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.GET_TOPIC)]['error'])
 			return	
-		
-		words = user.get_words_on_topic(language, topic)
-		text = "_Language:_ *{}*\n_Topic:_ *{}*\n_Words:_\n".format(utils.treat_msg_to_send(language, "*"),utils.treat_msg_to_send(topic, "*"))
-		for word in words:
-			string_lst = word.get_word().split()
-			if string_lst[0] == '&img':
-				text += "*." + utils.treat_msg_to_send(word.cards['text'].get_question(), "*") + "*\n"
-			else:
-				text += "*." + utils.treat_msg_to_send(word.get_word(), "*") + "*\n"
 
+
+
+		words = user.get_words_on_topic(language, topic)
+		words_string = utils.words_to_string_list(words)
+		btn = bot_utils.create_inline_keys_sequential(words_string)
 		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
+		bot.send_message(user_id, "...", reply_markup=markup)
+		btn_set = set()
+		markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 2, ("End selection", "DONE"))
+
+		user.btn_set = btn_set
+		user.keyboard_options = btn
+		user.temp_words_list = words
+		bot.send_message(user_id, "_Select the words you want to see the related media:_", reply_markup=markup, parse_mode="Markdown")
 		user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.GET_TOPIC)]['done'])
 
+
+	@bot.callback_query_handler(func=lambda call:
+							rtd.get_user(get_id(call.message)).get_state() == (fsm.LIST_WORDS, fsm.SELECT_WORDS))
+
+	def callback_select_words(call):
+		user = rtd.get_user(get_id(call.message))
+		user_id = user.get_id()
+		user.set_state(fsm.LOCKED)
+		print("CALLBACK TEXT: {}   DATA: {}".format(call.message.text,call.data))
+
+		btn_set = user.btn_set
+		btn_set, done = bot_utils.parse_selection_inline_keyboard_ans(call.data, btn_set)
+		btn = user.keyboard_options
+		
+		if done == True:
+			bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
+			words = user.temp_words_list
+			text = "_Erased words:_\n"
+			for i in btn_set:
+				# print(user.erase_word(words[i].get_word_id()))
+				bot.send_message(user_id, "*Word: *_{}_".format(utils.treat_msg_to_send(utils.get_foreign_word(words[i]), "_")))
+				utils.send_all_cards(words[i])
+			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.SELECT_WORDS)]['done'])		
+		else:
+			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 2, ("End selection", "DONE"))
+			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="_Select the words you want to see the related media:_",
+			 reply_markup=markup)
+			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.SELECT_WORDS)]['continue'])
