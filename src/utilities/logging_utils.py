@@ -50,6 +50,10 @@ class BotHandler(logging.Handler): # Inherit from logging.Handler
 
 
 def setup_logger_default(logger, path, bot=None):
+
+	for handler in logger.handlers[:]:
+		logger.removeHandler(handler)
+
 	PATH = path
 	
 	pos = PATH.rfind('/')
@@ -83,6 +87,10 @@ def setup_logger_default(logger, path, bot=None):
 
 
 def setup_logger_sending_manager(logger, debug_mode):
+
+	for handler in logger.handlers[:]:
+		logger.removeHandler(handler)
+
 	PATH = '../logs/sending_manager/'
 	if debug_mode:
 		PATH = '../logs_debug/sending_manager/'
@@ -108,6 +116,10 @@ def setup_logger_sending_manager(logger, debug_mode):
 	logger.setLevel(logging.DEBUG)
 
 def setup_logger_learnit_bot(logger, debug_mode):
+
+	for handler in logger.handlers[:]:
+		logger.removeHandler(handler)
+
 	PATH = '../logs/'
 	if debug_mode:
 		PATH = '../logs_debug/'
@@ -143,6 +155,9 @@ def add_bot_handler(logger, bot):
 
 
 def setup_logger_UserCardQueue(logger, user_id, debug_mode):
+	for handler in logger.handlers[:]:
+		logger.removeHandler(handler)
+
 	PATH = '../logs/sending_manager/'
 	if debug_mode:
 		PATH = '../logs_debug/sending_manager/'.format(user_id)

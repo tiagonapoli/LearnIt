@@ -168,26 +168,25 @@ def send_review_card(bot, card, user, card_type = 'Review', number = None, logge
 			if special_word == True:
 				bot.send_message(user_id, "Try to relate the next message to something you know in *{}/{}*. When you remeber or when you are ready, *send me any message*"
 									.format(treat_msg_to_send(language, "*"), treat_msg_to_send(topic, "*")), parse_mode="Markdown")
-			else:
-				if content == 'image':
-					if special_word == False:
-						bot.send_message(user_id, "Relate the image to a word in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
-					question = open(question,'rb')
-					print("Send photo {}".format(card.get_question()))
-					bot.send_photo(user_id, question, reply_markup = markup)
-					question.close()
-				elif content == 'audio':
-					if special_word == False:
-						bot.send_message(user_id, "Transcribe the audio in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
-					question = open(question,'rb')
-					print("Send voice {}".format(card.get_question()))
-					bot.send_voice(user_id, question, reply_markup = markup)
-					question.close()
-				elif content == 'text':
-					if special_word == False:
-						bot.send_message(user_id, "Relate the text to a word in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
-					print("Send text {}".format(card.get_question()))
-					bot.send_message(user_id, question, reply_markup = markup)
+			if content == 'image':
+				if special_word == False:
+					bot.send_message(user_id, "Relate the image to a word in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
+				question = open(question,'rb')
+				print("Send photo {}".format(card.get_question()))
+				bot.send_photo(user_id, question, reply_markup = markup)
+				question.close()
+			elif content == 'audio':
+				if special_word == False:
+					bot.send_message(user_id, "Transcribe the audio in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
+				question = open(question,'rb')
+				print("Send voice {}".format(card.get_question()))
+				bot.send_voice(user_id, question, reply_markup = markup)
+				question.close()
+			elif content == 'text':
+				if special_word == False:
+					bot.send_message(user_id, "Relate the text to a word in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
+				print("Send text {}".format(card.get_question()))
+				bot.send_message(user_id, question, reply_markup = markup)
 			
 			signal.alarm(0)
 			return True
@@ -319,10 +318,12 @@ def backup(db, debug_mode):
 
 
 
-def turn_off(db, debug_mode):
+def turn_off(rtd, bot, debug_mode):
 	"""
 		Safely turns of LingoBot. Makes a backup of the data (future)
 	"""
-	print(backup(db, debug_mode))
+
+	rtd.reset_all_states_turn_off(bot)
+	print(backup(rtd, debug_mode))
 	
 	pass

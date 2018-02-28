@@ -46,14 +46,19 @@ class UserCardQueue():
 		logging_utils.add_bot_handler(self.logger, bot)
 
 		
-		self.logger.info("Starting sending manager")
+		self.logger.info("Starting UserCardQueue")
 		self.NUMBER_OF_LAST_CARDS = 2
+
+		self.logger.debug("Set card waiting 0")
+		self.user.set_card_waiting(0)
+		self.sending_queue= deque()
+		
 		
 		self.now_review_stack = []
 		
 		self.now_learn_stack = []
 		self.next_learn_stack = []
-		self.grades_for_day = []
+		self.grades_for_day = {}
 		self.learn_cards_day_set = set()
 
 		self.learn_cnt_day = 0
@@ -64,11 +69,37 @@ class UserCardQueue():
 		self.review_cnt_hourly = 0
 		self.review_total_hourly = 0
 
-		self.sending_queue = None
+		self.user.set_card_waiting(0)
+		self.sending_queue= deque()
+
 		self.initialized_for_day = False
 
 		self.cards_expired = []
 		self.init_day()
+		self.logger.info("End init UserCardQueue")
+
+	def init_day(self):
+		self.logger.info("Init Day")
+
+		self.upd_cards_expired()
+		self.add_learning_cards()
+		self.add_review_cards()	
+
+		self.logger.debug("Set card waiting 0")
+		
+		self.learn_cnt_day = 0
+		self.learn_cnt_hourly = 0
+		self.learn_total_hourly = 0
+
+		self.review_cnt_day = 0
+		self.review_cnt_hourly = 0
+		self.review_total_hourly = 0
+
+		self.hourly_init()
+		self.logger.info("Initialized for day")
+		self.initialized_for_day = True
+		self.logger.info("End init Day")
+
 	
 
 	def add_learning_cards(self):
@@ -131,7 +162,8 @@ class UserCardQueue():
 			else:
 				i += 1
 
-		self.logger.debug("\nnow:" + stack_to_str(self.now_learn_stack) + "\nnext: " + stack_to_str(self.next_learn_stack)) 
+		self.logger.debug("now:" + stack_to_str(self.now_learn_stack) + 
+			"\n 						next: " + stack_to_str(self.next_learn_stack)) 
 		self.logger.info('End remove learning card {}'.format(card_id))
 
 
@@ -154,36 +186,6 @@ class UserCardQueue():
 				self.now_review_stack.append(card)
 		self.logger.debug('Added {} review cards'.format(added))
 		self.logger.info("End add review cards")
-
-
-	def init_day(self):
-		self.logger.info("Init Day")
-		self.now_review_stack = []
-		self.now_learn_stack = []
-		self.next_learn_stack = []		
-		self.learn_cards_day_set = set()
-		self.grades_for_day = {}
-
-		self.upd_cards_expired()
-		self.add_learning_cards()
-		self.add_review_cards()	
-
-		self.logger.debug("Set card waiting 0")
-		self.user.set_card_waiting(0)
-		self.sending_queue= deque()
-		
-		self.learn_cnt_day = 0
-		self.learn_cnt_hourly = 0
-		self.learn_total_hourly = 0
-
-		self.review_cnt_day = 0
-		self.review_cnt_hourly = 0
-		self.review_total_hourly = 0
-
-		self.hourly_init()
-		self.logger.info("Initialized for day")
-		self.initialized_for_day = True
-		self.logger.info("End init Day")
 
 
 
@@ -230,6 +232,9 @@ class UserCardQueue():
 		self.logger.info("Hourly process: {}/{}".format(total_sent, total))
 		self.logger.debug("Remaining cards: L={}  R={}".format(self.get_remaining_learn_cards(), len(self.now_review_stack)))
 		self.logger.debug("Queue: " + sending_queue_to_str(self.sending_queue))
+		self.logger.debug("learn now:" + stack_to_str(self.now_learn_stack)) 
+		self.logger.debug("learn next:" + stack_to_str(self.next_learn_stack)) 
+		self.logger.debug("review now:" + stack_to_str(self.now_review_stack)) 
 		self.logger.debug("min: {}  send_time_ini: {}".format(minute, send_time_ini))
 
 		if (self.user.working_hours(hour) == False):
@@ -239,10 +244,11 @@ class UserCardQueue():
 			len(self.sending_queue) < 2):
 			
 			if (self.review_cnt_hourly < self.review_total_hourly and
+				  len(self.now_review_stack) == 0 and
 				  self.get_remaining_learn_cards() > 0):
 				self.learn_total_hourly += 1
 				self.review_total_hourly -= 1
-			elif self.get_remaining_learn_cards() == 0:
+			elif self.get_remaining_learn_cards() == 0 and self.learn_cnt_hourly < self.learn_total_hourly:
 				self.learn_total_hourly -= 1
 				self.review_total_hourly += 1
 

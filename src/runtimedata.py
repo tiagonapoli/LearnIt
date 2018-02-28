@@ -323,6 +323,17 @@ class RuntimeData:
 					print(e)
 				user.set_state(fsm.IDLE)
 				user.set_card_waiting(0)
+
+	def reset_all_states_turn_off(self, bot):
+		"""Sets the states of all users to the initial state"""
+		for user_id, user in self.users.items():
+			if user.get_state() != fsm.IDLE:
+				try:
+					bot.send_message(user_id, "The bot is turning off, the operation is being canceled. Sorry for the inconvenience.")
+				except Exception as e:
+					print(e)
+			user.set_state(fsm.IDLE)
+			user.set_card_waiting(0)
 	
 
 	def add_user(self,user_id, username):

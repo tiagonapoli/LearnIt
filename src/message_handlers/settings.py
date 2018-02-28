@@ -52,8 +52,8 @@ def handle_settings(bot, rtd):
 		markup = bot_utils.keyboard_remove()
 
 		if option == 'Cards per hour':
-			btns = ['1', '2', '3', '4', '5']
-			markup = bot_utils.create_keyboard(btns, 2)
+			btns = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15']
+			markup = bot_utils.create_keyboard(btns, 3)
 			text = "*How many cards you want to receive per hour?*\n" + bot_utils.create_string_keyboard(btns)
 			bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
 			user.keyboard_options = btns
