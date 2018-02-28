@@ -103,10 +103,11 @@ next_state.update({
 	(LIST_WORDS, GET_LANGUAGE): {'done': (LIST_WORDS, GET_TOPIC),
 								 'no topics': IDLE,
 								 'error': (LIST_WORDS, GET_LANGUAGE)},
-	(LIST_WORDS, GET_TOPIC): {'done': (LIST_WORDS, SELECT_WORDS),
+	(LIST_WORDS, GET_TOPIC): {'done': (LIST_WORDS, GET_WORD),
 							  'error': (LIST_WORDS, GET_TOPIC)},
 	(LIST_WORDS, GET_WORD): {'done' : IDLE,
-								 'continue' : (LIST_WORDS, GET_WORD)}
+							 'error': (LIST_WORDS, GET_WORD),
+							 'continue' : (LIST_WORDS, GET_WORD)}
 })
 
 

@@ -101,12 +101,13 @@ def handle_list_words(bot, rtd, debug_mode):
 
 
 		words = user.get_words_on_topic(language, topic)
+		user.temp_words_list = words
 		words_string = utils.words_to_string_list(words)
 		words_string.append("End selection")
 	
 		markup = bot_utils.keyboard_remove()
-		text = ("*Select the word you want to see the related media* _(to exit this menu, select /{}_):\n".format(len(words_string))
-		 + bot_utils.create_string_keyboard(words_string))
+		text = ("*Select the word you want to see the related media* _(to exit this menu, select_ /{}_)_:\n".format(len(words_string))
+		 				+ bot_utils.create_string_keyboard(words_string))
 		user.keyboard_options = words_string
 
 		bot.send_message(user_id, text,	reply_markup=markup, parse_mode="Markdown")	
@@ -129,6 +130,9 @@ def handle_list_words(bot, rtd, debug_mode):
 		valid, option = bot_utils.parse_string_keyboard_ans_number(msg.text, user.keyboard_options)
 		if valid == False:
 			bot.reply_to(msg, "*Please choose from options.*", parse_mode="Markdown")
+			text = ("*Select the word you want to see the related media* _(to exit this menu, select_ /{}_)_:\n".format(len(user.keyboard_options))
+								 + bot_utils.create_string_keyboard(user.keyboard_options))
+			bot.send_message(user_id, text, parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.GET_WORD)]['error'])
 			return	
 
@@ -137,9 +141,11 @@ def handle_list_words(bot, rtd, debug_mode):
 			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.GET_WORD)]['done'])
 			return
 
-		utils.send_all_cards(bot, user.temp_words_list[option-1])
+		bot.send_message(user_id, "*Word:* _{}_".format(utils.treat_msg_to_send(utils.get_foreign_word(user.temp_words_list[option]), "_")), 
+																				parse_mode="Markdown")
+		utils.send_all_cards(bot, user.temp_words_list[option])
 
-		text = ("*Select the word you want to see the related media* _(to exit this menu, select /{}_):\n".format(len(user.keyboard_options))
-		 + bot_utils.create_string_keyboard(user.keyboard_options))
-		bot.send_message(user_id, text,	reply_markup=markup, parse_mode="Markdown")
+		text = ("*Select the word you want to see the related media* _(to exit this menu, select_ /{}_)_:\n".format(len(user.keyboard_options))
+							 + bot_utils.create_string_keyboard(user.keyboard_options))
+		bot.send_message(user_id, text, parse_mode="Markdown")
 		user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.GET_WORD)]['continue'])

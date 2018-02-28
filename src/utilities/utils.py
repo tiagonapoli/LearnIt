@@ -95,7 +95,7 @@ def send_foreign_word_ans(bot, card):
 		bot.send_message(user_id, "*Answer:* " + '_' + treat_msg_to_send(card.foreign_word, "_") + '_', parse_mode="Markdown")
 
 
-def send_all_cards(bot, word, ans_mark="_", logger=None):
+def send_all_cards(bot, word, ans_mark="*", logger=None):
 	for content, card in word.cards.items():
 		send_ans_card(bot, card, None, ans_mark, logger)
 

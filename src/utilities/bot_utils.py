@@ -93,7 +93,7 @@ def parse_string_keyboard_ans(ans, keys):
 		return False, utils.treat_special_chars(ans)
 
 
-def parse_string_keyboard_ans_number(ans, keys)
+def parse_string_keyboard_ans_number(ans, keys):
 	ans = ans.strip()
 	if ans[0] != '/':
 		return False, ans
