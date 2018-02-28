@@ -102,46 +102,44 @@ def handle_list_words(bot, rtd, debug_mode):
 
 		words = user.get_words_on_topic(language, topic)
 		words_string = utils.words_to_string_list(words)
-		btn = bot_utils.create_inline_keys_sequential(words_string)
+		words_string.append("End selection")
+	
 		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id, "...", reply_markup=markup)
-		btn_set = set()
-		markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 2, ("End selection", "DONE"))
+		text = ("*Select the word you want to see the related media* _(to exit this menu, select /{}_):\n".format(len(words_string))
+		 + bot_utils.create_string_keyboard(words_string))
+		user.keyboard_options = words_string
 
-		user.btn_set = btn_set
-		user.keyboard_options = btn
-		user.temp_words_list = words
-		bot.send_message(user_id, "_Select the words you want to see the related media:_", reply_markup=markup, parse_mode="Markdown")
+		bot.send_message(user_id, text,	reply_markup=markup, parse_mode="Markdown")	
 		user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.GET_TOPIC)]['done'])
 
 
-	@bot.callback_query_handler(func=lambda call:
-							rtd.get_user(get_id(call.message)).get_state() == (fsm.LIST_WORDS, fsm.SELECT_WORDS))
-
-	def callback_select_words(call):
-		user = rtd.get_user(get_id(call.message))
+	@bot.message_handler(func = lambda msg:
+					rtd.get_user(get_id(msg)).get_state() == (fsm.LIST_WORDS, fsm.GET_WORD), 
+					content_types=['text'])
+	def list_words3(msg):
+		"""
+			Get topic
+		"""
+		
+		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger(str(user_id))
-		print("CALLBACK TEXT: {}   DATA: {}".format(call.message.text,call.data))
 
-		btn_set = user.btn_set
-		btn_set, done = bot_utils.parse_selection_inline_keyboard_ans(call.data, btn_set)
-		btn = user.keyboard_options
-		
-		if done == True:
-			bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
-			words = user.temp_words_list
-			text = "_Erased words:_\n"
-			for i in btn_set:
-				# print(user.erase_word(words[i].get_word_id()))
-				bot.send_message(user_id, "*-=x=-=x=-=x=-=x=-=x=-=x=-=x=-=x=-*", parse_mode="Markdown")
-				bot.send_message(user_id, "*Word: *_{}_".format(utils.treat_msg_to_send(utils.get_foreign_word(words[i]), "_")), parse_mode="Markdown")
-				bot.send_message(user_id, "*-=x=-=x=-=x=-=x=-=x=-=x=-=x=-=x=-*", parse_mode="Markdown")
-				utils.send_all_cards(bot, words[i])
-			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.SELECT_WORDS)]['done'])		
-		else:
-			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 2, ("End selection", "DONE"))
-			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="_Select the words you want to see the related media:_",
-			 reply_markup=markup, parse_mode="Markdown")
-			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.SELECT_WORDS)]['continue'])
+		valid, option = bot_utils.parse_string_keyboard_ans_number(msg.text, user.keyboard_options)
+		if valid == False:
+			bot.reply_to(msg, "*Please choose from options.*", parse_mode="Markdown")
+			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.GET_WORD)]['error'])
+			return	
+
+		if msg.text == "/{}".format(len(user.keyboard_options)):
+			bot.send_message(user_id, "OK!")
+			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.GET_WORD)]['done'])
+			return
+
+		utils.send_all_cards(bot, user.temp_words_list[option-1])
+
+		text = ("*Select the word you want to see the related media* _(to exit this menu, select /{}_):\n".format(len(user.keyboard_options))
+		 + bot_utils.create_string_keyboard(user.keyboard_options))
+		bot.send_message(user_id, text,	reply_markup=markup, parse_mode="Markdown")
+		user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.GET_WORD)]['continue'])

@@ -93,6 +93,25 @@ def parse_string_keyboard_ans(ans, keys):
 		return False, utils.treat_special_chars(ans)
 
 
+def parse_string_keyboard_ans_number(ans, keys)
+	ans = ans.strip()
+	if ans[0] != '/':
+		return False, ans
+		 
+	ans = ans[1:]
+	try:
+		number = int(ans)
+		print("PARSE OPTION NUMBER {}".format(number))
+		number -= 1
+		if number >= 0 and number < len(keys):
+			return True, number
+		else:
+			return False, utils.treat_special_chars(ans)
+	except ValueError:
+		return False, utils.treat_special_chars(ans)
+
+
+
 def parse_selection_inline_keyboard_ans(callback_data,set_btn):
 	'''
  		Altera o set_btn
@@ -110,6 +129,7 @@ def parse_selection_inline_keyboard_ans(callback_data,set_btn):
 		#DONE
 		done = True
 		return set_btn, done
+
 
 
 def create_inline_key_button(text, data):
