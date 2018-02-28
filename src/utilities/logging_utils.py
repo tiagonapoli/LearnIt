@@ -66,7 +66,7 @@ def setup_logger_default(logger, path, bot=None):
 	
 	PATH += filename
 		
-	handler_file = logging.FileHandler(PATH, mode='w')
+	handler_file = logging.FileHandler(PATH, mode='a')
 	formatter = logging.Formatter('%(asctime)s  %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
 	handler_file.setFormatter(formatter)

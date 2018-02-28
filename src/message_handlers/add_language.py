@@ -2,8 +2,9 @@ import telebot
 import fsm
 from utilities import utils
 from utilities.bot_utils import get_id, create_key_button
+import logging
 
-def handle_add_language(bot, rtd):
+def handle_add_language(bot, rtd, debug_mode):
 
 	#=====================ADD LANGUAGE=====================
 	@bot.message_handler(func = lambda msg:
@@ -17,6 +18,7 @@ def handle_add_language(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		bot.send_message(user_id, "*Text me the language you want to add*", parse_mode="Markdown")
 		user.set_state(fsm.next_state[fsm.IDLE]['add_language'])
@@ -34,6 +36,8 @@ def handle_add_language(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
+
 
 		language = utils.treat_special_chars(msg.text)
 		if len(language) == 0:

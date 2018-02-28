@@ -8,6 +8,7 @@ from utilities import bot_utils
 from flashcard import Word, Card
 from utilities.bot_utils import get_id
 from queue import Queue
+import logging
 
 def prepare_to_receive(bot, user, content_type):
 	"""
@@ -48,6 +49,7 @@ def handle_add_word(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		known_languages = user.get_languages()
 		
@@ -80,6 +82,7 @@ def handle_add_word(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		valid, language = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 
@@ -119,6 +122,7 @@ def handle_add_word(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		language = user.temp_word.get_language()
 		
@@ -148,6 +152,7 @@ def handle_add_word(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		word_text = utils.treat_special_chars(msg.text)
 		if len(word_text) == 0:
@@ -194,6 +199,7 @@ def handle_add_word(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 		word = user.temp_word
 
 		filename = "{}_{}".format(user_id, word.get_word_id())
@@ -227,6 +233,7 @@ def handle_add_word(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(call.message))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		print("CALLBACK TEXT: {}   DATA: {}".format(call.message.text,call.data))
 
@@ -264,7 +271,7 @@ def handle_add_word(bot, rtd, debug_mode):
 	message_handlers.add_word_audio.handle_add_word_audio(bot, rtd, debug_mode)
 
 	#=================GET TEXT=================
-	message_handlers.add_word_text.handle_add_word_text(bot, rtd)
+	message_handlers.add_word_text.handle_add_word_text(bot, rtd, debug_mode)
 
 	#=================GET IMAGES=================
 	message_handlers.add_word_images.handle_add_word_images(bot, rtd, debug_mode)
@@ -278,6 +285,7 @@ def handle_add_word(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		valid, should_continue = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 		if valid == False:

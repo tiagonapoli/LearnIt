@@ -3,9 +3,10 @@ import fsm
 from utilities import bot_utils, utils
 from flashcard import Word, Card
 from utilities.bot_utils import get_id
+import logging
 
 
-def handle_erase_languages(bot, rtd):
+def handle_erase_languages(bot, rtd, debug_mode):
 
 	#=====================ERASE LANGUAGES=====================
 	@bot.message_handler(func = lambda msg:
@@ -16,6 +17,7 @@ def handle_erase_languages(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		known_languages = user.get_languages()
 
@@ -41,6 +43,7 @@ def handle_erase_languages(bot, rtd):
 		user = rtd.get_user(get_id(call.message))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 	
 		btn_set = user.btn_set
 		btn_set, done = bot_utils.parse_selection_inline_keyboard_ans(call.data, btn_set)

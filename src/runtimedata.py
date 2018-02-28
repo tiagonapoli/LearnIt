@@ -3,8 +3,9 @@ import datetime
 from flashcard import Word,Card
 import fsm
 import os
-from utilities import utils
+from utilities import utils, logging_utils
 from random import shuffle
+import logging
 
 
 
@@ -336,7 +337,7 @@ class RuntimeData:
 			user.set_card_waiting(0)
 	
 
-	def add_user(self,user_id, username):
+	def add_user(self,user_id, username, bot):
 		"""Register a new user.
 
 		Args:
@@ -349,7 +350,13 @@ class RuntimeData:
 		"""
 		if not user_id in self.users.keys():
 			self.users[user_id] = User(user_id, self.db)
+			logger = logging.getLogger(str(user_id))
+			path = '../logs/{}.log'.format(str(user_id))
+			if self.debug_mode:
+				path = '../logs_debug/{}.log'.format(str(user_id))
+			logging_utils.setup_logger_default(logger, path, bot)
 			return self.db.add_user(user_id, username)
+
 		return "User already exists."
 
 	def get_user_by_username(self, username):

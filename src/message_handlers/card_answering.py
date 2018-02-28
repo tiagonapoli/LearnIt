@@ -4,8 +4,9 @@ from flashcard import Word, Card
 from utilities.bot_utils import get_id
 from utilities import bot_utils
 from utilities import utils
+import logging
 
-def handle_card_answer(bot, rtd):
+def handle_card_answer(bot, rtd, debug_mode):
 
 	#=====================ANSWER CARD=====================
 	@bot.message_handler(func = lambda msg:
@@ -20,6 +21,7 @@ def handle_card_answer(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		card_id = user.get_card_waiting()
 		print("CARD_ID WAITING {}".format(card_id))
@@ -65,6 +67,7 @@ def handle_card_answer(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		card = user.temp_card
 

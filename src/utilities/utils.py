@@ -95,8 +95,11 @@ def send_foreign_word_ans(bot, card):
 		bot.send_message(user_id, "*Answer:* " + '_' + treat_msg_to_send(card.foreign_word, "_") + '_', parse_mode="Markdown")
 
 
+def send_all_cards(bot, word, ans_mark="_", logger=None):
+	for content, card in word.cards.items():
+		send_ans_card(bot, card, None, ans_mark, logger)
 
-def send_ans_card(bot, card, query_type, logger=None):
+def send_ans_card(bot, card, query_type, ans_mark="*", logger=None):
 	user_id = card.get_user()
 	question = card.get_question()
 	content = card.get_type()
@@ -106,17 +109,17 @@ def send_ans_card(bot, card, query_type, logger=None):
 	signal.alarm(20)
 	markup = bot_utils.keyboard_remove()
 	if content == 'image':
-		bot.send_message(user_id, "*Image answer:*",reply_markup = markup, parse_mode="Markdown")
+		bot.send_message(user_id, ans_mark + "Image answer:" + ans_mark,reply_markup = markup, parse_mode="Markdown")
 		question = open(question,'rb')
 		bot.send_photo(user_id, question, reply_markup = markup)
 		question.close()
 	elif content == 'audio':
-		bot.send_message(user_id, "*Audio answer:*",reply_markup = markup, parse_mode="Markdown")
+		bot.send_message(user_id, ans_mark + "Audio answer:" + ans_mark,reply_markup = markup, parse_mode="Markdown")
 		question = open(question,'rb')
 		bot.send_voice(user_id, question, reply_markup = markup)
 		question.close()
 	elif content == 'text':
-		bot.send_message(user_id, "*Text answer:*",reply_markup = markup, parse_mode="Markdown")
+		bot.send_message(user_id, ans_mark + "Text answer:" + ans_mark,reply_markup = markup, parse_mode="Markdown")
 		bot.send_message(user_id, question, reply_markup = markup)
 	signal.alarm(0)
 	

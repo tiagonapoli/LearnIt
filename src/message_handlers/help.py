@@ -11,7 +11,7 @@ help_msg = ("Use the command /add\_language to add the languages you are interes
 		   "\n*Gabriel Camargo*\nTelegram: t.me/gabriel\_camargo\nEmail: gacamargo1.000@gmail.com\n")
 
 
-def handle_help(bot, rtd):
+def handle_help(bot, rtd, debug_mode):
 
 	#=====================HELP=====================
 	@bot.message_handler(func = lambda msg:

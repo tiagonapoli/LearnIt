@@ -1,7 +1,7 @@
 import telebot
 from utilities.bot_utils import get_id
 
-def handle_message_not_understood(bot, rtd):
+def handle_message_not_understood(bot, rtd, debug_mode):
 
 	#=====================MESSAGE NOT UNDERSTOOD=====================
 	@bot.message_handler(func = lambda msg: (True and

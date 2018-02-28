@@ -2,8 +2,9 @@ import telebot
 import fsm
 from utilities import bot_utils
 from utilities.bot_utils import get_id
+import logging
 
-def handle_cancel(bot, rtd):
+def handle_cancel(bot, rtd, debug_mode):
 
 	#=====================CANCEL=====================
 	@bot.message_handler(func = lambda msg: (rtd.get_user(get_id(msg)).not_locked() and
@@ -18,6 +19,8 @@ def handle_cancel(bot, rtd):
 		
 		prev_state = user.get_state()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
+		
 		if (prev_state == fsm.WAITING_ANS or
 			prev_state == fsm.WAITING_POLL_ANS):
 			user.set_card_waiting(0)

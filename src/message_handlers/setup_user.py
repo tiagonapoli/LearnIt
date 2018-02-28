@@ -3,16 +3,11 @@ import fsm
 import logging
 from utilities.bot_utils import get_id, get_username
 from utilities import logging_utils
-
-logger = None
+import logging
 
 def handle_setup_user(bot, rtd, debug_mode):
 
-	logger = logging.getLogger(__name__)
-	path = '../logs/setup_user.log'
-	if debug_mode:
-		path = '../logs_debug/setup_user.log'
-	logging_utils.setup_logger_default(logger, path, bot)
+	
 
 	welcome = ("Use the command /add_language to add the languages you are interested in learning and then use the command /add_word to add words you are interested in memorizing, " +
 			"or just use the command /copy_words to copy words from other users. During any process you can use /cancel to cancel the ongoing events, if you made a mistake, for example.")
@@ -36,8 +31,9 @@ def handle_setup_user(bot, rtd, debug_mode):
 				bot.send_message(user_id, "Welcome back to LearnIt!\n" + welcome)
 			return
 		
+		m = rtd.add_user(user_id, username, bot)
+		logger = logging.getLogger('__main__')
 		logger.warning("New username {} {} ".format(user_id, username))
-		m = rtd.add_user(user_id, username)
 		bot.send_message(user_id, "Welcome to LearnIt!\n" + welcome)
 		user = rtd.get_user(user_id)
 		user.set_state(fsm.IDLE)

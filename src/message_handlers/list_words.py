@@ -4,9 +4,10 @@ from flashcard import Word, Card
 from utilities.bot_utils import get_id
 from utilities import utils
 from utilities import bot_utils
+import logging
 
 
-def handle_list_words(bot, rtd):	
+def handle_list_words(bot, rtd, debug_mode):	
 
 	#=====================LIST WORDS=====================
 	@bot.message_handler(func = lambda msg:
@@ -17,6 +18,7 @@ def handle_list_words(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		known_languages = user.get_languages()
 
@@ -45,6 +47,7 @@ def handle_list_words(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		valid, language = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 		if valid == False:
@@ -86,6 +89,7 @@ def handle_list_words(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		language = user.temp_word.get_language()
 		valid, topic = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
@@ -118,6 +122,7 @@ def handle_list_words(bot, rtd):
 		user = rtd.get_user(get_id(call.message))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 		print("CALLBACK TEXT: {}   DATA: {}".format(call.message.text,call.data))
 
 		btn_set = user.btn_set
@@ -130,11 +135,13 @@ def handle_list_words(bot, rtd):
 			text = "_Erased words:_\n"
 			for i in btn_set:
 				# print(user.erase_word(words[i].get_word_id()))
-				bot.send_message(user_id, "*Word: *_{}_".format(utils.treat_msg_to_send(utils.get_foreign_word(words[i]), "_")))
-				utils.send_all_cards(words[i])
+				bot.send_message(user_id, "*-=x=-=x=-=x=-=x=-=x=-=x=-=x=-=x=-*", parse_mode="Markdown")
+				bot.send_message(user_id, "*Word: *_{}_".format(utils.treat_msg_to_send(utils.get_foreign_word(words[i]), "_")), parse_mode="Markdown")
+				bot.send_message(user_id, "*-=x=-=x=-=x=-=x=-=x=-=x=-=x=-=x=-*", parse_mode="Markdown")
+				utils.send_all_cards(bot, words[i])
 			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.SELECT_WORDS)]['done'])		
 		else:
 			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 2, ("End selection", "DONE"))
 			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="_Select the words you want to see the related media:_",
-			 reply_markup=markup)
+			 reply_markup=markup, parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.LIST_WORDS, fsm.SELECT_WORDS)]['continue'])

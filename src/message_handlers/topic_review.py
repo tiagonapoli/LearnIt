@@ -5,8 +5,9 @@ from utilities.bot_utils import get_id
 from random import shuffle
 from utilities import utils
 from utilities import bot_utils
+import logging
 
-def handle_topic_review(bot, rtd):
+def handle_topic_review(bot, rtd, debug_mode):
 
 
 
@@ -22,6 +23,7 @@ def handle_topic_review(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		known_languages = user.get_languages()
 		
@@ -52,6 +54,7 @@ def handle_topic_review(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		valid, language = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 
@@ -94,6 +97,7 @@ def handle_topic_review(bot, rtd):
 		user = rtd.get_user(get_id(call.message))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		print("CALLBACK TEXT: {}   DATA: {}".format(call.message.text,call.data))
 
@@ -141,6 +145,7 @@ def handle_topic_review(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		valid, number = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 
@@ -170,6 +175,7 @@ def handle_topic_review(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		card = user.temp_card
 		res = utils.treat_special_chars(msg.text.lower())

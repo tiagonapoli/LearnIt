@@ -5,6 +5,7 @@ from utilities import utils
 from utilities import bot_utils
 from flashcard import Word, Card
 from utilities.bot_utils import get_id
+import logging
 
 def handle_add_word_audio(bot, rtd, debug_mode):
 
@@ -17,6 +18,7 @@ def handle_add_word_audio(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		word = user.temp_word
 		card_id = user.get_highest_card_id() + 1 + len(word.cards)

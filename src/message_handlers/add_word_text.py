@@ -5,9 +5,10 @@ from utilities import utils
 from utilities import bot_utils
 from flashcard import Word, Card
 from utilities.bot_utils import get_id
+import logging
 
 
-def handle_add_word_text(bot, rtd):
+def handle_add_word_text(bot, rtd, debug_mode):
 
 	@bot.message_handler(func = lambda msg:
 					rtd.get_user(get_id(msg)).get_state() == (fsm.ADD_WORD, fsm.SEND_TEXT),
@@ -16,6 +17,7 @@ def handle_add_word_text(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		
 		text_add = msg.text.strip()

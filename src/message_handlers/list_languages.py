@@ -3,9 +3,10 @@ import fsm
 from flashcard import Word, Card
 from utilities import utils
 from utilities.bot_utils import get_id, create_key_button
+import logging
 
 
-def handle_list_languages(bot, rtd):	
+def handle_list_languages(bot, rtd, debug_mode):	
 
 	#=====================LIST LANGUAGES=====================
 	@bot.message_handler(func = lambda msg:
@@ -16,6 +17,7 @@ def handle_list_languages(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		known_languages = user.get_languages()
 		text = "_Languages:_\n"

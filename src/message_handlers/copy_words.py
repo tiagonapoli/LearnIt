@@ -4,10 +4,10 @@ from utilities import utils
 from utilities import bot_utils
 from flashcard import Word, Card
 from utilities.bot_utils import get_id
-from queue import Queue
+import logging
 
 
-def handle_copy_words(bot, rtd):
+def handle_copy_words(bot, rtd, debug_mode):
 
 	#=====================ADD WORD=====================
 	@bot.message_handler(func = lambda msg:
@@ -21,6 +21,7 @@ def handle_copy_words(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		bot.send_message(user_id, 'Please, send the Telegram username of the user you want to copy some words from, in the format @username (or just username)')
 		user.set_state(fsm.next_state[fsm.IDLE]['copy_words'])
@@ -38,8 +39,9 @@ def handle_copy_words(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
-		username = msg.text
+		username = utils.treat_username_str(msg.text)
 		valid, user2 = rtd.get_user_by_username(username)
 		user.temp_user = user2
 
@@ -86,6 +88,7 @@ def handle_copy_words(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		valid, language = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 
@@ -125,6 +128,7 @@ def handle_copy_words(bot, rtd):
 		user = rtd.get_user(get_id(call.message))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 		print("CALLBACK TEXT: {}   DATA: {}".format(call.message.text,call.data))
 
 		btn_set = user.btn_set
@@ -163,6 +167,7 @@ def handle_copy_words(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		valid, overwrite = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 

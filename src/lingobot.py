@@ -75,67 +75,76 @@ rtd.reset_all_states()
 while True:
 	try:
 
-		bot = bot_utils.open_bot(debug_mode, logger)
+		for user_id in rtd.users.keys():
+			logger = logging.getLogger(str(user_id))
+			path = '../logs/{}.log'.format(str(user_id))
+			if debug_mode:
+				path = '../logs_debug/{}.log'.format(str(user_id))
+			logging_utils.setup_logger_default(logger, path, bot)
+
 
 		#=====================SETUP USER=====================
 		message_handlers.setup_user.handle_setup_user(bot, rtd, debug_mode)
 
 
 		#=====================USER DOESN'T EXIST=====================
-		message_handlers.error_handling.handle_user_dont_exist(bot, rtd)	
+		message_handlers.error_handling.handle_user_dont_exist(bot, rtd, debug_mode)	
 
 
 		#=====================CANCEL=====================
-		message_handlers.cancel.handle_cancel(bot, rtd)
+		message_handlers.cancel.handle_cancel(bot, rtd, debug_mode)
 
 
 		#=====================ANSWER AND RATE CARD DIFFICULTY=====================
-		message_handlers.card_answering.handle_card_answer(bot, rtd)
+		message_handlers.card_answering.handle_card_answer(bot, rtd, debug_mode)
 
 
 		#=====================ADD LANGUAGE=====================
-		message_handlers.add_language.handle_add_language(bot,rtd)
+		message_handlers.add_language.handle_add_language(bot, rtd, debug_mode)
 
 
 		#=====================LIST LANGUAGES=====================
-		message_handlers.list_languages.handle_list_languages(bot,rtd)
+		message_handlers.list_languages.handle_list_languages(bot, rtd, debug_mode)
 
 
 		#=====================ERASE LANGUAGES=====================
-		message_handlers.erase_languages.handle_erase_languages(bot,rtd)
+		message_handlers.erase_languages.handle_erase_languages(bot, rtd, debug_mode)
 
 
 		#=====================ADD WORD=====================
-		message_handlers.add_word.handle_add_word(bot,rtd, debug_mode)
+		message_handlers.add_word.handle_add_word(bot, rtd, debug_mode)
+
 
 		#=====================COPY WORDS=====================
-		message_handlers.copy_words.handle_copy_words(bot,rtd)
+		message_handlers.copy_words.handle_copy_words(bot, rtd, debug_mode)
+
 
 		#=====================LIST WORDS=====================
-		message_handlers.list_words.handle_list_words(bot,rtd)
+		message_handlers.list_words.handle_list_words(bot, rtd, debug_mode)
 
 
 		#=====================ERASE WORD=====================
-		message_handlers.erase_words.handle_erase_words(bot,rtd, debug_mode)
+		message_handlers.erase_words.handle_erase_words(bot, rtd, debug_mode)
 
 
 		#=====================TOPIC REVIEW=====================
-		message_handlers.topic_review.handle_topic_review(bot,rtd)
+		message_handlers.topic_review.handle_topic_review(bot, rtd, debug_mode)
 
 
 		#=====================SETTINGS=====================
-		message_handlers.settings.handle_settings(bot,rtd)
+		message_handlers.settings.handle_settings(bot, rtd, debug_mode)
 
 
 		#=====================HELP=====================
-		message_handlers.help.handle_help(bot,rtd)
+		message_handlers.help.handle_help(bot, rtd, debug_mode)
+
 
 		#=====================STOP=====================
-		message_handlers.stop.handle_stop(bot,rtd)
+		message_handlers.stop.handle_stop(bot, rtd, debug_mode)
 
 
 		#=====================MESSAGE NOT UNDERSTOOD=====================
-		message_handlers.message_not_understood.handle_message_not_understood(bot,rtd)
+		message_handlers.message_not_understood.handle_message_not_understood(bot, rtd, debug_mode)
 		
 		print("Press Ctrl+C to exit gently")
 		bot.polling()	

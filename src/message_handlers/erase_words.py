@@ -4,6 +4,7 @@ from utilities import bot_utils
 from utilities import utils
 from flashcard import Word, Card
 from utilities.bot_utils import get_id
+import logging
 
 
 def handle_erase_words(bot, rtd, debug_mode):	
@@ -17,6 +18,7 @@ def handle_erase_words(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		known_languages = user.get_languages()
 
@@ -43,6 +45,7 @@ def handle_erase_words(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		valid, language = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 		if valid == False:
@@ -83,6 +86,7 @@ def handle_erase_words(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		language = user.temp_word.get_language()
 		valid, topic = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
@@ -113,6 +117,7 @@ def handle_erase_words(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(call.message))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 		print("CALLBACK TEXT: {}   DATA: {}".format(call.message.text,call.data))
 
 		btn_set = user.btn_set
@@ -132,6 +137,3 @@ def handle_erase_words(bot, rtd, debug_mode):
 			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
 			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="Select words to erase:", reply_markup=markup)
 			user.set_state(fsm.next_state[(fsm.ERASE_WORDS, fsm.SELECT_WORDS)]['continue'])
-
-
-	

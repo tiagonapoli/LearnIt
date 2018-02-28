@@ -3,7 +3,7 @@ import fsm
 from utilities.bot_utils import get_id
 
 
-def handle_user_dont_exist(bot, rtd):
+def handle_user_dont_exist(bot, rtd, debug_mode):
 
 	#=====================USER DOESN'T EXIST - MSG=====================
 	@bot.message_handler(func = lambda msg:	rtd.check_user_existence(get_id(msg)) == False, content_types=['text','photo','audio','voice'])

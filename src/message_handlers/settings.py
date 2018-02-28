@@ -3,8 +3,9 @@ import fsm
 from utilities import utils
 from utilities import bot_utils
 from utilities.bot_utils import get_id
+import logging
 
-def handle_settings(bot, rtd):
+def handle_settings(bot, rtd, debug_mode):
 
 	#=====================SETTINGS=====================
 	@bot.message_handler(func = lambda msg:
@@ -18,6 +19,7 @@ def handle_settings(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		btns = ['Cards per hour', 'Set profile public', 'Set profile private']
 		
@@ -41,6 +43,7 @@ def handle_settings(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 
 		valid, option = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 
@@ -81,6 +84,7 @@ def handle_settings(bot, rtd):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
+		logger = logging.getLogger(str(user_id))
 		
 		valid, cards_per_hour = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 		markup = bot_utils.keyboard_remove()
