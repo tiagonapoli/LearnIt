@@ -1,6 +1,0 @@
-user_id,user_word_id,language,topic,foreign_word,user_card_id,type,attempts,easiness_factor,interval,next_date
-359999978,1,testes,wololo's gang,wololo,1,image,2,1.6,2,2018-03-02
-359999978,1,testes,wololo's gang,wololo,2,audio,2,1.6,2,2018-03-02
-359999978,1,testes,wololo's gang,wololo,3,text,2,1.6,2,2018-03-02
-359999978,2,testes,wololo's gang,youtube,4,audio,2,1.6,2,2018-03-02
-359999978,2,testes,wololo's gang,youtube,5,text,2,1.6,2,2018-03-02
