@@ -112,7 +112,7 @@ while True:
 			logger.error("Had to restart bot")
 			bot = bot_utils.open_bot(debug_mode, logger)
 			
-		sleep = 300
+		sleep = 220
 		if debug_mode:
 			sleep = 4
 		logger.info("Sleep {}".format(sleep))
@@ -121,7 +121,7 @@ while True:
 
 	except Exception as e:
 		logger.error("EXCEPTION on sending manager", exc_info=True)
-		sleep = 300
+		sleep = 220
 		if debug_mode:
 			sleep = 10
-		time.sleep(600)
+		time.sleep(sleep)
