@@ -23,6 +23,11 @@ def handle_add_word_text(bot, rtd, debug_mode):
 		text_add = msg.text.strip()
 		print(text_add)
 
+		if len(text_add) >= 290:
+			bot.send_message(user_id, "Please, don't exceed 290 characters. You digited {} characters. Send the text again:".format(len(text_add)))
+			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.SEND_TEXT)]['error'])
+			return
+
 		word = user.temp_word
 		card_id = user.get_highest_card_id() + 1 + len(word.cards)
 		card = Card(word.user_id, word.word_id, word.language, word.topic, word.foreign_word,

@@ -13,7 +13,7 @@ CREATE TABLE users(
 	card_waiting int DEFAULT 0,
 	card_waiting_type int DEFAULT 0,
 	grade_waiting_for_process int DEFAULT 0,
-	username varchar(30),
+	username varchar(50),
 	public int DEFAULT 0
 );
 
@@ -57,7 +57,7 @@ CREATE TABLE cards(
 	user_word_id int,
 	language varchar(50),
 	topic varchar(50),
-	foreign_word varchar(50),
+	foreign_word varchar(200),
 	user_card_id int,
 	type varchar(20),
 	
@@ -77,7 +77,7 @@ CREATE TABLE archives(
 	user_card_id int,
 	counter int,
 	type varchar(20),
-	content_path varchar(140),
+	content_path varchar(300),
 
 	primary key (user_id, user_card_id, counter),
 	foreign key (user_id, user_card_id) references cards(user_id, user_card_id) ON DELETE CASCADE

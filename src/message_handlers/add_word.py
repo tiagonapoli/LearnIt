@@ -127,6 +127,12 @@ def handle_add_word(bot, rtd, debug_mode):
 		language = user.temp_word.get_language()
 		
 		valid, topic = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
+
+		if len(topic) >= 45:
+			bot.send_message(user_id, "Please, don't exceed 45 characters. You digited {} characters. Send the topic again:".format(len(topic)))
+			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_TOPIC)]['error'])
+			return
+
 		if len(topic) == 0:
 			bot.send_message(user_id, "Please, don't user / or \ or _ or *. Send the topic again:")
 			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_TOPIC)]['error'])
@@ -155,6 +161,11 @@ def handle_add_word(bot, rtd, debug_mode):
 		logger = logging.getLogger(str(user_id))
 
 		word_text = utils.treat_special_chars(msg.text)
+		if len(word_text) >= 190:
+			bot.send_message(user_id, "Please, don't exceed 190 characters. You digited {} characters. Send the word again:".format(len(word_text)))
+			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)]['error'])
+			return
+
 		if len(word_text) == 0:
 			bot.send_message(user_id, "Please, don't user / or \ or _ or *. Send the word again:")
 			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_WORD)]['error'])

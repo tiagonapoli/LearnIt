@@ -40,6 +40,12 @@ def handle_add_language(bot, rtd, debug_mode):
 
 
 		language = utils.treat_special_chars(msg.text)
+
+		if len(language) >= 45:
+			bot.send_message(user_id, "Please, don't exceed 45 characters. You digited {} characters. Send the language again:".format(len(language)))
+			user.set_state(fsm.next_state[fsm.ADD_LANGUAGE]['error'])
+			return
+
 		if len(language) == 0:
 			bot.send_message(user_id, "Please, don't user / or \ or _ or *. Send the language again:")
 			user.set_state(fsm.next_state[fsm.ADD_LANGUAGE]['error'])
