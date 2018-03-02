@@ -9,4 +9,4 @@ src/utilities/__pycache__/*
 data/*
 data_debug/*
 backup/*
-debug_backup/*
+backup_debug/*
