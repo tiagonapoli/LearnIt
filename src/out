@@ -1,0 +1,67 @@
+UserCardQueue359999978         ERROR    EXCEPTION ON SEND REVIEW CARD
+Traceback (most recent call last):
+  File "/home/tiago/repo/LingoBot/src/utilities/utils.py", line 184, in send_review_card
+    question = open(question,'rb')
+FileNotFoundError: [Errno 2] No such file or directory: '../data_debug/359999978/1/2.mp3'
+sending_manager                ERROR    Had to restart 359999978
+
+sending_manager                WARNING  Sending manager turned off
+
+cp: cannot stat '../data_debug/': No such file or directory
+359999978                      WARNING  Bot turned off
+
+DB_NAME: learnit_debug
+DB_USER_NAME: tiago
+dbname=learnit_debug user=tiago host=localhost password=abcde
+Connected with database!
+359999978 NEW STATE 0 -1 -1
+DB_NAME: learnit_debug
+DB_USER_NAME: tiago
+dbname=learnit_debug user=tiago host=localhost password=abcde
+Connected with database!
+Press Ctrl+C to exit gently
+get state - id:359999978  state:0
+get state - id:359999978  state:0
+get state - id:359999978  state:0
+359999978 NEW STATE 999 -1 -1
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+get state - id:359999978  state:999
+359999978 NEW STATE 0 -1 -1
+BACKUP PATH= ../backup_debug/01-03-2018.23-20/
+Backup made successfully
+Data backup was successfull

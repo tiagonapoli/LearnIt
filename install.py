@@ -8,6 +8,7 @@ os.system('sudo apt-get update')
 os.system('sudo apt-get install postgresql postgresql-contrib')
 os.system('sudo apt-get install python3-pip')
 os.system('sudo pip3 install psycopg2')
+os.system('sudo pip3 install psycopg2-binary')
 os.system('sudo pip3 install --upgrade requests')
 os.system('sudo pip3 install pyTelegramBotAPI')
 

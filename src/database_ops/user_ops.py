@@ -5,10 +5,12 @@ from utilities import logging_utils
 def check_logger(user_id, logger, debug_mode):
 	if (not user_id in logger.keys()):
 		logger[user_id] = logging.getLogger(__name__)
-		path = '../logs/user_ops%s.log'.format(user_id)
+		path = '../logs/user_ops{}.log'.format(user_id)
 		if debug_mode:
-			path = '../logs_debug/user_ops%s.log'.format(user_id)
-		logger[user_id] = logging_utils.setup_logger_default(logger[user_id], path) 
+			path = '../logs_debug/user_ops{}.log'.format(user_id)
+
+		bot = bot_utils.open_bot(debug_mode, logger)
+		logger[user_id] = logging_utils.setup_logger_default(logger[user_id], path, bot) 
 	
 
 

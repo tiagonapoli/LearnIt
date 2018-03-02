@@ -40,13 +40,6 @@ def check_special_word(word_text):
 		return True
 	return False
 
-def open_bot(logger):
-	arq = open("../credentials/bot_token.txt", "r")
-	TOKEN = (arq.read().splitlines())[0]
-	arq.close()
-	bot_aux = telebot.TeleBot(TOKEN)
-	logger.info("Bot initialized successfully")
-	return bot_aux
 
 def get_file_extension(filename):
 	path, extension = os.path.splitext(filename)
