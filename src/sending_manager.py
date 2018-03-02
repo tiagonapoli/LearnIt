@@ -125,6 +125,7 @@ class SendingManager():
 
 			except Exception as e:
 				self.logger.error("EXCEPTION on sending manager", exc_info=True)
+				self.restart_bot()
 				sleep = 20
 				if self.debug_mode:
 					sleep = 20
