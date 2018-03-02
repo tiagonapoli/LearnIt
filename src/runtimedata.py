@@ -1,6 +1,5 @@
 from dbapi import Database
 import datetime
-from flashcard import Word,Card
 import fsm
 import os
 from utilities import utils, logging_utils
@@ -324,6 +323,17 @@ class RuntimeData:
 					print(e)
 				user.set_state(fsm.IDLE)
 				user.set_card_waiting(0)
+
+	def reset_state_exception(self, bot, user_id):
+		"""Sets the states of all users to the initial state"""
+		if user_id in self.users.keys():
+			user = self.users[user_id]
+			try:
+				bot.send_message(user_id, "An error in the server ocurred, the operation was canceled")
+			except Exception as e:
+				print(e)
+			user.set_state(fsm.IDLE)
+			user.set_card_waiting(0)
 
 	def reset_all_states_turn_off(self, bot):
 		"""Sets the states of all users to the initial state"""

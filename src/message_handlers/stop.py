@@ -1,4 +1,3 @@
-import telebot
 import fsm
 from utilities.bot_utils import get_id
 import logging

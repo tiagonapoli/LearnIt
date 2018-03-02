@@ -5,9 +5,9 @@ import time
 from utilities import utils
 import datetime
 
-SENDING_MANAGER = logging.INFO
+SENDING_MANAGER = logging.WARNING
 SENDING_MANAGER_FILE = logging.DEBUG
-USER_CARD_QUEUE = logging.INFO
+USER_CARD_QUEUE = logging.WARNING
 USER_CARD_QUEUE_FILE = logging.DEBUG
 MESSAGES_BOT = logging.WARNING
 DEFAULT_FILE = logging.DEBUG

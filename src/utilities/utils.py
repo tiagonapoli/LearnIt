@@ -302,7 +302,7 @@ def save_voice(voice_msg, path, voice_name, bot):
 
 def backup(db, debug_mode):
 	if debug_mode:
-		PATH =  "../debug_backup/" + datetime.datetime.now().strftime("%d-%m-%Y.%H-%M") + "/"
+		PATH =  "../backup_debug/" + datetime.datetime.now().strftime("%d-%m-%Y.%H-%M") + "/"
 	else:
 		PATH =  "../backup/" + datetime.datetime.now().strftime("%d-%m-%Y.%H-%M") + "/"
 	if not os.path.exists(PATH):

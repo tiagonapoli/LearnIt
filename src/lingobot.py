@@ -1,7 +1,5 @@
 #! /usr/bin/python3
 import sys
-import os
-import subprocess
 import telebot
 import signal
 import time
@@ -32,11 +30,24 @@ import message_handlers.message_not_understood
 
 from runtimedata import RuntimeData
 from utilities import utils, bot_utils, logging_utils
+from sending_manager import SendingManagerThread
 
 
 """
 	Bot message handlers source file
 """
+
+def signal_handler(sign, frame):
+	"""
+		Handles CTRL+C signal that exits gently the bot
+	"""
+	send_thread.safe_stop()
+	send_thread.join()
+	utils.turn_off(rtd, bot, debug_mode)
+	logger.warning("Bot turned off")
+	sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
 
 args = sys.argv
 args = args[1:]
@@ -49,28 +60,11 @@ logging_utils.setup_logger_learnit_bot(logger, debug_mode)
 bot = bot_utils.open_bot(debug_mode, logger)
 logging_utils.add_bot_handler(logger, bot)
 
-def signal_handler(sign, frame):
-	"""
-		Handles CTRL+C signal that exits gently the bot
-	"""
-	sending_manager.send_signal(signal.SIGINT)
-	utils.turn_off(rtd, bot, debug_mode)
-	logger.warning("Bot turned off")
-	print("Exiting bot...")
-	sys.exit(0)
 
-signal.signal(signal.SIGINT, signal_handler)
-
-
-if debug_mode:
-	sending_manager = subprocess.Popen("gnome-terminal -x ./sending_manager.py -debug", stdout=subprocess.PIPE, shell=True) 		
-else:
-	sending_manager = subprocess.Popen("gnome-terminal -x ./sending_manager.py", stdout=subprocess.PIPE, shell=True)
-
-
-print(debug_mode) 
 rtd = RuntimeData(debug_mode)
 rtd.reset_all_states()
+send_thread = SendingManagerThread(debug_mode)
+send_thread.start()
 
 while True:
 	try:

@@ -1,127 +1,139 @@
 #! /usr/bin/python3
-import sys
 import datetime
-import telebot
 import time
-import signal
-import os
-
+from threading import Thread
 from runtimedata import RuntimeData
 from UserCardQueue import UserCardQueue
-from utilities import utils, logging_utils, bot_utils
+from utilities import logging_utils, bot_utils
 import logging
 
-args = sys.argv
-args = args[1:]
-debug_mode = False
-if len(args) > 0 and args[0] == '-debug':
-	debug_mode = True
 
-logger = logging.getLogger(__name__)
-logging_utils.setup_logger_sending_manager(logger, debug_mode)
+class SendingManager():
 
+	def __init__(self, debug_mode):
+		self.debug_mode = debug_mode
+		self.continua = 1
+		self.logger = logging.getLogger(__name__)
+		logging_utils.setup_logger_sending_manager(self.logger, self.debug_mode)
+		self.bot = bot_utils.open_bot(self.debug_mode, self.logger) 
+		logging_utils.add_bot_handler(self.logger, self.bot)
 
-def signal_handler(sign, frame):
-	"""
-		Handles CTRL+C signal that exits gently the bot
-	"""
-	logger.warning("Sending manager turned off")
-	for user_id, user in users.items():
-		if user.get_active() == 0:
-			continue
-		user_queues[user_id].logger.info("Exiting sending manager")
-	sys.exit(0)
+		self.rtd = RuntimeData(self.debug_mode)
+		self.rtd.get_known_users()
+		self.users = self.rtd.users
+		self.user_queues = {}
 
-signal.signal(signal.SIGINT, signal_handler)
+		self.now = datetime.datetime.now()
+		self.last_hour = (self.now.hour - 1 + 24) % 24
+		self.cycles = 0
 
-bot = bot_utils.open_bot(debug_mode, logger)
-logging_utils.add_bot_handler(logger, bot)
+	def upd_users(self):
+		self.now = datetime.datetime.now()
+		hour = self.now.hour
 
-rtd = RuntimeData(debug_mode)
-rtd.get_known_users()
-users = rtd.users
+		self.rtd.get_known_users()
+		self.users = self.rtd.users
 
-user_queues = {}
-
-now = datetime.datetime.now()
-last_hour = (now.hour - 1 + 24) % 24
-cycles = 0
-#rtd.reset_all_states()
-
-
-logger.info("Starting sending manager")
-
-while True:
-	try:
-		logger.info("Woke Up - Cycles: {}".format(cycles))
-		cycles += 1
-
-		now = datetime.datetime.now()
-		hour = now.hour 
-		rtd.get_known_users()
-
-		users = rtd.users
-
-		for user_id, user in users.items():
+		for user_id, user in self.users.items():
 			if user.get_active() == 0:
 				continue
 
-			if ((user_id in user_queues.keys()) and 
+			if ((user_id in self.user_queues.keys()) and 
 					hour == 0 and 
-					user_queues[user_id].get_initialized() == False):
-				user_queues[user_id].process_end_day()
-				user_queues[user_id].init_day()
+					self.user_queues[user_id].get_initialized() == False):
+				self.user_queues[user_id].process_end_day()
+				self.user_queues[user_id].init_day()
 
-			if not (user_id in user_queues.keys()):
-				user_queues[user_id] = UserCardQueue(user, bot, debug_mode)
+			if not (user_id in self.user_queues.keys()):
+				self.user_queues[user_id] = UserCardQueue(user, self.bot, self.debug_mode)
 
-			if  cycles % 2 == 0:
-				user_queues[user_id].upd_cards_expired() 				
+			if  self.cycles % 2 == 0:
+				self.user_queues[user_id].upd_cards_expired() 				
 
-			user_queues[user_id].add_learning_cards()
+			self.user_queues[user_id].add_learning_cards()
 
 			if hour != 0:
-				user_queues[user_id].reset_initialized()
-				
+				self.user_queues[user_id].reset_initialized()
 
-		if last_hour != hour:
-			last_hour = hour
-			for user_id, user in users.items():
+
+	def new_hour_check(self):
+		self.now = datetime.datetime.now()
+		hour = self.now.hour 
+		if self.last_hour != hour:
+			self.last_hour = hour
+			for user_id, user in self.users.items():
 				if user.get_active() == 0:
 					continue
-				user_queues[user_id].hourly_init()
+				self.user_queues[user_id].hourly_init()
+
 				
+	def prepare_users_queues(self, user_id):
+		self.user_queues[user_id].prepare_queue()
 
-		for user_id, user in users.items():
-			if user.get_active() == 0:
-				continue
-			user_queues[user_id].prepare_queue()
-
-
+	def process_users_queues(self, user_id):
 		restart = False
-		for user_id, user in users.items():
-			if user.get_active() == 0:
-				continue
-			sucess = user_queues[user_id].process_queue(bot)
-			if sucess == False:
-				restart = True
-
+		sucess = self.user_queues[user_id].process_queue(self.bot)
+		if sucess == False:
+			restart = True
 
 		if restart == True:
-			rtd.reset_all_states_exception(bot)
-			logger.error("Had to restart bot")
-			bot = bot_utils.open_bot(debug_mode, logger)
-			
-		sleep = 220
-		if debug_mode:
-			sleep = 4
-		logger.info("Sleep {}".format(sleep))
-		time.sleep(sleep)
+			self.rtd.reset_state_exception(user_id, self.bot)
+			self.logger.error("Had to restart {}".format(user_id))
 
 
-	except Exception as e:
-		logger.error("EXCEPTION on sending manager", exc_info=True)
-		sleep = 220
-		if debug_mode:
-			sleep = 10
-		time.sleep(sleep)
+	def stop(self):
+		self.continua = 0
+
+	def run(self):
+		self.logger.info("Starting sending manager")
+
+		while self.continua == 1:
+			try:
+				self.logger.info("Woke Up - Cycles: {}".format(self.cycles))
+				self.cycles += 1
+
+				self.upd_users()
+				self.new_hour_check()
+				for user_id, user in self.users.items():
+					if user.get_active() == 0:
+						continue
+					self.prepare_users_queues(user_id)
+					self.process_users_queues(user_id)
+					
+				sleep = 220
+				if self.debug_mode:
+					sleep = 20
+				self.logger.info("Sleep {}".format(sleep))
+				time.sleep(sleep)
+
+			except Exception as e:
+				self.logger.error("EXCEPTION on sending manager", exc_info=True)
+				sleep = 220
+				if self.debug_mode:
+					sleep = 20
+				time.sleep(sleep)
+
+
+		self.logger.warning("Sending manager turned off")
+		for user_id, user in self.users.items():
+			if user.get_active() == 0:
+				continue
+			self.user_queues[user_id].logger.info("Exiting sending manager")
+
+
+class SendingManagerThread(Thread):
+
+	def __init__(self, debug_mode):
+		Thread.__init__(self)
+		self.sending_manager = SendingManager(debug_mode)
+
+	def safe_stop(self):
+		self.sending_manager.stop()
+
+	def run(self):
+		self.sending_manager.run()
+
+
+
+
+	

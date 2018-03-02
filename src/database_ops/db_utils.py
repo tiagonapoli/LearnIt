@@ -5,6 +5,3 @@ def create_card_with_row(row):
 
 def create_word_with_row(row):
 	return Word(row[0], row[1], row[2], row[3], row[4])
-
-def treat_str_SQL(str):
-	return str.replace("'", "''")

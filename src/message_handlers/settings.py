@@ -1,4 +1,3 @@
-import telebot
 import fsm
 from utilities import utils
 from utilities import bot_utils

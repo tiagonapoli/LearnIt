@@ -1,4 +1,3 @@
-import telebot
 import fsm
 import message_handlers.add_word_audio
 import message_handlers.add_word_text

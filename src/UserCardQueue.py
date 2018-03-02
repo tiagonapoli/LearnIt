@@ -1,10 +1,7 @@
-import sys
 import datetime
-import telebot
 import fsm
 from collections import deque
-from flashcard import Card
-from random import shuffle, randint
+from random import shuffle
 from utilities import utils, logging_utils
 import logging
 

@@ -1,4 +1,3 @@
-import telebot
 import fsm
 import logging
 from utilities.bot_utils import get_id, get_username

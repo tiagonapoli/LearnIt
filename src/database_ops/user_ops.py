@@ -1,20 +1,13 @@
-import psycopg2
-import os
 import time
-import datetime
-import abc
 import logging
-from flashcard import Word
-from flashcard import Card
 from utilities import logging_utils
-from database_ops.db_utils import treat_str_SQL
 
 def check_logger(user_id, logger, debug_mode):
 	if (not user_id in logger.keys()):
 		logger[user_id] = logging.getLogger(__name__)
-		path = '../logs/user_ops{}.log'.format(user_id)
+		path = '../logs/user_ops%s.log'.format(user_id)
 		if debug_mode:
-			path = '../logs_debug/user_ops{}.log'.format(user_id)
+			path = '../logs_debug/user_ops%s.log'.format(user_id)
 		logger[user_id] = logging_utils.setup_logger_default(logger[user_id], path) 
 	
 
@@ -39,9 +32,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "SELECT state1, state2, state3 FROM users WHERE id={}".format(user_id)
+			cmd = "SELECT state1, state2, state3 FROM users WHERE id=%s"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (user_id, ))
 				row = self.cursor.fetchall()
 				if len(row) == 0:
 					return "User doesn't exist"
@@ -65,9 +58,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "UPDATE users SET state1={}, state2={}, state3={} WHERE id={}".format(state1, state2, state3, user_id)
+			cmd = "UPDATE users SET state1=%s, state2=%s, state3=%s WHERE id=%s"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (state1, state2, state3, user_id))
 				self.conn.commit()
 				return
 			except:
@@ -90,11 +83,11 @@ class UserOps():
 		while tries > 0:
 			tries -= 1
 			try:
-				self.cursor.execute("SELECT id from users WHERE id={};".format(user_id))
+				self.cursor.execute("SELECT id from users WHERE id=%s;", (user_id, ))
 				rows = self.cursor.fetchall()
 				if(len(rows) > 0):
 					return True
-				self.cursor.execute("INSERT INTO users VALUES ({}, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, '{}', DEFAULT);".format(user_id, treat_str_SQL(username)))
+				self.cursor.execute("INSERT INTO users VALUES (%s, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, %s, DEFAULT);", (user_id, username))
 				self.conn.commit()
 				return True
 			except:
@@ -138,9 +131,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "SELECT learning_words_per_day from users WHERE id={};".format(user_id)
+			cmd = "SELECT learning_words_per_day from users WHERE id=%s;"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (user_id, ))
 				rows = self.cursor.fetchall()
 				if(len(rows) == 0):
 					return 0
@@ -156,9 +149,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "SELECT review_cards_per_day from users WHERE id={};".format(user_id)
+			cmd = "SELECT review_cards_per_day from users WHERE id=%s;"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (user_id, ))
 				rows = self.cursor.fetchall()
 				if(len(rows) == 0):
 					return 0
@@ -174,9 +167,9 @@ class UserOps():
 		tries = 20
 		while tries > 0:
 			tries -= 1
-			cmd = "UPDATE users SET card_waiting={} WHERE id={};".format(card_id, user_id)
+			cmd = "UPDATE users SET card_waiting=%s WHERE id=%s;"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (card_id, user_id))
 				self.conn.commit()
 				return
 			except:
@@ -192,9 +185,9 @@ class UserOps():
 		tries = 20
 		while tries > 0:
 			tries -= 1
-			cmd = "SELECT card_waiting FROM users WHERE id={};".format(user_id)
+			cmd = "SELECT card_waiting FROM users WHERE id=%s;"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (user_id, ))
 				card = self.cursor.fetchall()
 				if(len(card) == 0):
 					return 0
@@ -210,9 +203,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "SELECT grade_waiting_for_process from users WHERE id={};".format(user_id)
+			cmd = "SELECT grade_waiting_for_process from users WHERE id=%s;"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (user_id, ))
 				rows = self.cursor.fetchall()
 				if(len(rows) == 0):
 					return None
@@ -230,9 +223,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "UPDATE users SET grade_waiting_for_process={} WHERE id={}".format(grade, user_id)
+			cmd = "UPDATE users SET grade_waiting_for_process=%s WHERE id=%s"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (grade, user_id))
 				self.conn.commit()
 				return
 			except:
@@ -248,9 +241,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "SELECT card_waiting_type from users WHERE id={};".format(user_id)
+			cmd = "SELECT card_waiting_type from users WHERE id=%s;"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (user_id, ))
 				rows = self.cursor.fetchall()
 				if(len(rows) == 0):
 					return 0
@@ -268,9 +261,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "UPDATE users SET card_waiting_type={} WHERE id={}".format(card_waiting_type, user_id)
+			cmd = "UPDATE users SET card_waiting_type=%s WHERE id=%s"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (card_waiting_type, user_id))
 				self.conn.commit()
 				return 
 			except:
@@ -283,9 +276,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "SELECT cards_per_hour from users WHERE id={};".format(user_id)
+			cmd = "SELECT cards_per_hour from users WHERE id=%s;"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (user_id, ))
 				rows = self.cursor.fetchall()
 				if(len(rows) == 0):
 					return 0
@@ -303,9 +296,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "UPDATE users SET cards_per_hour={} WHERE id={}".format(cards_per_hour, user_id)
+			cmd = "UPDATE users SET cards_per_hour=%s WHERE id=%s"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (cards_per_hour, user_id))
 				self.conn.commit()
 				return 
 			except:
@@ -318,9 +311,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "SELECT active from users WHERE id={};".format(user_id)
+			cmd = "SELECT active from users WHERE id=%s;"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (user_id, ))
 				rows = self.cursor.fetchall()
 				if(len(rows) == 0):
 					return 0
@@ -335,9 +328,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "UPDATE users SET active={} WHERE id={}".format(active, user_id)
+			cmd = "UPDATE users SET active=%s WHERE id=%s"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (active, user_id))
 				self.conn.commit()
 				return 
 			except:
@@ -350,9 +343,9 @@ class UserOps():
 		tries = 20
 		while tries > 0:
 			tries -= 1
-			cmd = "SELECT id from users WHERE username='{}';".format(treat_str_SQL(username))
+			cmd = "SELECT id from users WHERE username=%s;"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (username, ))
 				rows = self.cursor.fetchall()
 				if(len(rows) == 0):
 					return None
@@ -368,9 +361,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "SELECT public from users WHERE id={};".format(user_id)
+			cmd = "SELECT public from users WHERE id=%s;"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (user_id, ))
 				rows = self.cursor.fetchall()
 				if(len(rows) == 0):
 					return 0
@@ -385,9 +378,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "SELECT username from users WHERE id={};".format(user_id)
+			cmd = "SELECT username from users WHERE id=%s;"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (user_id, ))
 				rows = self.cursor.fetchall()
 				if(len(rows) == 0):
 					return 0
@@ -403,9 +396,9 @@ class UserOps():
 		tries = 5
 		while tries > 0:
 			tries -= 1
-			cmd = "UPDATE users SET public={} WHERE id={}".format(public, user_id)
+			cmd = "UPDATE users SET public=%s WHERE id=%s"
 			try:
-				self.cursor.execute(cmd)
+				self.cursor.execute(cmd, (public, user_id))
 				self.conn.commit()
 				return 
 			except:

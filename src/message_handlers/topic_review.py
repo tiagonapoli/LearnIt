@@ -1,6 +1,4 @@
-import telebot
 import fsm
-from flashcard import Word, Card
 from utilities.bot_utils import get_id
 from random import shuffle
 from utilities import utils

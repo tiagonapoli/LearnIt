@@ -1,7 +1,5 @@
-import telebot
 import fsm
 from utilities import bot_utils, utils
-from flashcard import Word, Card
 from utilities.bot_utils import get_id
 import logging
 

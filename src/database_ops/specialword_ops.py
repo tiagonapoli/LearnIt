@@ -1,6 +1,5 @@
-import psycopg2
 import time
-from database_ops.db_utils import treat_str_SQL, create_card_with_row
+from database_ops.db_utils import create_card_with_row
 from utilities import logging_utils
 import database_ops.archive_ops
 import logging
@@ -25,7 +24,7 @@ class SpecialWordOps():
 		while tries > 0:
 			tries -= 1
 			try:
-				self.cursor.execute("SELECT * FROM specialwords WHERE archive='{}'".format(treat_str_SQL(archive)))
+				self.cursor.execute("SELECT * FROM specialwords WHERE archive=%s", (archive, ))
 				rows = self.cursor.fetchall()
 				if(len(rows) > 0):
 					return True
@@ -40,7 +39,7 @@ class SpecialWordOps():
 		while tries > 0:
 			tries -= 1
 			try:
-				self.cursor.execute("SELECT users_using FROM specialwords WHERE archive='{}'".format(treat_str_SQL(archive)))
+				self.cursor.execute("SELECT users_using FROM specialwords WHERE archive=%s", (archive, ))
 				rows = self.cursor.fetchall()
 				if(len(rows) == 0):
 					return 0
@@ -61,13 +60,13 @@ class SpecialWordOps():
 					if users_using == 1:
 						os.remove(archive.split()[1])
 						self.logger.info("Erase file {}".format(archive))
-						self.cursor.execute("DELETE FROM specialwords WHERE archive='{}'".format(treat_str_SQL(archive)))
+						self.cursor.execute("DELETE FROM specialwords WHERE archive=%s", (archive, ))
 						self.conn.commit()
 					else:
-						self.cursor.execute("UPDATE specialwords SET users_using={} WHERE archive='{}'".format(users_using - 1, treat_str_SQL(archive)))
+						self.cursor.execute("UPDATE specialwords SET users_using=%s WHERE archive=%s", (users_using - 1, archive))
 				return
 			except:
-				self.logger.error("Error in erase_specialword".format(archive), exc_info=True)
+				self.logger.error("Error in erase_specialword", exc_info=True)
 				time.sleep(1)	
 
 	def add_specialword(self, word):
@@ -78,11 +77,11 @@ class SpecialWordOps():
 			try:
 				if self.check_existence(archive):
 					users_using = self.get_users_using(archive)
-					self.cursor.execute("UPDATE specialwords SET users_using={} WHERE archive='{}'".format(users_using + 1, treat_str_SQL(archive)))
+					self.cursor.execute("UPDATE specialwords SET users_using=%s WHERE archive=%s", (users_using + 1, archive))
 				else:
-					self.cursor.execute("INSERT INTO specialwords VALUES (DEFAULT, '{}');".format(treat_str_SQL(archive)))
+					self.cursor.execute("INSERT INTO specialwords VALUES (DEFAULT, %s);", (archive, ))
 					self.conn.commit()
 				return
 			except:
-				self.logger.error("Error add_specialword".format(archive), exc_info=True)
+				self.logger.error("Error add_specialword", exc_info=True)
 				time.sleep(1)			

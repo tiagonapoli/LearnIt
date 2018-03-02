@@ -1,8 +1,5 @@
 import psycopg2
 import os
-import time
-import datetime
-import abc
 from flashcard import Word
 from flashcard import Card
 
@@ -237,27 +234,27 @@ class Database():
 
 if __name__ == '__main__':
 	
-	test = Database()
+	test = Database(1)
 
 	#create files to debug
-	file = open('../data/ibagem.jpg', 'w')
+	file = open('../data_debug/ibagem.jpg', 'w')
 	file.write('olar')
 	file.close()
 
-	file = open('../data/image.png', 'w')
+	file = open('../data_debug/image.png', 'w')
 	file.write('olar2')
 	file.close()
 
-	file = open('../data/ingreis.txt', 'w')
+	file = open('../data_debug/ingreis.txt', 'w')
 	file.write('olar3')
 	file.close()
 
-	file = open('../data/talao.txt', 'w')
+	file = open('../data_debug/talao.txt', 'w')
 	file.write('olar4')
 	file.close()
 	#Add user and languages
-	print(test.add_user(42))
-	print(test.add_user(84))
+	print(test.add_user(42, 'teagao'))
+	print(test.add_user(84, 'camargao'))
 
 	#highest card/word id
 	print("-----------------Highest Card/Word ID-----------------")
@@ -365,5 +362,5 @@ if __name__ == '__main__':
 	print("-----------------Get word test-----------------\n\n")
 	print(test.get_word(42,1))
 
-	print(test.backup())
+	print(test.backup('../backup_debug/'))
 

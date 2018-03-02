@@ -1,4 +1,3 @@
-import psycopg2
 import os
 
 class ArchiveOps():
@@ -9,8 +8,8 @@ class ArchiveOps():
 		self.cursor = cursor
 
 	def erase_archive(self, user_id, card_id, counter):
-		self.cursor.execute("SELECT type,content_path FROM archives WHERE user_id={} AND user_card_id={} AND counter={}"
-						.format(user_id, card_id, counter))
+		self.cursor.execute("SELECT type,content_path FROM archives WHERE user_id=%s AND user_card_id=%s AND counter=%s",
+							(user_id, card_id, counter))
 		archives = self.cursor.fetchall()
 		if len(archives) == 0:
 			print("ERROR in erase_archive, dbapi")
@@ -26,8 +25,8 @@ class ArchiveOps():
 					print("ERROR in erase_language - Archive {}".format(archive[1]))
 					print(e)
 
-		self.cursor.execute("DELETE FROM archives WHERE user_id={} AND user_card_id={} AND counter={}"
-						.format(user_id, card_id, counter))
+		self.cursor.execute("DELETE FROM archives WHERE user_id=%s AND user_card_id=%s AND counter=%s",
+							(user_id, card_id, counter))
 		self.conn.commit()
 		return "Archive successfuly removed"
 

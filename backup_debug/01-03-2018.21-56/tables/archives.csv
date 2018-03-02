@@ -1,0 +1,4 @@
+user_id,user_card_id,counter,type,content_path
+359999978,1,1,image,../data_debug/359999978/1/1.jpg
+359999978,2,1,audio,../data_debug/359999978/1/2.mp3
+359999978,3,1,text,qwesd

@@ -1,7 +1,5 @@
-import telebot
 import fsm
-from flashcard import Word, Card
-from utilities.bot_utils import get_id, create_key_button
+from utilities.bot_utils import get_id
 
 help_msg = ("Use the command /add\_language to add the languages you are interested in learning and then use the command /add\_word to add words you are interested in memorizing, " + 
 			"or just use the command /copy\_words to copy words from other users. " +
