@@ -1,6 +1,6 @@
 import time
 import logging
-from utilities import logging_utils
+from utilities import logging_utils, bot_utils
 
 def check_logger(user_id, logger, debug_mode):
 	if (not user_id in logger.keys()):
