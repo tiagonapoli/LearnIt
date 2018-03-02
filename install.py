@@ -7,10 +7,11 @@ os.system('sudo apt-get update')
 
 os.system('sudo apt-get install postgresql postgresql-contrib')
 os.system('sudo apt-get install python3-pip')
-os.system('sudo pip3 install psycopg2')
-os.system('sudo pip3 install psycopg2-binary')
+os.system('sudo pip3 install --upgrade psycopg2')
+os.system('sudo pip3 install --upgrade psycopg2-binary')
 os.system('sudo pip3 install --upgrade requests')
-os.system('sudo pip3 install pyTelegramBotAPI')
+os.system('sudo pip3 install --upgrade urllib3')
+os.system('sudo pip3 install --upgrade pyTelegramBotAPI')
 
 
 print("Creating psql user {} with password 'abcde'. You can change it later, if you want. But then you must change on ./credentials/connect_str.txt and ./credentials/connect_str_debug.txt too.".format(username))

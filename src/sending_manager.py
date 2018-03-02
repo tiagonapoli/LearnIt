@@ -13,10 +13,10 @@ class SendingManager():
 	def __init__(self, debug_mode):
 		self.debug_mode = debug_mode
 		self.continua = 1
-		self.logger = logging.getLogger(__name__)
-		logging_utils.setup_logger_sending_manager(self.logger, self.debug_mode)
-		self.bot = bot_utils.open_bot(self.debug_mode, self.logger) 
-		logging_utils.add_bot_handler(self.logger, self.bot)
+		self.restart_bot_flag = 0
+		self.logger = None
+		self.bot = None
+		self.start_bot() 
 
 		self.rtd = RuntimeData(self.debug_mode)
 		self.rtd.get_known_users()
@@ -26,6 +26,16 @@ class SendingManager():
 		self.now = datetime.datetime.now()
 		self.last_hour = (self.now.hour - 1 + 24) % 24
 		self.cycles = 0
+
+	def start_bot(self):
+		del self.bot
+		self.restart_bot_flag = 0
+		self.logger = logging.getLogger(__name__)
+		logger_aux = logging.getLogger('__main__')
+		logger_aux.warning("Restarted bot sending manager")
+		logging_utils.setup_logger_sending_manager(self.logger, self.debug_mode)
+		self.bot = bot_utils.open_bot(self.debug_mode, self.logger) 
+		logging_utils.add_bot_handler(self.logger, self.bot)
 
 	def upd_users(self):
 		self.now = datetime.datetime.now()
@@ -84,12 +94,19 @@ class SendingManager():
 	def stop(self):
 		self.continua = 0
 
+	def restart_bot(self):
+		self.restart_bot_flag = 1
+
 	def run(self):
 		self.logger.info("Starting sending manager")
 
 		while self.continua == 1:
 			try:
 				self.logger.info("Woke Up - Cycles: {}".format(self.cycles))
+
+				if self.restart_bot_flag == 1:
+					self.start_bot()
+
 				self.cycles += 1
 
 				self.upd_users()
@@ -100,7 +117,7 @@ class SendingManager():
 					self.prepare_users_queues(user_id)
 					self.process_users_queues(user_id)
 					
-				sleep = 220
+				sleep = 60
 				if self.debug_mode:
 					sleep = 20
 				self.logger.info("Sleep {}".format(sleep))
@@ -108,7 +125,7 @@ class SendingManager():
 
 			except Exception as e:
 				self.logger.error("EXCEPTION on sending manager", exc_info=True)
-				sleep = 220
+				sleep = 20
 				if self.debug_mode:
 					sleep = 20
 				time.sleep(sleep)
@@ -132,6 +149,9 @@ class SendingManagerThread(Thread):
 
 	def run(self):
 		self.sending_manager.run()
+
+	def restart_bot(self):
+		self.sending_manager.restart_bot()
 
 
 
