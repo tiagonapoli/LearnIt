@@ -20,8 +20,7 @@ def handle_setup_user(bot, rtd, debug_mode):
 		username = get_username(msg)
 
 		if username == None:
-			bot.send_message(user_id, 
-				bot_language.translate("Please, create your Telegram Username first. You just have to go to Settings->Info->Username to create it. After you create one, type /start again.", user))
+			bot.send_message(user_id, "Please, create your Telegram Username first. You just have to go to Settings->Info->Username to create it. After you create one, type /start again.")
 			return
 
 		if rtd.check_user_existence(user_id):
