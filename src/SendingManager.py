@@ -139,8 +139,6 @@ class SendingManagerThread(Thread):
 
 	def safe_stop(self):
 		self.sending_manager.stop()
-		if self.is_alive():
-			self.join()
 
 	def run(self):
 		self.sending_manager.run()

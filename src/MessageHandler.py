@@ -69,11 +69,8 @@ class MessageHandler():
 		self.rtd.reset_all_states_exception(self.bot)
 
 
-	def turn_off(self):
-		self.stop()
+	def backup(self):
 		utils.turn_off(self.rtd, self.bot, self.debug_mode)
-		del self.bot
-		self.bot = None
 	
 
 	def setup_bot(self):
@@ -133,14 +130,15 @@ class MessageHandlerThread(Thread):
 
 	def safe_stop(self):
 		self.message_handler.stop()
-		if self.is_alive():
-			self.join()
-
+	
 	def run(self):
 		self.message_handler.run()
 
 	def restart_bot(self):
 		self.message_handler.restart_bot()
+
+	def backup(self):
+		self.message_handler.backup()
 
 	def idle_time_exceed(self):
 		return self.message_handler.idle_time_exceed()

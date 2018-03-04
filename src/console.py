@@ -30,9 +30,8 @@ class LearnIt(Thread):
 		self.message_handler_thread.restart_bot()
 
 	def stop_message_handler(self):
-		self.logger.info("Stopping message handler")
 		self.message_handler_thread.safe_stop()
-		self.logger.info("Message Handler stopped!!")
+		self.logger.warning("Requested message handler to stop")
 
 	def start_sending_manager(self):
 		self.logger.info("Starting sending manager")
@@ -43,20 +42,37 @@ class LearnIt(Thread):
 		self.sending_manager_thread.restart_bot()
 
 	def stop_sending_manager(self):
-		self.logger.info("Stopping sending manager")
 		self.sending_manager_thread.safe_stop()
-		self.logger.info("Sending Manager stopped!!")
+		self.logger.warning("Requested sending manager to stop")
 
 	def default(self):
 		self.start_message_handler()
 		self.start_sending_manager()
 
 	def safe_stop(self):
+
 		self.continue_flag = False
 		while self.locked == True:
 			time.sleep(0.5)
+		self.logger.warning("LearnIt Safe Stop!")
+
 		self.stop_sending_manager()
 		self.stop_message_handler()
+
+		self.logger.warning("Start backup")
+		self.message_handler_thread.backup()
+		self.logger.warning("Ended backup")
+
+
+		self.logger.warning("Waiting message handler to stop")
+		if self.message_handler_thread.is_alive():
+			self.message_handler_thread.join()
+		self.logger.warning("Message handler stopped!")
+		self.logger.warning("Waiting send manager to stop")
+		if self.sending_manager_thread.is_alive():
+			self.sending_manager_thread.join()
+		self.logger.warning("Sending manager stopped!")
+
 
 	def run(self):
 		self.logger.info("Running LearniIt")
@@ -71,10 +87,11 @@ class LearnIt(Thread):
 				self.restart_bot_sending_manager()
 				sleep = self.message_handler_thread.get_max_idle_time()
 				self.logger.info("Sleep {}".format(sleep))
+				self.locked = False			
 				time.sleep(sleep)
 			else:
+				self.locked = False
 				time.sleep(sleep)
-			self.locked = False
 
 class Console():
 
@@ -85,8 +102,8 @@ class Console():
 		self.message_handler = None
 		self.sending_manager = None
 		self.learnit = None
-		self.MESSAGE_HANDLER_MAX_IDLE_TIME = 300
-		self.SENDING_MANAGER_SLEEP_TIME = 240
+		self.MESSAGE_HANDLER_MAX_IDLE_TIME = 180
+		self.SENDING_MANAGER_SLEEP_TIME = 180
 		self.INSTALLED = False
 		self.read_data()
 
@@ -124,10 +141,9 @@ class Console():
 
 	def turn_off(self):
 		print("System turning off...")
-		self.learnit.safe_stop()
-		self.message_handler.turn_off()
-		self.sending_manager.stop()
 		self.save_data()
+		print("Saved data")
+		self.learnit.safe_stop()
 
 	def turn_on(self):
 		print("System turning on")

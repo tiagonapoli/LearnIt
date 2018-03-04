@@ -28,7 +28,8 @@ def handle_setup_user(bot, rtd, debug_mode):
 			if user.get_active() == 0:
 				user.set_active(1)
 				bot.send_message(user_id, 
-					bot_language.translate("Welcome back to LearnIt!", user) + "\n" + bot_language.translate("welcome_msg", user))
+					bot_language.translate("Welcome back to LearnIt!", user) + "\n" + bot_language.translate("welcome_msg", user),
+					parse_mode="Markdown")
 			return
 		
 		m = rtd.add_user(user_id, username, bot)
@@ -40,7 +41,6 @@ def handle_setup_user(bot, rtd, debug_mode):
 		logger = logging.getLogger('bot_sender')
 		logger.warning("New username {} {} ".format(user_id, username))
 
-		bot.send_message(user_id, bot_language.translate("Welcome to LearnIt!", user) + "\n" + bot_language.translate("welcome_msg", user))
 
 		options = ['English', 'Português']
 		text = "*Please select your mother language:*\n*Por favor, selecione sua língua nativa:*" + "\n" + bot_utils.create_string_keyboard(options)
@@ -75,7 +75,7 @@ def handle_setup_user(bot, rtd, debug_mode):
 
 		markup = bot_utils.keyboard_remove()
 		bot.send_message(user_id, 
-			bot_language.translate("OK!", user),
+			bot_language.translate("Welcome to LearnIt!", user) + "\n" + bot_language.translate("welcome_msg", user),
 			reply_markup=markup, 
 			parse_mode="Markdown")
 		user.set_state(fsm.next_state[(fsm.SETUP_USER, fsm.GET_LANGUAGE)]['done'])

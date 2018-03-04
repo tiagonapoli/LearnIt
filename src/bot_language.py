@@ -35,11 +35,11 @@ help_msg_pt = ("Use o comando /add\_language para adicionar línguas ou matéria
 		   "\n*Gabriel Camargo*\nTelegram: t.me/gabriel\_camargo\nEmail: gacamargo1.000@gmail.com\n")
 
 
-welcome = ("Use the command /add_language to add the languages you are interested in learning and then use the command /add_word to add words you are interested in memorizing, " +
-			"or just use the command /copy_words to copy words from other users. During any process you can use /cancel to cancel the ongoing events, if you made a mistake, for example.")
+welcome = ("Use the command /add\_language to add the languages you are interested in learning and then use the command /add\_word to add words you are interested in memorizing, " +
+			"or just use the command /copy\_words to copy words from other users. During any process you can use /cancel to cancel the ongoing events, if you made a mistake, for example.")
 
-welcome_pt = ("Use o comando /add_language para adicionar línguas ou matérias nas quais você está interessado em aprender, e depois use o comando /add_word para adicionar palavras para aprender e memorizar, " +
-			"ou use /copy_words para copiar cards prontos de outros usuários. Durante qualquer processo, use /cancel para cancelar qualquer evento, se você cometeu algum erro, por exemplo")
+welcome_pt = ("Use o comando /add\_language para adicionar línguas ou matérias nas quais você está interessado em aprender, e depois use o comando /add\_word para adicionar palavras para aprender e memorizar, " +
+			"ou use /copy\_words para copiar cards prontos de outros usuários. Durante qualquer processo, use /cancel para cancelar qualquer evento, se você cometeu algum erro, por exemplo")
 
 
 message = { "*Text me the language you want to add*": 
@@ -367,16 +367,16 @@ message = { "*Text me the language you want to add*":
 				 1: "Por favor, crie seu nome de usuário de Telegram primeiro. Você só tem quer ir em Configurações do Telegram -> Informações -> Nome de usuário. Depois de criar um, digite /start novamente."},
 
 			"Welcome back to LearnIt!": 
-				{0: "Welcome back to LearnIt!",
-				 1: "Bem-vindo de volta ao LearnIt!"},
+				{0: "*Welcome back to LearnIt!*",
+				 1: "*Bem-vindo de volta ao LearnIt!*"},
 
 			"welcome_msg": 
 				{0: welcome,
 				 1: welcome_pt},
 
 			"Welcome to LearnIt!": 
-				{0: "Welcome to LearnIt!",
-				 1: "Bem vindo ao LearnIt!"},
+				{0: "*Welcome to LearnIt!*",
+				 1: "*Bem vindo ao LearnIt!*"},
 
 			"You will *not* receive any card until you use the command /start again": 
 				{0: "You will *not* receive any card until you use the command /start again",
