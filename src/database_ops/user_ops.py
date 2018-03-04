@@ -1,22 +1,12 @@
 import time
 import logging
-from utilities import logging_utils, bot_utils
-
-def check_logger(user_id, logger, debug_mode):
-	if (not user_id in logger.keys()):
-		logger[user_id] = logging.getLogger(__name__)
-		path = '../logs/user_ops{}.log'.format(user_id)
-		if debug_mode:
-			path = '../logs_debug/user_ops{}.log'.format(user_id)
-		logger[user_id] = logging_utils.setup_logger_default(logger[user_id], path) 
-	
-
+from utilities import logging_utils, bot_utils	
 
 class UserOps():
 
 	def __init__(self, conn, cursor, debug_mode):
+		self.logger = logging.getLogger('db_api')
 		self.debug_mode = debug_mode
-		self.logger = {}
 		self.conn = conn
 		self.cursor = cursor
 
@@ -37,11 +27,11 @@ class UserOps():
 				self.cursor.execute(cmd, (user_id, ))
 				row = self.cursor.fetchall()
 				if len(row) == 0:
-					return "User doesn't exist"
+					self.logger.warning("User {} doesn't exist".format(user_id))
+					return 
 				return (row[0][0], row[0][1], row[0][2])
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error get_state", exc_info=True)
+				self.logger.error("Error get_state {}".format(user_id), exc_info=True)
 				time.sleep(1)
 		return []
 
@@ -64,8 +54,7 @@ class UserOps():
 				self.conn.commit()
 				return
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error set_state", exc_info=True)
+				self.logger.error("Error set_state {}".format(user_id), exc_info=True)
 				time.sleep(1)
 				
 	def add_user(self, user_id, username):
@@ -87,12 +76,11 @@ class UserOps():
 				rows = self.cursor.fetchall()
 				if(len(rows) > 0):
 					return True
-				self.cursor.execute("INSERT INTO users VALUES (%s, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, %s, DEFAULT);", (user_id, username))
+				self.cursor.execute("INSERT INTO users VALUES (%s, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, %s, DEFAULT, DEFAULT);", (user_id, username))
 				self.conn.commit()
 				return True
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error add_user", exc_info=True)
+				self.logger.error("Error add_user {} {}".format(user_id, username), exc_info=True)
 				time.sleep(1)
 				
 		return False
@@ -119,8 +107,7 @@ class UserOps():
 					known.add(row[0])
 				return known
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error get_known_users", exc_info=True)
+				self.logger.error("Error get_known_users", exc_info=True)
 				time.sleep(1)
 				
 		return set()
@@ -139,8 +126,7 @@ class UserOps():
 					return 0
 				return rows[0][0]
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error get_learning_words_limit", exc_info=True)
+				self.logger.error("Error get_learning_words_limit {}".format(user_id), exc_info=True)
 				time.sleep(1)
 		return 0
 
@@ -157,8 +143,7 @@ class UserOps():
 					return 0
 				return rows[0][0]
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error get_review_cards", exc_info=True)
+				self.logger.error("Error get_review_cards {}".format(user_id), exc_info=True)
 				time.sleep(1)
 		return 0
 
@@ -173,8 +158,7 @@ class UserOps():
 				self.conn.commit()
 				return
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error set_card_waiting", exc_info=True)
+				self.logger.error("Error set_card_waiting {}".format(user_id), exc_info=True)
 				time.sleep(1)
 		return None
 
@@ -193,8 +177,7 @@ class UserOps():
 					return 0
 				return card[0][0]
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error get_card_waiting", exc_info=True)
+				self.logger.error("Error get_card_waiting {}".format(user_id), exc_info=True)
 				time.sleep(1)
 
 		return 0
@@ -211,8 +194,7 @@ class UserOps():
 					return None
 				return rows[0][0]
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error get_grade_waiting", exc_info=True)
+				self.logger.error("Error get_grade_waiting {}".format(user_id), exc_info=True)
 				time.sleep(1)
 		return None
 
@@ -229,8 +211,7 @@ class UserOps():
 				self.conn.commit()
 				return
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error set_grade_waiting", exc_info=True)
+				self.logger.error("Error set_grade_waiting {}".format(user_id), exc_info=True)
 				time.sleep(1)
 		return None
 
@@ -249,8 +230,7 @@ class UserOps():
 					return 0
 				return rows[0][0]
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error get_card_waiting_type", exc_info=True)
+				self.logger.error("Error get_card_waiting_type {}".format(user_id), exc_info=True)
 				time.sleep(1)
 
 		return None
@@ -267,8 +247,7 @@ class UserOps():
 				self.conn.commit()
 				return 
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error set_card_waiting_type", exc_info=True)
+				self.logger.error("Error set_card_waiting_type {}".format(user_id), exc_info=True)
 				time.sleep(1)
 		return None
 
@@ -284,8 +263,7 @@ class UserOps():
 					return 0
 				return rows[0][0]
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error get_cards_per_hour", exc_info=True)
+				self.logger.error("Error get_cards_per_hour {}".format(user_id), exc_info=True)
 				time.sleep(1)
 
 		return None
@@ -302,8 +280,7 @@ class UserOps():
 				self.conn.commit()
 				return 
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error set_cards_per_hour", exc_info=True)
+				self.logger.error("Error set_cards_per_hour {}".format(user_id), exc_info=True)
 				time.sleep(1)
 		return None
 
@@ -319,8 +296,7 @@ class UserOps():
 					return 0
 				return rows[0][0]
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error get_active", exc_info=True)
+				self.logger.error("Error get_active {}".format(user_id), exc_info=True)
 				time.sleep(1)
 		return None
 
@@ -334,8 +310,7 @@ class UserOps():
 				self.conn.commit()
 				return 
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error set_active", exc_info=True)
+				self.logger.error("Error set_active {}".format(user_id), exc_info=True)
 				time.sleep(1)
 		return None
 
@@ -351,8 +326,7 @@ class UserOps():
 					return None
 				return rows[0][0]
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error get_id_by_username", exc_info=True)
+				self.logger.error("Error get_id_by_username {}".format(username), exc_info=True)
 				time.sleep(1)
 		return None
 			
@@ -369,8 +343,7 @@ class UserOps():
 					return 0
 				return rows[0][0]
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error get_public", exc_info=True)
+				self.logger.error("Error get_public {}".format(user_id), exc_info=True)
 				time.sleep(1)
 		return 0
 
@@ -386,8 +359,7 @@ class UserOps():
 					return 0
 				return rows[0][0]
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error get_username", exc_info=True)
+				self.logger.error("Error get_username {}".format(user_id), exc_info=True)
 				time.sleep(1)
 		return 0
 
@@ -402,8 +374,37 @@ class UserOps():
 				self.conn.commit()
 				return 
 			except:
-				check_logger(user_id, self.logger, self.debug_mode)
-				self.logger[user_id].error("Error set_public", exc_info=True)
+				self.logger.error("Error set_public {}".format(user_id), exc_info=True)
+				time.sleep(1)
+		return None
+
+	def get_native_language(self, user_id):
+		tries = 5
+		while tries > 0:
+			tries -= 1
+			cmd = "SELECT native_language from users WHERE id=%s;"
+			try:
+				self.cursor.execute(cmd, (user_id, ))
+				rows = self.cursor.fetchall()
+				if(len(rows) == 0):
+					return 0
+				return rows[0][0]
+			except:
+				self.logger.error("Error get_native_language {}".format(user_id), exc_info=True)
+				time.sleep(1)
+		return 0
+
+	def set_native_language(self, user_id, language):
+		tries = 5
+		while tries > 0:
+			tries -= 1
+			cmd = "UPDATE users SET native_language=%s WHERE id=%s"
+			try:
+				self.cursor.execute(cmd, (language, user_id))
+				self.conn.commit()
+				return 
+			except:
+				self.logger.error("Error set_native_language {}".format(user_id), exc_info=True)
 				time.sleep(1)
 		return None
 

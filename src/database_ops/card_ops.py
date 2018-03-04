@@ -1,10 +1,12 @@
 from database_ops.db_utils import create_card_with_row
 import database_ops.archive_ops
-
+import logging
+from utilities import logging_utils
 
 class CardOps():
 
 	def __init__(self, conn, cursor, debug_mode):
+		self.logger = logging.getLogger('db_api')
 		self.debug_mode = debug_mode
 		self.conn = conn
 		self.cursor = cursor
@@ -14,7 +16,8 @@ class CardOps():
 		self.cursor.execute("SELECT highest_card_id FROM users WHERE id=%s", (user_id,))
 		row = self.cursor.fetchall()
 		if len(row) == 0:
-			return "User doesn't exist"
+			self.logger.warning("User {} doesn't exist".fomrat(user_id))
+			return 
 		return row[0][0]
 
 
@@ -60,8 +63,7 @@ class CardOps():
 		row = self.cursor.fetchall()
 
 		if len(row) == 0:
-			print("Error in get_card")
-			print("Card {}, {} doesn't exist".format(user_id, user_card_id))		
+			self.logger.warning("Card {}, {} doesn't exist".format(user_id, user_card_id))
 			return None
 
 		row = row[0]
@@ -79,8 +81,7 @@ class CardOps():
 		rows = self.cursor.fetchall()
 
 		if len(rows) == 0:
-			print("Error in get_cards_on_topic")
-			print("Card {}, {}, {} doesn't exist".format(user_id, language, topic))		
+			self.logger.warning("Card {}, {}, {} doesn't exist".format(user_id, language, topic))
 			return []
 
 		cards = []
@@ -102,7 +103,7 @@ class CardOps():
 		rows = self.cursor.fetchall()
 
 		if len(rows) == 0:
-			print("EMPTY in get_all_cards")
+			self.logger.warning("{} - There's no cards registered".format(user_id))
 			return []
 
 		cards = []
@@ -123,9 +124,8 @@ class CardOps():
 						(user_id, user_card_id))
 		rows = self.cursor.fetchall()
 		if len(rows) == 0:
-			print("Error in erase_card, dbapi")
-			print("Card %s, %s doesn't exist".format(user_id, user_card_id))
-			return "Card %s, %s doesn't exist".format(user_id, user_card_id)
+			self.logger.warning("Card {}, {} doesn't exist".format(user_id, user_card_id))
+			return 
 
 		# erasing archives of the card
 		self.cursor.execute("SELECT counter FROM archives WHERE user_id=%s AND user_card_id=%s;", (user_id, user_card_id))
@@ -135,7 +135,9 @@ class CardOps():
 
 		self.cursor.execute("DELETE FROM cards WHERE user_id=%s AND user_card_id=%s", (user_id, user_card_id))
 		self.conn.commit()
-		return "Card successfuly removed"
+
+		self.logger.info("Card {}, {} successfuly removed".format(user_id, user_card_id))
+		return 
 
 
 	def set_supermemo_data(self, card):

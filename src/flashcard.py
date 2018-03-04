@@ -170,6 +170,7 @@ class Card(TimeControl, WordInfo):
 					os.remove(archive)
 					print("Erased {}.".format(archive))
 				except Exception as e:
+					pass
 					print(e)
 		self.archives = []
 

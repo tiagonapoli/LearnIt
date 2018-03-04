@@ -3,6 +3,8 @@ from utilities import utils
 from utilities import bot_utils
 from utilities.bot_utils import get_id
 import logging
+import bot_language
+
 
 def handle_settings(bot, rtd, debug_mode):
 
@@ -18,12 +20,15 @@ def handle_settings(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
-		btns = ['Cards per hour', 'Set profile public', 'Set profile private']
+		btns = [bot_language.translate('Cards per hour', user), 
+				bot_language.translate('Set profile public', user), 
+				bot_language.translate('Set profile private', user),
+				bot_language.translate('Change bot language', user)]
 		
 		markup = bot_utils.create_keyboard(btns, 2)
-		text = "*Which settings do you want to change?*\n" + bot_utils.create_string_keyboard(btns)
+		text = bot_language.translate("*Which settings do you want to change?*", user) + "\n" + bot_utils.create_string_keyboard(btns)
 
 		bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
 		user.keyboard_options = btns
@@ -42,34 +47,44 @@ def handle_settings(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
 		valid, option = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 
 		if valid == False:
-			bot.reply_to(msg, "Please choose from keyboard")
+			bot.reply_to(msg, 
+				bot_language.translate("Please choose from keyboard", user))
 			user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.GET_OPTION)]['error'])
 			return
 
 		markup = bot_utils.keyboard_remove()
 
-		if option == 'Cards per hour':
+		if option == bot_language.translate('Cards per hour', user):
 			btns = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15']
 			markup = bot_utils.create_keyboard(btns, 3)
-			text = "*How many cards you want to receive per hour?*\n" + bot_utils.create_string_keyboard(btns)
+			text = bot_language.translate("*How many cards you want to receive per hour?*", user) + "\n" + bot_utils.create_string_keyboard(btns)
 			bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
 			user.keyboard_options = btns
 			user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.GET_OPTION)]['cards per hour'])
-		elif option == 'Set profile public':
+		elif option == bot_language.translate('Set profile public', user):
 			user.set_public(1)
 			markup = bot_utils.keyboard_remove()
-			bot.send_message(user_id, 'Your profile is now public', reply_markup=markup)
+			bot.send_message(user_id, 
+				bot_language.translate('Your profile is now public', user), reply_markup=markup)
 			user.set_state(fsm.IDLE)
-		elif option == 'Set profile private':
+		elif option == bot_language.translate('Set profile private', user):
 			user.set_public(0)
 			markup = bot_utils.keyboard_remove()
-			bot.send_message(user_id, 'Your profile is now private', reply_markup=markup)
+			bot.send_message(user_id, 
+				bot_language.translate('Your profile is now private', user), reply_markup=markup)
 			user.set_state(fsm.IDLE)
+		elif option == bot_language.translate('Change bot language', user):
+			options = ['English', 'Português']
+			text = "*Please select your mother language:*\n*Por favor, selecione sua língua nativa:*" + "\n" + bot_utils.create_string_keyboard(options)
+			markup = bot_utils.create_keyboard(options, 3)
+			bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
+			user.keyboard_options = options
+			user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.GET_OPTION)]['change language'])
 
 
 	@bot.message_handler(func = lambda msg:
@@ -83,17 +98,50 @@ def handle_settings(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 		
 		valid, cards_per_hour = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 		markup = bot_utils.keyboard_remove()
 
 		if valid == False:
-			bot.reply_to(msg, "Please choose from keyboard")
+			bot.reply_to(msg, 
+				bot_language.translate("Please choose from keyboard", user))
 			user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.CARDS_PER_HOUR)]['error'])
 			return
 
 		markup = bot_utils.keyboard_remove()
 		user.set_cards_per_hour(int(cards_per_hour))
-		bot.send_message(user_id, "_Cards per hour set successfuly!_", reply_markup=markup, parse_mode="Markdown")
+		bot.send_message(user_id, 
+			bot_language.translate("_Cards per hour set successfuly!_", user), 
+			reply_markup=markup, 
+			parse_mode="Markdown")
 		user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.CARDS_PER_HOUR)]['done'])
+
+
+	@bot.message_handler(func = lambda msg:
+					rtd.get_user(get_id(msg)).get_state() == (fsm.SETTINGS, fsm.GET_LANGUAGE),
+					content_types=['text'])
+	def add_word1(msg):
+		"""
+			Add word: Get word's language
+		"""
+		user = rtd.get_user(get_id(msg))
+		user_id = user.get_id()
+		user.set_state(fsm.LOCKED)
+
+		valid, language = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
+
+		if valid == False:
+			bot.reply_to(msg, 
+				bot_language.translate("Please choose from keyboard", user))
+			user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.GET_LANGUAGE)]['error'])
+			return
+
+		user.set_native_language(bot_language.native_languages[language])
+
+		markup = bot_utils.keyboard_remove()
+		bot.send_message(user_id, 
+			bot_language.translate("OK!", user),
+			reply_markup=markup, 
+			parse_mode="Markdown")
+		user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.GET_LANGUAGE)]['done'])

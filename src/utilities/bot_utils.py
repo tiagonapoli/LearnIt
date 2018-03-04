@@ -80,7 +80,7 @@ def parse_string_keyboard_ans(ans, keys):
 	ans = ans[1:]
 	try:
 		number = int(ans)
-		print("PARSE OPTION NUMBER {}".format(number))
+		#print("PARSE OPTION NUMBER {}".format(number))
 		number -= 1
 		if number >= 0 and number < len(keys):
 			if type(keys[number]) == "tuple":
@@ -101,7 +101,7 @@ def parse_string_keyboard_ans_number(ans, keys):
 	ans = ans[1:]
 	try:
 		number = int(ans)
-		print("PARSE OPTION NUMBER {}".format(number))
+		#print("PARSE OPTION NUMBER {}".format(number))
 		number -= 1
 		if number >= 0 and number < len(keys):
 			return True, number
@@ -116,7 +116,7 @@ def parse_selection_inline_keyboard_ans(callback_data,set_btn):
 	'''
  		Altera o set_btn
  	'''
-	print("CALLBACK DATA: {}".format(callback_data))
+	#print("CALLBACK DATA: {}".format(callback_data))
 	done = False
 	try:
 		btn_number = int(callback_data)

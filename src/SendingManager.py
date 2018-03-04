@@ -10,11 +10,15 @@ import logging
 
 class SendingManager():
 
-	def __init__(self, debug_mode):
+	def __init__(self, sleep, debug_mode):
+		self.sleep = sleep
 		self.debug_mode = debug_mode
-		self.continua = 1
-		self.restart_bot_flag = 0
-		self.logger = None
+		
+		self.continue_flag = False
+		self.restart_bot_flag = False
+
+		self.bot_logger = logging.getLogger('bot_sender')
+		self.logger = logging.getLogger('learnit_thread')
 		self.bot = None
 		self.start_bot() 
 
@@ -27,15 +31,15 @@ class SendingManager():
 		self.last_hour = (self.now.hour - 1 + 24) % 24
 		self.cycles = 0
 
+
 	def start_bot(self):
+		self.logger.info("Restart bot sending manager")
 		del self.bot
-		self.restart_bot_flag = 0
-		self.logger = logging.getLogger(__name__)
-		logger_aux = logging.getLogger('__main__')
-		logger_aux.warning("Restarted bot sending manager")
-		logging_utils.setup_logger_sending_manager(self.logger, self.debug_mode)
+		self.bot = None
+		
+		self.restart_bot_flag = False
 		self.bot = bot_utils.open_bot(self.debug_mode, self.logger) 
-		logging_utils.add_bot_handler(self.logger, self.bot)
+		self.logger.warning("Restarted bot sending manager")
 
 	def upd_users(self):
 		self.now = datetime.datetime.now()
@@ -92,19 +96,19 @@ class SendingManager():
 
 
 	def stop(self):
-		self.continua = 0
+		self.continue_flag = False
 
 	def restart_bot(self):
-		self.restart_bot_flag = 1
+		self.restart_bot_flag = True
 
 	def run(self):
-		self.logger.info("Starting sending manager")
-
-		while self.continua == 1:
+		self.continue_flag = True
+		
+		while self.continue_flag:
 			try:
 				self.logger.info("Woke Up - Cycles: {}".format(self.cycles))
 
-				if self.restart_bot_flag == 1:
+				if self.restart_bot_flag:
 					self.start_bot()
 
 				self.cycles += 1
@@ -117,36 +121,27 @@ class SendingManager():
 					self.prepare_users_queues(user_id)
 					self.process_users_queues(user_id)
 					
-				sleep = 60
-				if self.debug_mode:
-					sleep = 20
-				self.logger.info("Sleep {}".format(sleep))
-				time.sleep(sleep)
+				self.logger.info("Sleep {}".format(self.sleep))
+				time.sleep(self.sleep)
 
 			except Exception as e:
+				self.bot_logger.error("EXCEPTION on sending manager", exc_info=True)
 				self.logger.error("EXCEPTION on sending manager", exc_info=True)
 				self.restart_bot()
-				sleep = 20
-				if self.debug_mode:
-					sleep = 20
-				time.sleep(sleep)
-
+				time.sleep(self.sleep)
 
 		self.logger.warning("Sending manager turned off")
-		for user_id, user in self.users.items():
-			if user.get_active() == 0:
-				continue
-			self.user_queues[user_id].logger.info("Exiting sending manager")
-
 
 class SendingManagerThread(Thread):
 
-	def __init__(self, debug_mode):
+	def __init__(self, sending_manager):
 		Thread.__init__(self)
-		self.sending_manager = SendingManager(debug_mode)
+		self.sending_manager = sending_manager
 
 	def safe_stop(self):
 		self.sending_manager.stop()
+		if self.is_alive():
+			self.join()
 
 	def run(self):
 		self.sending_manager.run()

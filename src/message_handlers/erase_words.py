@@ -4,6 +4,7 @@ from utilities import utils
 from flashcard import Word
 from utilities.bot_utils import get_id
 import logging
+import bot_language
 
 
 def handle_erase_words(bot, rtd, debug_mode):	
@@ -17,17 +18,17 @@ def handle_erase_words(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
 		known_languages = user.get_languages()
 
 		if len(known_languages) == 0:
-			bot.send_message(user_id, "_Please, add a language first._", parse_mode="Markdown")
+			bot.send_message(user_id, bot_language.translate("_Please, add a language first._", user), parse_mode="Markdown")
 			user.set_state(fsm.IDLE)
 			return 	
 
 		markup = bot_utils.create_keyboard(known_languages, 2)
-		text = "*Please select the language:*\n" + bot_utils.create_string_keyboard(known_languages)
+		text = bot_language.translate("*Please select the language:*", user) + "\n" + bot_utils.create_string_keyboard(known_languages)
 		user.keyboard_options = known_languages
 
 		bot.send_message(user_id, text,	reply_markup=markup, parse_mode="Markdown")	
@@ -44,17 +45,20 @@ def handle_erase_words(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
 		valid, language = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 		if valid == False:
-			bot.reply_to(msg, "Please choose from keyboard")
+			bot.reply_to(msg, 
+				bot_language.translate("Please choose from keyboard", user))
 			user.set_state(fsm.next_state[(fsm.ERASE_WORDS, fsm.GET_LANGUAGE)]['error'])
 			return
 
 		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id, "*Select the word's topic:*",
-						reply_markup=markup, parse_mode="Markdown")
+		bot.send_message(user_id, 
+			bot_language.translate("*Select the word's topic:*", user),
+			reply_markup=markup, 
+			parse_mode="Markdown")
 		topics = user.get_all_topics(language)
 		topics.sort()
 
@@ -62,7 +66,7 @@ def handle_erase_words(bot, rtd, debug_mode):
 
 			btn = list(topics)
 			markup = bot_utils.create_keyboard(btn)
-			keyboard = "_Topics registered:_\n" + bot_utils.create_string_keyboard(btn) 
+			keyboard = bot_language.translate("_Topics registered:_", user) + "\n" + bot_utils.create_string_keyboard(btn) 
 
 			bot.send_message(user_id, keyboard, reply_markup=markup, parse_mode="Markdown")
 			user.temp_word = Word(user_id, None)
@@ -70,7 +74,9 @@ def handle_erase_words(bot, rtd, debug_mode):
 			user.keyboard_options = btn
 			user.set_state(fsm.next_state[(fsm.ERASE_WORDS, fsm.GET_LANGUAGE)]['done'])
 		else: 
-			bot.send_message(user_id, "_There are no topics registered in this language yet._", parse_mode="Markdown")
+			bot.send_message(user_id, 
+				bot_language.translate("_There are no topics registered in this language yet._", user), 
+				parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.ERASE_WORDS, fsm.GET_LANGUAGE)]['no topics'])
 
 
@@ -85,12 +91,14 @@ def handle_erase_words(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
 		language = user.temp_word.get_language()
 		valid, topic = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 		if valid == False:
-			bot.reply_to(msg, "_Please choose from options._", parse_mode="Markdown")
+			bot.reply_to(msg, 
+				bot_language.translate("_Please choose from options._", user), 
+				parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.ERASE_WORDS, fsm.GET_TOPIC)]['error'])
 			return			
 
@@ -105,7 +113,9 @@ def handle_erase_words(bot, rtd, debug_mode):
 		user.btn_set = btn_set
 		user.keyboard_options = btn
 		user.temp_words_list = words
-		bot.send_message(user_id, "_Select words to erase:_", reply_markup=markup, parse_mode="Markdown")
+		bot.send_message(user_id, 
+			bot_language.translate("_Select words to erase:_", user),
+			reply_markup=markup, parse_mode="Markdown")
 		user.set_state(fsm.next_state[(fsm.ERASE_WORDS, fsm.GET_TOPIC)]['done'])
 
 
@@ -116,8 +126,7 @@ def handle_erase_words(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(call.message))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
-		print("CALLBACK TEXT: {}   DATA: {}".format(call.message.text,call.data))
+		logger = logging.getLogger('{}'.format(user_id))
 
 		btn_set = user.btn_set
 		btn_set, done = bot_utils.parse_selection_inline_keyboard_ans(call.data, btn_set)
@@ -126,13 +135,14 @@ def handle_erase_words(bot, rtd, debug_mode):
 		if done == True:
 			bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
 			words = user.temp_words_list
-			text = "_Erased words:_\n"
+			text = bot_language.translate("_Erased words:_", user) + "\n"
 			for i in btn_set:
 				print(user.erase_word(words[i].get_word_id()))
 				text += "*." + utils.treat_msg_to_send(utils.get_foreign_word(words[i]), "*") + "*\n"
 			bot.send_message(user_id, text, parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.ERASE_WORDS, fsm.SELECT_WORDS)]['done'])		
 		else:
-			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
-			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="Select words to erase:", reply_markup=markup)
+			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, (bot_language.translate("End selection", user), "DONE"))
+			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, 
+				text=bot_language.translate("Select words to erase:", user), reply_markup=markup)
 			user.set_state(fsm.next_state[(fsm.ERASE_WORDS, fsm.SELECT_WORDS)]['continue'])

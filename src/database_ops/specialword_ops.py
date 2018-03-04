@@ -11,11 +11,7 @@ class SpecialWordOps():
 
 	def __init__(self, conn, cursor, debug_mode):
 		self.debug_mode = debug_mode
-		self.logger = logging.getLogger(__name__)
-		path = '../logs/specialwords_ops.log'
-		if debug_mode:
-			path = '../logs_debug/specialwords_ops.log'
-		logging_utils.setup_logger_default(self.logger, path)
+		self.logger = logging.getLogger('db_api')
 		self.conn = conn
 		self.cursor = cursor
 

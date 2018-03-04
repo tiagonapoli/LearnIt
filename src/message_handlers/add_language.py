@@ -2,6 +2,7 @@ import fsm
 from utilities import utils
 from utilities.bot_utils import get_id
 import logging
+import bot_language
 
 def handle_add_language(bot, rtd, debug_mode):
 
@@ -15,11 +16,14 @@ def handle_add_language(bot, rtd, debug_mode):
 			Add language sequence
 		"""
 		user = rtd.get_user(get_id(msg))
-		user_id = user.get_id()
+		user_id = user.get_id()		
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
-		bot.send_message(user_id, "*Text me the language you want to add*", parse_mode="Markdown")
+		bot.send_message(user_id, 
+			bot_language.translate("*Text me the language you want to add*", user), 
+			parse_mode="Markdown")
+		
 		user.set_state(fsm.next_state[fsm.IDLE]['add_language'])
 
 
@@ -34,22 +38,34 @@ def handle_add_language(bot, rtd, debug_mode):
 		"""
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
+		
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
 
 		language = utils.treat_special_chars(msg.text)
 
 		if len(language) >= 45:
-			bot.send_message(user_id, "Please, don't exceed 45 characters. You digited {} characters. Send the language again:".format(len(language)))
+			bot.send_message(user_id, 
+				bot_language.translate("Please, don't exceed 45 characters. You digited {} characters. Send the language again:", user).format(len(language)))
 			user.set_state(fsm.next_state[fsm.ADD_LANGUAGE]['error'])
 			return
 
 		if len(language) == 0:
-			bot.send_message(user_id, "Please, don't user / or \ or _ or *. Send the language again:")
+			bot.send_message(user_id, 
+				bot_language.translate("Please, don't user / or \ or _ or *. Send the language again:", user))
 			user.set_state(fsm.next_state[fsm.ADD_LANGUAGE]['error'])
 			return
 
-		print(language)
-		bot.send_message(user_id, utils.treat_msg_to_send(user.add_language(language)), parse_mode="Markdown")
+		logger.info(language)
+
+		if user.add_language(language) == True:
+			bot.send_message(user_id, 
+				utils.treat_msg_to_send(bot_language.translate("{} added successfully to your languages",user).format(language)), 
+				parse_mode="Markdown")
+		else:
+			bot.send_message(user_id, 
+				utils.treat_msg_to_send(bot_language.translate("{} already exists", user).format(language)), 
+				parse_mode="Markdown")			
+		
 		user.set_state(fsm.next_state[fsm.ADD_LANGUAGE]['done'])

@@ -19,11 +19,11 @@ os.system("sudo -u postgres psql -c \"CREATE USER {} WITH PASSWORD 'abcde';\"".f
 os.system("sudo -u postgres psql -c \"ALTER USER {} WITH SUPERUSER;\"".format(username))
 
 
-f = open('./credentials/connect_str.txt', 'w')
+f = open('../credentials/connect_str.txt', 'w')
 f.write('dbname=learnit user={} host=localhost password=abcde'.format(username))
 f.close()
 
-f = open('./credentials/connect_str_debug.txt', 'w')
+f = open('../credentials/connect_str_debug.txt', 'w')
 f.write('dbname=learnit_debug user={} host=localhost password=abcde'.format(username))
 f.close()
 
@@ -36,14 +36,14 @@ os.system("sudo -u postgres psql -c 'GRANT ALL PRIVILEGES ON DATABASE learnit_de
 
 print("Type the LearnIt bot token:")
 token = input()
-f = open('./credentials/bot_token.txt', 'w')
+f = open('../credentials/bot_token.txt', 'w')
 f.write(token)
 f.close()
 
 
 print("Type the LearnIt debug bot token:")
 token = input()
-f = open('./credentials/bot_debug_token.txt', 'w')
+f = open('../credentials/bot_debug_token.txt', 'w')
 f.write(token)
 f.close()
 

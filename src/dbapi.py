@@ -1,5 +1,6 @@
 import psycopg2
 import os
+import logging
 from flashcard import Word
 from flashcard import Card
 
@@ -38,15 +39,18 @@ class Database():
 		connect_str = arq.read()
 		self.DB_NAME = connect_str.split()[0][7:]
 		self.DB_USER_NAME = connect_str.split()[1][5:]
-		print("DB_NAME: {}".format(self.DB_NAME))
-		print("DB_USER_NAME: {}".format(self.DB_USER_NAME))
-		print(connect_str)
+
+		self.logger = logging.getLogger('db_api')
+
+		#print("DB_NAME: {}".format(self.DB_NAME))
+		#print("DB_USER_NAME: {}".format(self.DB_USER_NAME))
+		#print(connect_str)
 		arq.close()
 		# use our connection values to establish a connection
 		self.conn = psycopg2.connect(connect_str)
 		# create a psycopg2 cursor that can execute queries
 		self.cursor = self.conn.cursor()
-		print("Connected with database!")
+		#print("Connected with database!")
 		
 		self.word_ops = database_ops.word_ops.WordOps(self.conn, self.cursor, debug_mode)
 		self.archive_ops = database_ops.archive_ops.ArchiveOps(self.conn, self.cursor, debug_mode)
@@ -154,6 +158,12 @@ class Database():
 
 	def get_username(self, user_id):
 		return self.user_ops.get_username(user_id)
+
+	def get_native_language(self, user_id):
+		return self.user_ops.get_native_language(user_id)
+
+	def set_native_language(self, user_id, language):
+		return self.user_ops.set_native_language(user_id, language)
 
 	#==================TOPIC ops==================
 	def add_topic(self, user_id, language, topic):

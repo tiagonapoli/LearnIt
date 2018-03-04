@@ -4,6 +4,7 @@ import datetime
 from utilities import bot_utils
 import signal
 import time
+import bot_language
 
 class SendTimeoutException(Exception):   # custom exception
     
@@ -61,7 +62,7 @@ def treat_username_str(username):
 
 def get_foreign_word(word):
 	string_lst = word.get_word().split()
-	print(word.get_word())
+	#print(word.get_word())
 	if string_lst[0] == '&img':
 		return word.cards['text'].get_question()
 	return word.get_word()
@@ -73,11 +74,13 @@ def words_to_string_list(words):
 	return ret
 
 
-def send_foreign_word_ans(bot, card):
+def send_foreign_word_ans(bot, card, user):
 	user_id = card.get_user()
 	string_lst = card.foreign_word.split()
 	if string_lst[0] == '&img':
-		bot.send_message(user_id, "*Answer:* ", parse_mode="Markdown")
+		bot.send_message(user_id, 
+			bot_language.translate("*Answer:* ", user), 
+			parse_mode="Markdown")
 		try:
 			question = open(string_lst[1],'rb')
 			bot.send_photo(user_id, question)
@@ -85,14 +88,15 @@ def send_foreign_word_ans(bot, card):
 		except:
 			pass
 	else:
-		bot.send_message(user_id, "*Answer:* " + '_' + treat_msg_to_send(card.foreign_word, "_") + '_', parse_mode="Markdown")
+		bot.send_message(user_id, 
+			bot_language.translate("*Answer:* ", user) + '_' + treat_msg_to_send(card.foreign_word, "_") + '_', parse_mode="Markdown")
 
 
-def send_all_cards(bot, word, ans_mark="*", logger=None):
+def send_all_cards(bot, word, user, ans_mark="*", logger=None):
 	for content, card in word.cards.items():
-		send_ans_card(bot, card, None, ans_mark, logger)
+		send_ans_card(bot, card, None, user, ans_mark, logger)
 
-def send_ans_card(bot, card, query_type, ans_mark="*", logger=None):
+def send_ans_card(bot, card, query_type, user, ans_mark="*", logger=None):
 	user_id = card.get_user()
 	question = card.get_question()
 	content = card.get_type()
@@ -102,27 +106,22 @@ def send_ans_card(bot, card, query_type, ans_mark="*", logger=None):
 	signal.alarm(20)
 	markup = bot_utils.keyboard_remove()
 	if content == 'image':
-		bot.send_message(user_id, ans_mark + "Image answer:" + ans_mark,reply_markup = markup, parse_mode="Markdown")
+		bot.send_message(user_id, ans_mark + bot_language.translate("Image answer:", user) + ans_mark,reply_markup = markup, parse_mode="Markdown")
 		question = open(question,'rb')
 		bot.send_photo(user_id, question, reply_markup = markup)
 		question.close()
 	elif content == 'audio':
-		bot.send_message(user_id, ans_mark + "Audio answer:" + ans_mark,reply_markup = markup, parse_mode="Markdown")
+		bot.send_message(user_id, ans_mark + bot_language.translate("Audio answer:", user) + ans_mark,reply_markup = markup, parse_mode="Markdown")
 		question = open(question,'rb')
 		bot.send_voice(user_id, question, reply_markup = markup)
 		question.close()
 	elif content == 'text':
-		bot.send_message(user_id, ans_mark + "Text answer:" + ans_mark,reply_markup = markup, parse_mode="Markdown")
+		bot.send_message(user_id, ans_mark + bot_language.translate("Text answer:", user) + ans_mark,reply_markup = markup, parse_mode="Markdown")
 		bot.send_message(user_id, question, reply_markup = markup)
 	signal.alarm(0)
 	
 
-poll_text = ("*5* - _perfect response, without any hesitation_\n" +
-			 "*4* - _correct response after a hesitation_\n" +
-			 "*3* - _correct response recalled with difficulty_\n" + 
-			 "*2* - _incorrect response; where the correct one seemed easy to recall_\n" + 
-			 "*1* - _incorrect response; the correct one was remembered_\n" +
-			 "*0* - _complete blackout._")
+
 
 
 def send_review_card(bot, card, user, card_type = 'Review', number = None, logger=None, set_card_db = True):
@@ -145,7 +144,7 @@ def send_review_card(bot, card, user, card_type = 'Review', number = None, logge
 			user_id = user.get_id()
 
 			markup = bot_utils.keyboard_remove()
-			bot.send_message(user_id, "*{} card{}!*".format(card_type, number), parse_mode="Markdown", reply_markup=markup)
+			bot.send_message(user_id, bot_language.translate("*{} card{}!*".format(card_type, '{}'), user).format(number), parse_mode="Markdown", reply_markup=markup)
 			
 			if set_card_db == True:
 				user.set_card_waiting(card.get_card_id())
@@ -162,26 +161,30 @@ def send_review_card(bot, card, user, card_type = 'Review', number = None, logge
 				special_word = True
 
 			if special_word == True:
-				bot.send_message(user_id, "Try to relate the next message to something you know in *{}/{}*. When you remeber or when you are ready, *send me any message*"
-									.format(treat_msg_to_send(language, "*"), treat_msg_to_send(topic, "*")), parse_mode="Markdown")
+				bot.send_message(user_id, 
+					bot_language.translate("Try to relate the next message to something you know in *{}/{}*. When you remeber or when you are ready, *send me any message*", user)
+						.format(treat_msg_to_send(language, "*"), treat_msg_to_send(topic, "*")), parse_mode="Markdown")
 			if content == 'image':
 				if special_word == False:
-					bot.send_message(user_id, "Relate the image to a word in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
+					bot.send_message(user_id, 
+						bot_language.translate("Relate the image to a word in _{}_, topic _{}_", user).format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
 				question = open(question,'rb')
-				print("Send photo {}".format(card.get_question()))
+				#print("Send photo {}".format(card.get_question()))
 				bot.send_photo(user_id, question, reply_markup = markup)
 				question.close()
 			elif content == 'audio':
 				if special_word == False:
-					bot.send_message(user_id, "Transcribe the audio in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
+					bot.send_message(user_id, 
+						bot_language.translate("Transcribe the audio in _{}_, topic _{}_", user).format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
 				question = open(question,'rb')
-				print("Send voice {}".format(card.get_question()))
+				#print("Send voice {}".format(card.get_question()))
 				bot.send_voice(user_id, question, reply_markup = markup)
 				question.close()
 			elif content == 'text':
 				if special_word == False:
-					bot.send_message(user_id, "Relate the text to a word in _{}_, topic _{}_".format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
-				print("Send text {}".format(card.get_question()))
+					bot.send_message(user_id, 
+						bot_language.translate("Relate the text to a word in _{}_, topic _{}_", user).format(treat_msg_to_send(language, "_"), treat_msg_to_send(topic, "_")), parse_mode="Markdown")
+				#print("Send text {}".format(card.get_question()))
 				bot.send_message(user_id, question, reply_markup = markup)
 			
 			signal.alarm(0)
@@ -205,7 +208,7 @@ def treat_special_chars(text):
 	#text = text.replace('\\', '')
 	text = text.strip()
 	text = text.replace('\n', '')
-	print("{} -> treated -> {}".format(ant,text))
+	#print("{} -> treated -> {}".format(ant,text))
 	return text
 
 def save_image(image_msg, path, image_name, bot):

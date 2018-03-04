@@ -33,13 +33,15 @@ SELECT_TOPICS = 31
 GET_IMAGE = 32
 GET_OVERWRITE = 33
 GET_CONTINUE = 34
+SETUP_USER = 35
 
 
 '''FSM'''
 
 #=====================IDLE MENU=====================
 next_state = {	
-	IDLE:   {'card_query': WAITING_ANS,
+	IDLE:   {'setup user': (SETUP_USER, GET_LANGUAGE),
+			 'card_query': WAITING_ANS,
       		 'add_word': (ADD_WORD, GET_LANGUAGE),
       		 'add_language': ADD_LANGUAGE,
       		 'list_words': (LIST_WORDS, GET_LANGUAGE),
@@ -71,22 +73,22 @@ next_state.update({
 						   'word img': (ADD_WORD, GET_IMAGE),
 						   'error': (ADD_WORD, GET_WORD)},
 	(ADD_WORD, GET_IMAGE): {'done': (ADD_WORD, RELATE_MENU)},
-	(ADD_WORD, RELATE_MENU): {'Send audio': (ADD_WORD, SEND_AUDIO),
-							  'Send image': (ADD_WORD, SEND_IMAGE),
-							  'Send text': (ADD_WORD, SEND_TEXT),
+	(ADD_WORD, RELATE_MENU): {'2': (ADD_WORD, SEND_AUDIO),
+							  '1': (ADD_WORD, SEND_IMAGE),
+							  '0': (ADD_WORD, SEND_TEXT),
 			  				  'continue': (ADD_WORD, RELATE_MENU),
 			  				  'done': (ADD_WORD, GET_CONTINUE)},
 	(ADD_WORD, SEND_IMAGE): { 'error': (ADD_WORD, SEND_IMAGE),
-							  'Send audio': (ADD_WORD, SEND_AUDIO),
-							  'Send text': (ADD_WORD, SEND_TEXT),
+							  '2': (ADD_WORD, SEND_AUDIO),
+							  '0': (ADD_WORD, SEND_TEXT),
 			  				  'done': (ADD_WORD, GET_CONTINUE)},
 	(ADD_WORD, SEND_AUDIO): {'error': (ADD_WORD, SEND_AUDIO),
-							 'Send image': (ADD_WORD, SEND_IMAGE),
-							 'Send text': (ADD_WORD, SEND_TEXT),
+							 '1': (ADD_WORD, SEND_IMAGE),
+							 '0': (ADD_WORD, SEND_TEXT),
 			  				 'done': (ADD_WORD, GET_CONTINUE)},
 	(ADD_WORD, SEND_TEXT): {'error': (ADD_WORD, SEND_TEXT),
-							'Send image': (ADD_WORD, SEND_IMAGE),
-							'Send audio': (ADD_WORD, SEND_AUDIO),
+							'1': (ADD_WORD, SEND_IMAGE),
+							'2': (ADD_WORD, SEND_AUDIO),
 			  				'done': (ADD_WORD, GET_CONTINUE)},
 	(ADD_WORD, GET_CONTINUE): {'done': IDLE,
 							   'error': (ADD_WORD, GET_CONTINUE),
@@ -148,9 +150,12 @@ next_state.update({
 #=====================SETTINGS=====================
 next_state.update({
 	(SETTINGS, GET_OPTION) : {'error' : (SETTINGS, GET_OPTION),
+							  'change language': (SETTINGS, GET_LANGUAGE),
 							  'cards per hour' : (SETTINGS, CARDS_PER_HOUR)},
 	(SETTINGS, CARDS_PER_HOUR) : {'error' : (SETTINGS, CARDS_PER_HOUR),
-								  'done' : IDLE}
+								  'done' : IDLE},
+	(SETTINGS, GET_LANGUAGE): {'error': (SETTINGS, GET_LANGUAGE),
+							  'done': IDLE}
 })
 
 #=====================COPY WORDS=====================
@@ -164,4 +169,10 @@ next_state.update({
 						   		  'continue': (COPY_WORDS, SELECT_TOPICS)},
 	(COPY_WORDS, GET_OVERWRITE): {'done': IDLE,
 						   		  'error': (COPY_WORDS, GET_OVERWRITE)}	
+})
+
+#=====================SETUP USER=====================
+next_state.update({
+	(SETUP_USER, GET_LANGUAGE): {'error': (SETUP_USER, GET_LANGUAGE),
+								 'done': IDLE}
 })

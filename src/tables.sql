@@ -14,7 +14,8 @@ CREATE TABLE users(
 	card_waiting_type int DEFAULT 0,
 	grade_waiting_for_process int DEFAULT 0,
 	username varchar(50),
-	public int DEFAULT 0
+	public int DEFAULT 0,
+	native_language int DEFAULT 0
 );
 
 CREATE TABLE languages(

@@ -1,6 +1,8 @@
 import os
 from database_ops.db_utils import create_card_with_row, create_word_with_row
 from utilities import utils
+import logging
+from utilities import logging_utils
 import database_ops.topic_ops
 import database_ops.card_ops
 import database_ops.specialword_ops
@@ -9,6 +11,7 @@ import database_ops.specialword_ops
 class WordOps():
 
 	def __init__(self, conn, cursor, debug_mode):
+		self.logger = logging.getLogger('db_api')
 		self.debug_mode = debug_mode
 		self.conn = conn
 		self.cursor = cursor
@@ -21,7 +24,8 @@ class WordOps():
 		self.cursor.execute("SELECT highest_word_id FROM users WHERE id=%s", (user_id, ))
 		row = self.cursor.fetchall()
 		if len(row) == 0:
-			return "User doesn't exist"
+			self.logger.warning("User {} doesn't exist".format(user_id))
+			return
 		return row[0][0]
 
 	def add_word(self, word):
@@ -36,7 +40,8 @@ class WordOps():
 							(user_id, language, topic ,foreign_word))
 		rows = self.cursor.fetchall()
 		if(len(rows) > 0):
-			return "{} is already in your words".format(word.get_word())
+			self.logger.info("{} is already in {} words".format(word.get_word(), user_id))
+			return
 
 		self.topic_ops.add_topic(user_id, language, topic)
 
@@ -56,7 +61,8 @@ class WordOps():
 		if utils.check_special_word(word.get_word()):
 			self.specialword_ops.add_specialword(word)
 
-		return "Word {} and content added successfully!".format(foreign_word)
+		self.logger.info("Word {} and content added successfully to {}!".format(foreign_word, user_id))
+		return
 
 	def check_word_existence(self, user_id, language, topic, foreign_word):
 		self.cursor.execute("SELECT user_word_id FROM words WHERE user_id=%s AND language=%s AND topic=%s AND foreign_word=%s;",
@@ -71,7 +77,8 @@ class WordOps():
 		rows = self.cursor.fetchall()
 
 		if len(rows) == 0:
-			return "Invalid word"
+			self.logger.warning("Invalid word {} {}".format(word_id, user_id))
+			return 
 
 		language = rows[0][0]
 		topic = rows[0][1]
@@ -102,20 +109,19 @@ class WordOps():
 			if os.path.exists('../data_debug/{}/{}'.format(user_id, word_id)):
 				try:
 					os.rmdir('../data_debug/{}/{}'.format(user_id, word_id))
-					print("Erased directory {}".format('../data_debug/{}/{}'.format(user_id, word_id)))
+					self.logger.info("Erased directory {}".format('../data_debug/{}/{}'.format(user_id, word_id)))
 				except Exception as e:
-					print("ERROR in erase_word - directory {}".format('../data_debug/{}/{}'.format(user_id, word_id)))
-					print(e)
+					self.logger.error("ERROR in erase_word - directory {}".format('../data_debug/{}/{}'.format(user_id, word_id)), exc_info=True)
 		else:
 			if os.path.exists('../data/{}/{}'.format(user_id, word_id)):
 				try:
 					os.rmdir('../data/{}/{}'.format(user_id, word_id))
-					print("Erased directory {}".format('../data/{}/{}'.format(user_id, word_id)))
+					self.logger.info("Erased directory {}".format('../data/{}/{}'.format(user_id, word_id)))
 				except Exception as e:
-					print("ERROR in erase_word - directory {}".format('../data/{}/{}'.format(user_id, word_id)))
-					print(e)
+					self.logger.error("ERROR in erase_word - directory {}".format('../data/{}/{}'.format(user_id, word_id)), exc_info=True)
 
-		return "Word {} erased successfully!".format(word_text)
+		self.logger.info("Word {} erased successfully!".format(word_text))
+		return 
 
 
 	def get_word(self, user_id, word_id):

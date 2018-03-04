@@ -1,3 +1,3 @@
 #!/bin/bash
 cd src
-reset && ./lingobot.py
+reset && ./console.py

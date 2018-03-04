@@ -1,9 +1,11 @@
 import database_ops.word_ops
-
+import logging
+from utilities import logging_utils
 
 class TopicOps():
 
 	def __init__(self, conn, cursor, debug_mode):
+		self.logger = logging.getLogger('db_api')
 		self.debug_mode = debug_mode
 		self.conn = conn
 		self.cursor = cursor
@@ -37,10 +39,11 @@ class TopicOps():
 		rows = self.cursor.fetchall()
 
 		if len(rows) == 0:
-			print("Topic {},{},{} doesn't exist.".format(user_id,language,topic))
+			self.logger.warning("Topic {},{},{} doesn't exist.".format(user_id,language,topic))
 			return
 
 		self.cursor.execute("DELETE FROM topics WHERE user_id=%s AND language=%s AND topic=%s;", (user_id, language,topic))
 		self.conn.commit()
-		print("Topic {},{},{} erased.".format(user_id, language, topic))
+
+		self.logger.info("Topic {},{},{} erased.".format(user_id, language, topic))
 		return

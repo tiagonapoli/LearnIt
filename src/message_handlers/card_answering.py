@@ -3,6 +3,8 @@ from utilities.bot_utils import get_id
 from utilities import bot_utils
 from utilities import utils
 import logging
+import bot_language
+
 
 def handle_card_answer(bot, rtd, debug_mode):
 
@@ -19,10 +21,10 @@ def handle_card_answer(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
 		card_id = user.get_card_waiting()
-		print("CARD_ID WAITING {}".format(card_id))
+		#print("CARD_ID WAITING {}".format(card_id))
 
 		card = user.get_card(card_id)
 		res = utils.treat_special_chars(msg.text.lower())
@@ -32,23 +34,27 @@ def handle_card_answer(bot, rtd, debug_mode):
 		string_lst = card.get_word().split()
 		if string_lst[0] != '&img':
 			if res == card.foreign_word.lower():
-				bot.send_message(user_id, "Your answer was correct!")
+				bot.send_message(user_id, 
+					bot_language.translate("Your answer was correct!", user))
 			else:
-				bot.send_message(user_id, "There was a mistake in your answer :(")
+				bot.send_message(user_id, 
+					bot_language.translate("There was a mistake in your answer :(", user))
 
-		utils.send_foreign_word_ans(bot, card)
+		utils.send_foreign_word_ans(bot, card, user)
 
 		cards = user.get_cards_on_word(card.get_word_id())
 		for ans in cards:
-			utils.send_ans_card(bot, ans, card.get_type())
+			utils.send_ans_card(bot, ans, card.get_type(), user)
 		
-		text = utils.poll_text
+		text = bot_language.translate("poll_text", user)
 
 		options = ['0', '1', '2', '3', '4', '5']
 		markup = bot_utils.create_keyboard(options, 6)
 		user.keyboard_options = options
-		bot.send_message(user_id,"_Please grade your performance to answer the card_\n" + text,
-						reply_markup=markup, parse_mode="Markdown")
+		bot.send_message(user_id,
+			bot_language.translate("_Please grade your performance to answer the card_\n", user) + text,
+			reply_markup=markup, 
+			parse_mode="Markdown")
 
 		user.set_state(fsm.next_state[fsm.WAITING_ANS])
 
@@ -65,14 +71,15 @@ def handle_card_answer(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
 		card = user.temp_card
 
 		valid, grade = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 
 		if valid == False:
-			bot.reply_to(msg, "Please choose from keyboard")
+			bot.reply_to(msg, 
+				bot_language.translate("Please choose from keyboard", user))
 			user.set_state(fsm.next_state[fsm.WAITING_POLL_ANS]['error'])
 			return
 			
@@ -81,7 +88,10 @@ def handle_card_answer(bot, rtd, debug_mode):
 		user.set_grade_waiting(grade)
 
 		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id,"_OK!_", reply_markup=markup, parse_mode="Markdown")
+		bot.send_message(user_id,
+			bot_language.translate("_OK!_", user), 
+			reply_markup=markup, 
+			parse_mode="Markdown")
 		user.set_state(fsm.next_state[fsm.WAITING_POLL_ANS]['done'])
 
 

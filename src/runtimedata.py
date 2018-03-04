@@ -1,4 +1,5 @@
 from dbapi import Database
+import time
 import datetime
 import fsm
 import os
@@ -11,9 +12,13 @@ import logging
 class User:
 
 	def __init__(self, user_id, database_reference):
+		logging_utils.setup_user_logger(user_id)
+		self.logger = logging.getLogger(str(user_id))
+		self.last_op_time = time.time()
 		self.db = database_reference
 		self.user_id = user_id
 		self.username = self.db.get_username(self.user_id)
+		self.native = self.db.get_native_language(self.user_id)
 		self.temp_word = None
 		self.temp_card = None
 		self.temp_words_list = None
@@ -30,6 +35,20 @@ class User:
 
 	def get_username(self):
 		return self.username
+
+	def get_native_language(self):
+		return self.native
+
+	def set_native_language(self, language):
+		self.native = language
+		return self.db.set_native_language(self.user_id, language)
+
+
+	def set_last_op_time(self):
+		self.last_op_time = time.time()		
+
+	def get_last_op_time(self):
+		return self.last_op_time
 
 	def get_state(self):
 		"""Gets the primary state of the user.
@@ -51,7 +70,7 @@ class User:
 		if len(ret) == 1:
 			ret = ret[0]
 
-		print("get state - id:{}  state:{}".format(self.user_id,ret))
+		#print("get state - id:{}  state:{}".format(self.user_id,ret))
 		return ret
 
 
@@ -70,8 +89,9 @@ class User:
 			while len(state) < 3:
 				state = state + (-1,)
 
-		print("{} NEW STATE {} {} {}".format(self.user_id, state[0], state[1], state[2]))
 		self.db.set_state(self.user_id, state[0], state[1], state[2])
+		print("{} NEW STATE {} {} {}   {}".format(self.user_id, state[0], state[1], state[2], time.time()))
+		self.set_last_op_time()
 
 
 	def get_card(self, card_id):
@@ -90,8 +110,8 @@ class User:
 			- "{} is already in your words".
 			In the above example, {} means the word which is beeing added.
 		"""
-		print("---Word to add user {}---".format(word.user_id))
-		print(word)
+		#print("---Word to add user {}---".format(word.user_id))
+		#print(word)
 		return self.db.add_word(word)
 
 
@@ -314,7 +334,6 @@ class RuntimeData:
 			user.set_card_waiting(0)
 
 	def reset_all_states_exception(self, bot):
-		"""Sets the states of all users to the initial state"""
 		for user_id, user in self.users.items():
 			if user.get_state() == fsm.LOCKED:
 				try:
@@ -360,11 +379,6 @@ class RuntimeData:
 		"""
 		if not user_id in self.users.keys():
 			self.users[user_id] = User(user_id, self.db)
-			logger = logging.getLogger(str(user_id))
-			path = '../logs/{}.log'.format(str(user_id))
-			if self.debug_mode:
-				path = '../logs_debug/{}.log'.format(str(user_id))
-			logging_utils.setup_logger_default(logger, path, bot)
 			return self.db.add_user(user_id, username)
 
 		return "User already exists."

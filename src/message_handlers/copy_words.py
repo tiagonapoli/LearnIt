@@ -3,6 +3,7 @@ from utilities import utils
 from utilities import bot_utils
 from utilities.bot_utils import get_id
 import logging
+import bot_language
 
 
 def handle_copy_words(bot, rtd, debug_mode):
@@ -19,9 +20,10 @@ def handle_copy_words(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
-		bot.send_message(user_id, 'Please, send the Telegram username of the user you want to copy some words from, in the format @username (or just username)')
+		bot.send_message(user_id, 
+			bot_language.translate('Please, send the Telegram username of the user you want to copy some words from, in the format @username (or just username)', user))
 		user.set_state(fsm.next_state[fsm.IDLE]['copy_words'])
 
 
@@ -37,39 +39,44 @@ def handle_copy_words(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
 		username = utils.treat_username_str(msg.text)
 		valid, user2 = rtd.get_user_by_username(username)
 		user.temp_user = user2
 
 		if valid == False:
-			bot.reply_to(msg, "Invalid username. Please, if you still want to copy from a user, send /copy_words again.")
+			bot.reply_to(msg, 
+				bot_language.translate("Invalid username. Please, if you still want to copy from a user, send /copy_words again.", user))
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_USER)]['error'])
 			return
 
 		if user.get_id() == user2.get_id():
-			bot.reply_to(msg, "You can't copy from yourself! Please, if you still want to copy from a user, send /copy_words again.")
+			bot.reply_to(msg, 
+				bot_language.translate("You can't copy from yourself! Please, if you still want to copy from a user, send /copy_words again.", user))
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_USER)]['error'])
 			return
 
 		public = user2.get_public()
 
 		if public == False:
-			bot.reply_to(msg, "This user is not public. Please, if you still want to copy from a user, send /copy_words again.")
+			bot.reply_to(msg, 
+				bot_language.translate("This user is not public. Please, if you still want to copy from a user, send /copy_words again.", user))
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_USER)]['error'])
 			return
 
 		known_languages = user2.get_languages()
 		
 		if len(known_languages) == 0:
-			bot.send_message(user_id, "The user _{}_ does not have any language".format(utils.treat_msg_to_send(user2.get_username(), "_")), parse_mode="Markdown")
+			bot.send_message(user_id, 
+				bot_language.translate("The user _{}_ does not have any language", user).format(utils.treat_msg_to_send(user2.get_username(), "_")), 
+				parse_mode="Markdown")
 			user.set_state(fsm.IDLE)
 			return
 
 		markup = bot_utils.create_keyboard(known_languages, 2)
 
-		text = "*Please select the language:*\n" + bot_utils.create_string_keyboard(known_languages)
+		text = bot_language.translate("*Please select the language:*", user) + "\n" + bot_utils.create_string_keyboard(known_languages)
 		bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
 		user.keyboard_options = known_languages
 		user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_USER)]['done'])
@@ -86,12 +93,12 @@ def handle_copy_words(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
 		valid, language = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 
 		if valid == False:
-			bot.reply_to(msg, "Please choose from keyboard")
+			bot.reply_to(msg, bot_language.translate("Please choose from keyboard", user))
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_LANGUAGE)]['error'])
 			return
 
@@ -106,15 +113,20 @@ def handle_copy_words(bot, rtd, debug_mode):
 		if len(topics) > 0:
 			btn = bot_utils.create_inline_keys_sequential(topics)
 			btn_set = set()
-			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
+			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, (bot_language.translate("End selection", user), "DONE"))
 
 			user.btn_set = btn_set
 			user.keyboard_options = btn
-			bot.send_message(user_id, "Select the topics you want to copy:",
-							reply_markup=markup, parse_mode="Markdown")
+			bot.send_message(user_id, 
+				bot_language.translate("Select the topics you want to copy:", user),
+				reply_markup=markup, 
+				parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_LANGUAGE)]['done'])
 		else: 
-			bot.send_message(user_id, "_There are no topics registered in this language yet._", reply_markup=markup, parse_mode="Markdown")
+			bot.send_message(user_id, 
+				bot_language.translate("_There are no topics registered in this language yet._", user), 
+				reply_markup=markup, 
+				parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_LANGUAGE)]['no topics'])
 	
 
@@ -126,8 +138,7 @@ def handle_copy_words(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(call.message))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
-		print("CALLBACK TEXT: {}   DATA: {}".format(call.message.text,call.data))
+		logger = logging.getLogger('{}'.format(user_id))
 
 		btn_set = user.btn_set
 		btn_set, done = bot_utils.parse_selection_inline_keyboard_ans(call.data, btn_set)
@@ -137,19 +148,22 @@ def handle_copy_words(bot, rtd, debug_mode):
 			user.btn_set = btn_set
 			user.temp_topics_list = btn
 
-			opt = ['Yes', 'No']
+			opt = [bot_language.translate('Yes', user), 
+				   bot_language.translate('No', user)]
 			markup = bot_utils.create_keyboard(opt, 2)
 
-			text = ("In case some words to be copied already exist in your words, *should we overwrite?* If you already copied from this user and topic maybe you don't want to overwrite _(If we overwrite you lose all learning data about that word)_\n"
-					 + bot_utils.create_string_keyboard(opt))
+			text = (bot_language.translate("In case some words to be copied already exist in your words, *should we overwrite?* If you already copied from this user and topic maybe you don't want to overwrite _(If we overwrite you lose all learning data about that word)_", user) 
+					+ "\n"
+					+ bot_utils.create_string_keyboard(opt))
 			user.keyboard_options = opt
 
 			bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
 			bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.SELECT_TOPICS)]['done'])
 		else:
-			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
-			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, text="Select the topics you want to copy:", reply_markup=markup)
+			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, (bot_language.translate("End selection", user), "DONE"))
+			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, 
+				text=bot_language.translate("Select the topics you want to copy:", user), reply_markup=markup)
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.SELECT_TOPICS)]['continue'])
 
 
@@ -165,16 +179,17 @@ def handle_copy_words(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
 		valid, overwrite = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
 
 		if valid == False:
-			bot.reply_to(msg, "Please choose from keyboard")
+			bot.reply_to(msg,
+				bot_language.translate("Please choose from keyboard", user))
 			user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_OVERWRITE)]['error'])
 			return
 
-		if overwrite == "Yes":
+		if overwrite == bot_language.translate("Yes", user):
 			overwrite = True
 		else:
 			overwrite = False
@@ -186,13 +201,13 @@ def handle_copy_words(bot, rtd, debug_mode):
 		for i in btn_set:
 			selected_topics.append(topics[i][0])
 
-		text = '*Overwritten words:*\n'
+		text = bot_language.translate('*Overwritten words:*', user) + "\n"
 		count = 0
 		for topic in selected_topics:
 			overwritten_words = rtd.copy_topic(user, user.temp_user, user.temp_language, topic, overwrite)
 
 			if len(overwritten_words) > 0:
-			 	text += '*Topic: ' + utils.treat_msg_to_send(topic, "*") + '*\n'
+			 	text += bot_language.translate('*Topic: ', user) + utils.treat_msg_to_send(topic, "*") + '*\n'
 			 	count += 1
 			 	for word in overwritten_words:
 			 		text += '_.' + utils.treat_msg_to_send(word, "_") + '_\n'
@@ -202,6 +217,6 @@ def handle_copy_words(bot, rtd, debug_mode):
 		if count > 0:
 			bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
 		else:
-			bot.send_message(user_id, 'There were no overwritten words!', reply_markup=markup)
+			bot.send_message(user_id, bot_language.translate('There were no overwritten words!', user), reply_markup=markup)
 
 		user.set_state(fsm.next_state[(fsm.COPY_WORDS, fsm.GET_OVERWRITE)]['done'])

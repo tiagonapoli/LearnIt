@@ -5,6 +5,7 @@ import message_handlers.add_word
 from flashcard import Word, Card
 from utilities.bot_utils import get_id
 import logging
+import bot_language
 
 
 def handle_add_word_images(bot, rtd, debug_mode):
@@ -20,7 +21,7 @@ def handle_add_word_images(bot, rtd, debug_mode):
 		user = rtd.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger(str(user_id))
+		logger = logging.getLogger('{}'.format(user_id))
 
 		word = user.temp_word
 		card_id = user.get_highest_card_id() + 1 + len(word.cards)
@@ -38,11 +39,11 @@ def handle_add_word_images(bot, rtd, debug_mode):
 								"{}".format(filename), 
 								bot)
 		
-		print(path)
+		#print(path)
 		card.add_archive(path)
 		word.set_card(card)
-		print(str(user.temp_word))
-		bot.send_message(user_id, "Image received successfuly")
+		#print(str(user.temp_word))
+		bot.send_message(user_id, bot_language.translate("Image received successfuly", user))
 
 		if user.receive_queue.empty():
 			message_handlers.add_word.save_word(bot, user)
@@ -50,10 +51,11 @@ def handle_add_word_images(bot, rtd, debug_mode):
 			language = user.temp_word.get_language() 
 			topic = user.temp_word.get_topic()
 			
-			options = ['Yes', 'No']
+			options = [bot_language.translate('Yes', user), 
+					   bot_language.translate('No', user)]
 			user.keyboard_options = options
 			markup = bot_utils.create_keyboard(options, 2)
-			text = "_Would you like to add more words in_ *{}*_, in topic_ *{}*_?_\n".format(
+			text = bot_language.translate("_Would you like to add more words in_ *{}*_, in topic_ *{}*_?_\n", user).format(
 						utils.treat_msg_to_send(language, "*"), utils.treat_msg_to_send(topic, "*")) + bot_utils.create_string_keyboard(options)
 			bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")		
 			

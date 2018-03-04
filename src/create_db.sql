@@ -2,7 +2,6 @@ CREATE DATABASE learnit;
 CREATE DATABASE learnit_debug;
 
 \connect learnit
-
 CREATE TABLE users(
 	id int primary key,
 	active int DEFAULT 1,
@@ -19,7 +18,8 @@ CREATE TABLE users(
 	card_waiting_type int DEFAULT 0,
 	grade_waiting_for_process int DEFAULT 0,
 	username varchar(50),
-	public int DEFAULT 0
+	public int DEFAULT 0,
+	native_language int DEFAULT 0
 );
 
 CREATE TABLE languages(
@@ -88,6 +88,7 @@ CREATE TABLE archives(
 	foreign key (user_id, user_card_id) references cards(user_id, user_card_id) ON DELETE CASCADE
 );
 
+
 \connect learnit_debug
 
 CREATE TABLE users(
@@ -106,7 +107,8 @@ CREATE TABLE users(
 	card_waiting_type int DEFAULT 0,
 	grade_waiting_for_process int DEFAULT 0,
 	username varchar(50),
-	public int DEFAULT 0
+	public int DEFAULT 0,
+	native_language int DEFAULT 0
 );
 
 CREATE TABLE languages(
