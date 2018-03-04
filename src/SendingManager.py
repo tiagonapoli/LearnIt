@@ -91,8 +91,8 @@ class SendingManager():
 			restart = True
 
 		if restart == True:
-			self.rtd.reset_state_exception(user_id, self.bot)
-			self.logger.error("Had to restart {} state {}".format(user_id, self.users[user_id].get_state()))
+			self.users[user_id].reset_state_exception(self.bot)
+			self.start_bot()
 
 
 	def stop(self):

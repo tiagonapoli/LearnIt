@@ -236,7 +236,7 @@ class UserCardQueue():
 			return
 
 		if (send_time_ini <= minute and 
-			len(self.sending_queue) < 2):
+			len(self.sending_queue) < 1):
 			
 			if (self.review_cnt_hourly < self.review_total_hourly and
 				  len(self.now_review_stack) == 0 and

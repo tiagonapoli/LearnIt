@@ -103,7 +103,7 @@ class Console():
 		self.sending_manager = None
 		self.learnit = None
 		self.MESSAGE_HANDLER_MAX_IDLE_TIME = 180
-		self.SENDING_MANAGER_SLEEP_TIME = 180
+		self.SENDING_MANAGER_SLEEP_TIME = 60
 		self.INSTALLED = False
 		self.read_data()
 

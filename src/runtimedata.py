@@ -290,6 +290,16 @@ class User:
 	def check_word_existence(self, language, topic, foreign_word):
 		return self.db.check_word_existence(self.user_id, language, topic, foreign_word)
 
+	def reset_state_exception(self, bot):
+		"""Sets the states of all users to the initial state"""
+		self.logger.error("Exception! Had to restart {}".format(self.user_id))
+		try:
+			bot.send_message(self.user_id, "An error in the server ocurred, the operation was canceled")
+		except Exception as e:
+			self.logger.error("Can't send message")
+		self.set_state(fsm.IDLE)
+		self.set_card_waiting(0)
+
 
 class RuntimeData: 
 	"""Class that do all the runtime data management.
@@ -342,17 +352,6 @@ class RuntimeData:
 					print(e)
 				user.set_state(fsm.IDLE)
 				user.set_card_waiting(0)
-
-	def reset_state_exception(self, bot, user_id):
-		"""Sets the states of all users to the initial state"""
-		if user_id in self.users.keys():
-			user = self.users[user_id]
-			try:
-				bot.send_message(user_id, "An error in the server ocurred, the operation was canceled")
-			except Exception as e:
-				print(e)
-			user.set_state(fsm.IDLE)
-			user.set_card_waiting(0)
 
 	def reset_all_states_turn_off(self, bot):
 		"""Sets the states of all users to the initial state"""
