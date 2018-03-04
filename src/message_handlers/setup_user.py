@@ -51,8 +51,10 @@ def handle_setup_user(bot, rtd, debug_mode):
 		user.keyboard_options = options
 		user.set_state(fsm.next_state[fsm.IDLE]['setup user'])
 
+
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == (fsm.SETUP_USER, fsm.GET_LANGUAGE),
+					(rtd.check_user_existence(get_id(msg)) == True and
+					 rtd.get_user(get_id(msg)).get_state() == (fsm.SETUP_USER, fsm.GET_LANGUAGE)),
 					content_types=['text'])
 	def add_word1(msg):
 		"""
