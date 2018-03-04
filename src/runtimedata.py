@@ -90,7 +90,7 @@ class User:
 				state = state + (-1,)
 
 		self.db.set_state(self.user_id, state[0], state[1], state[2])
-		print("{} NEW STATE {} {} {}   {}".format(self.user_id, state[0], state[1], state[2], time.time()))
+		#print("{} NEW STATE {} {} {}   {}".format(self.user_id, state[0], state[1], state[2], time.time()))
 		self.set_last_op_time()
 
 

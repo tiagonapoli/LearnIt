@@ -33,7 +33,7 @@ class SendingManager():
 
 
 	def start_bot(self):
-		self.logger.info("Restart bot sending manager")
+		self.logger.warning("Restart bot sending manager")
 		del self.bot
 		self.bot = None
 		

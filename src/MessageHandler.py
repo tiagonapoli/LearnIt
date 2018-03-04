@@ -46,7 +46,7 @@ class MessageHandler():
 		for user_id, user in self.rtd.users.items():
 			if ret > now - user.get_last_op_time():
 				ret = now - user.get_last_op_time()
-				print("{} {}", now, now - user.get_last_op_time())
+				print(now, now - user.get_last_op_time())
 		if ret == 99999999:
 			ret = 0
 
@@ -77,7 +77,7 @@ class MessageHandler():
 	
 
 	def setup_bot(self):
-		self.logger.info("Setup message handler")
+		self.logger.warning("Setup message handler")
 		self.restart_bot_flag = False
 		del self.bot
 		self.bot = None
