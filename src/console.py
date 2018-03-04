@@ -156,9 +156,8 @@ class Console():
 					elif inp[1] == 'sleep_time':
 						SENDING_MANAGER_SLEEP_TIME = int(inp[2])
 				elif inp[0] == 'restart':
-					turn_off()
-					time.sleep(1)
-					turn_on()
+					self.learnit.restart_bot_sending_manager()
+					self.learnit.restart_bot_message_handler()
 		except KeyboardInterrupt as e:
 			pass	
 
