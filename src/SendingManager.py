@@ -108,8 +108,7 @@ class SendingManager():
 			try:
 				self.logger.info("Woke Up - Cycles: {}".format(self.cycles))
 
-				if self.restart_bot_flag:
-					self.start_bot()
+				self.start_bot()
 
 				self.cycles += 1
 
