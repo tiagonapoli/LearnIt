@@ -40,11 +40,11 @@ class LearnIt(Thread):
 
 	def restart_bot_sending_manager(self):
 		self.logger.warning("Set to restart sending manager bot")
-		self.message_handler_thread.restart_bot()
+		self.sending_manager_thread.restart_bot()
 
 	def stop_sending_manager(self):
 		self.logger.info("Stopping sending manager")
-		self.message_handler_thread.safe_stop()
+		self.sending_manager_thread.safe_stop()
 		self.logger.info("Sending Manager stopped!!")
 
 	def default(self):
