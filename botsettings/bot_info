@@ -1,21 +1,20 @@
 -----Commands-----
 cancel - Cancel any existing process
-add_word - Adds a word into a language vocabulary
-copy_words - Select topics from other user to use in your training
-list_words - List all registered words
-erase_words - Erases selected words
-review - Select some topics to review
-add_language - Adds a language into your language list
-list_languages - List all registered languages
-erase_languages - Erase selected languages
-help - Help and developers contact information
+copy_from_user - Copy from other users 
+select_train - Select your active training
+add - Add a card
+list - List your cards
+review - Review some topics
+erase - Erase
+edit - Edit
+help - Help and developers contact
 settings - Change bot settings
 start - Sign in to use the bot
 stop - Stop the bot
 
 -----Description-----
-A bot to help you learn languages or anything you can put into flashcards! You can add subjects or languages you are learning by using /add_language. Then you can add flashcards to help you learn using /add_word, or copy flashcards from other users, using /copy_words. You can create audio, image or text flashcards. The bot will send these flashcards in the best learning intervals for you to answer! 
+A bot to help you learn anything you can put into flashcards! You can add subjects and cards you are learning by using /add or copy flashcards from other users, using /copy_from_user. You can create audio, image or text flashcards. The bot will send these flashcards in the best learning intervals for you to answer! 
 
 
 -----About-----
-A bot to help you learn languages or anything you can put into flashcards!
+A bot to help you learn anything you can put into flashcards!

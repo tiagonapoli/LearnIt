@@ -18,68 +18,54 @@ CREATE TABLE users(
 	native_language int DEFAULT 0
 );
 
-CREATE TABLE languages(
+CREATE TABLE subjects(
 	user_id int,
-	language_name varchar(50),
+	subject varchar(50),
 	
-	primary key (user_id, language_name),
+	primary key (user_id, subject),
 	foreign key (user_id) references users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE topics(
 	user_id int,
-	language varchar(50),
+	subject varchar(50),
 	topic varchar(50),
 
-	primary key (user_id, language, topic),
-	foreign key (user_id, language) references languages(user_id, language_name) ON DELETE CASCADE
+	primary key (user_id, subject, topic),
+	foreign key (user_id, subject) references subjects(user_id, subjects) ON DELETE CASCADE
 );
 
 CREATE TABLE words(
 	user_id int,
-	user_word_id int,
-	language varchar(50),
+	word_id int,
+	subject varchar(50),
 	topic varchar(50),
-	foreign_word varchar(200),
+	word varchar(300),
+	type int, 
 
-	UNIQUE(user_id, language, topic, foreign_word),
-	primary key (user_id, user_word_id),
-	foreign key (user_id, language, topic) references topics(user_id, language, topic) ON DELETE CASCADE
+	UNIQUE(user_id, subject, topic, word),
+	primary key (user_id, word_id),
+	foreign key (user_id, subject, topic) references topics(user_id, subject, topic) ON DELETE CASCADE
 );
 
-CREATE TABLE specialwords(
-	users_using int DEFAULT 1,
-	archive varchar(200),
-	primary key (archive)
-);
 
 CREATE TABLE cards(
 	user_id int,
-	user_word_id int,
-	language varchar(50),
+	word_id int,
+	subject varchar(50),
 	topic varchar(50),
-	foreign_word varchar(200),
-	user_card_id int,
-	type varchar(20),
+	word varchar(300),
+	card_id int,
+	type int,
+	content_path varchar(300),
 	
 	attempts int,
 	easiness_factor double precision DEFAULT 1.3,
 	interval double precision,
 	next_date date,
 
-	UNIQUE(user_id, user_card_id),
-	primary key (user_id, user_word_id, user_card_id),
-	foreign key (user_id, user_word_id) references words(user_id, user_word_id) ON DELETE CASCADE	
+	UNIQUE(user_id, card_id),
+	primary key (user_id, word_id, card_id),
+	foreign key (user_id, word_id) references words(user_id, word_id) ON DELETE CASCADE	
 
-);
-
-CREATE TABLE archives(
-	user_id int,
-	user_card_id int,
-	counter int,
-	type varchar(20),
-	content_path varchar(300),
-
-	primary key (user_id, user_card_id, counter),
-	foreign key (user_id, user_card_id) references cards(user_id, user_card_id) ON DELETE CASCADE
 );
