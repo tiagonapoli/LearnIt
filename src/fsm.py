@@ -5,21 +5,21 @@
 LOCKED = 999
 IDLE = 0   
 WAITING_ANS = 1
-ADD_WORD = 2
-ADD_LANGUAGE = 3
+ADD_ITEM = 2
+ADD_SUBJECT = 3
 WAITING_POLL_ANS = 5
-GET_LANGUAGE = 6
+GET_SUBJECT = 6
 GET_TOPIC = 7
-GET_WORD = 8
+GET_STUDY_ITEM = 8
 SEND_IMAGE = 9
 SEND_AUDIO = 11
 SEND_TEXT = 13
 RELATE_MENU = 15
-LIST_WORDS = 17
-ERASE_WORDS = 18
-SELECT_WORDS = 19
-ERASE_LANGUAGES = 20
-SELECT_LANGUAGES = 21
+LIST = 17
+ERASE_STUDY_ITEMS = 18
+SELECT_STUDY_ITEMS = 19
+ERASE_SUBJECTS = 20
+SELECT_SUBJECTS = 21
 REVIEW = 22	
 GET_TOPICS = 23
 GET_NUMBER = 24
@@ -27,13 +27,14 @@ WAITING_CARD_ANS = 25
 SETTINGS = 26
 GET_OPTION = 27
 CARDS_PER_HOUR = 28
-COPY_WORDS = 29
+COPY_STUDY_ITEMS = 29
 GET_USER = 30
 SELECT_TOPICS = 31
 GET_IMAGE = 32
 GET_OVERWRITE = 33
 GET_CONTINUE = 34
 SETUP_USER = 35
+GET_LANGUAGE = 36
 
 
 '''FSM'''
@@ -42,15 +43,13 @@ SETUP_USER = 35
 next_state = {	
 	IDLE:   {'setup user': (SETUP_USER, GET_LANGUAGE),
 			 'card_query': WAITING_ANS,
-      		 'add_word': (ADD_WORD, GET_LANGUAGE),
-      		 'add_language': ADD_LANGUAGE,
-      		 'list_words': (LIST_WORDS, GET_LANGUAGE),
-      		 'list_languages': IDLE,
-      		 'erase_words': (ERASE_WORDS, GET_LANGUAGE),
-      		 'erase_languages': (ERASE_LANGUAGES, SELECT_LANGUAGES),
-      		 'review' : (REVIEW, GET_LANGUAGE),
+      		 'add_item': (ADD_ITEM, GET_SUBJECT),
+      		 'list': (LIST, GET_SUBJECT),
+      		 'erase_words': (ERASE_STUDY_ITEMS, GET_SUBJECT),
+      		 'erase_languages': (ERASE_SUBJECTS, SELECT_SUBJECTS),
+      		 'review' : (REVIEW, GET_SUBJECT),
       		 'settings' : (SETTINGS, GET_OPTION),
-      		 'copy_words': (COPY_WORDS, GET_USER)}
+      		 'copy_words': (COPY_STUDY_ITEMS, GET_USER)}
 }
 
 
@@ -62,80 +61,77 @@ next_state.update({
 })
 
 
-#=====================ADD WORD=====================
+#=====================ADD STUDY_ITEM=====================
 next_state.update({
-	(ADD_WORD, GET_LANGUAGE): {'done': (ADD_WORD, GET_TOPIC),
-							   'error': (ADD_WORD, GET_LANGUAGE)},
-	(ADD_WORD, GET_TOPIC): {'done': (ADD_WORD, GET_WORD),
-							'error': (ADD_WORD, GET_TOPIC)},
-	(ADD_WORD, GET_WORD): {'done': (ADD_WORD, RELATE_MENU),
+	(ADD_ITEM, GET_SUBJECT): {'done': (ADD_ITEM, GET_TOPIC),
+							  'error': (ADD_ITEM, GET_SUBJECT)},
+	(ADD_ITEM, GET_TOPIC): {'done': (ADD_ITEM, GET_STUDY_ITEM),
+							'error': (ADD_ITEM, GET_TOPIC)},
+	(ADD_ITEM, GET_STUDY_ITEM): {'done': (ADD_ITEM, RELATE_MENU),
 						   'error_idle': IDLE,
-						   'word img': (ADD_WORD, GET_IMAGE),
-						   'error': (ADD_WORD, GET_WORD)},
-	(ADD_WORD, GET_IMAGE): {'done': (ADD_WORD, RELATE_MENU)},
-	(ADD_WORD, RELATE_MENU): {'2': (ADD_WORD, SEND_AUDIO),
-							  '1': (ADD_WORD, SEND_IMAGE),
-							  '0': (ADD_WORD, SEND_TEXT),
-			  				  'continue': (ADD_WORD, RELATE_MENU),
-			  				  'done': (ADD_WORD, GET_CONTINUE)},
-	(ADD_WORD, SEND_IMAGE): { 'error': (ADD_WORD, SEND_IMAGE),
-							  '2': (ADD_WORD, SEND_AUDIO),
-							  '0': (ADD_WORD, SEND_TEXT),
-			  				  'done': (ADD_WORD, GET_CONTINUE)},
-	(ADD_WORD, SEND_AUDIO): {'error': (ADD_WORD, SEND_AUDIO),
-							 '1': (ADD_WORD, SEND_IMAGE),
-							 '0': (ADD_WORD, SEND_TEXT),
-			  				 'done': (ADD_WORD, GET_CONTINUE)},
-	(ADD_WORD, SEND_TEXT): {'error': (ADD_WORD, SEND_TEXT),
-							'1': (ADD_WORD, SEND_IMAGE),
-							'2': (ADD_WORD, SEND_AUDIO),
-			  				'done': (ADD_WORD, GET_CONTINUE)},
-	(ADD_WORD, GET_CONTINUE): {'done': IDLE,
-							   'error': (ADD_WORD, GET_CONTINUE),
-							   'continue': (ADD_WORD, GET_WORD)}
+						   'study item 1': (ADD_ITEM, GET_IMAGE),
+						   'error': (ADD_ITEM, GET_STUDY_ITEM)},
+	(ADD_ITEM, GET_IMAGE): {'done': (ADD_ITEM, RELATE_MENU)},
+	(ADD_ITEM, RELATE_MENU): {'2': (ADD_ITEM, SEND_AUDIO),
+							  '1': (ADD_ITEM, SEND_IMAGE),
+							  '0': (ADD_ITEM, SEND_TEXT),
+			  				  'continue': (ADD_ITEM, RELATE_MENU),
+			  				  'done': (ADD_ITEM, GET_CONTINUE)},
+	(ADD_ITEM, SEND_IMAGE): { 'error': (ADD_ITEM, SEND_IMAGE),
+							  '2': (ADD_ITEM, SEND_AUDIO),
+							  '0': (ADD_ITEM, SEND_TEXT),
+			  				  'done': (ADD_ITEM, GET_CONTINUE)},
+	(ADD_ITEM, SEND_AUDIO): {'error': (ADD_ITEM, SEND_AUDIO),
+							 '1': (ADD_ITEM, SEND_IMAGE),
+							 '0': (ADD_ITEM, SEND_TEXT),
+			  				 'done': (ADD_ITEM, GET_CONTINUE)},
+	(ADD_ITEM, SEND_TEXT): {'error': (ADD_ITEM, SEND_TEXT),
+							'1': (ADD_ITEM, SEND_IMAGE),
+							'2': (ADD_ITEM, SEND_AUDIO),
+			  				'done': (ADD_ITEM, GET_CONTINUE)},
+	(ADD_ITEM, GET_CONTINUE): {'done': IDLE,
+							   'error': (ADD_ITEM, GET_CONTINUE),
+							   'continue': (ADD_ITEM, GET_STUDY_ITEM)}
 })
 
 
-#=====================ADD LANGUAGE=====================
+#=====================LIST=====================
 next_state.update({
-	ADD_LANGUAGE: {'done': IDLE,
-				   'error': ADD_LANGUAGE}
+	(LIST, GET_SUBJECT): {'Next': (LIST, GET_TOPIC),
+						  'no subjects': IDLE,
+						  'End': IDLE,
+						  'Error': (LIST, GET_SUBJECT)},
+	(LIST, GET_TOPIC): {'Next': (LIST, GET_STUDY_ITEM),
+						'Back': (LIST, GET_SUBJECT),
+						'End': IDLE,
+						'Error': (LIST, GET_TOPIC)},
+	(LIST, GET_STUDY_ITEM): {'Done' : IDLE,
+							 'Back' : (LIST, GET_TOPIC),
+							 'Error': (LIST, GET_STUDY_ITEM),
+							 'Next' : (LIST, GET_STUDY_ITEM)}
 })
 
 
-#=====================LIST WORDS=====================
+#=====================ERASE STUDY_ITEMS=====================
 next_state.update({
-	(LIST_WORDS, GET_LANGUAGE): {'done': (LIST_WORDS, GET_TOPIC),
+	(ERASE_STUDY_ITEMS, GET_SUBJECT): {'done': (ERASE_STUDY_ITEMS, GET_TOPIC),
 								 'no topics': IDLE,
-								 'error': (LIST_WORDS, GET_LANGUAGE)},
-	(LIST_WORDS, GET_TOPIC): {'done': (LIST_WORDS, GET_WORD),
-							  'error': (LIST_WORDS, GET_TOPIC)},
-	(LIST_WORDS, GET_WORD): {'done' : IDLE,
-							 'error': (LIST_WORDS, GET_WORD),
-							 'continue' : (LIST_WORDS, GET_WORD)}
-})
-
-
-#=====================ERASE WORDS=====================
-next_state.update({
-	(ERASE_WORDS, GET_LANGUAGE): {'done': (ERASE_WORDS, GET_TOPIC),
-								 'no topics': IDLE,
-								 'error': (ERASE_WORDS, GET_LANGUAGE)},
-	(ERASE_WORDS, GET_TOPIC): {'done': (ERASE_WORDS, SELECT_WORDS),
-							  'error': (ERASE_WORDS, GET_TOPIC)},
-	(ERASE_WORDS, SELECT_WORDS): {'continue': (ERASE_WORDS, SELECT_WORDS),
+								 'error': (ERASE_STUDY_ITEMS, GET_SUBJECT)},
+	(ERASE_STUDY_ITEMS, GET_TOPIC): {'done': (ERASE_STUDY_ITEMS, SELECT_STUDY_ITEMS),
+							  'error': (ERASE_STUDY_ITEMS, GET_TOPIC)},
+	(ERASE_STUDY_ITEMS, SELECT_STUDY_ITEMS): {'continue': (ERASE_STUDY_ITEMS, SELECT_STUDY_ITEMS),
 								  'done': IDLE}
 })
 
-#=====================ERASE LANGUAGES=====================
+#=====================ERASE SUBJECTS=====================
 next_state.update({
-	(ERASE_LANGUAGES, SELECT_LANGUAGES): {'continue': (ERASE_LANGUAGES, SELECT_LANGUAGES),
+	(ERASE_SUBJECTS, SELECT_SUBJECTS): {'continue': (ERASE_SUBJECTS, SELECT_SUBJECTS),
 								  		  'done': IDLE}
 })
 
 #=====================TOPIC REVIEW=====================
 next_state.update({
-	(REVIEW, GET_LANGUAGE) : {'error' : (REVIEW, GET_LANGUAGE),
+	(REVIEW, GET_SUBJECT) : {'error' : (REVIEW, GET_SUBJECT),
 							  'no topics' : IDLE,
 							  'done' : (REVIEW, GET_TOPICS)},
 	(REVIEW, GET_TOPICS) : {'continue' : (REVIEW, GET_TOPICS),
@@ -158,17 +154,17 @@ next_state.update({
 							  'done': IDLE}
 })
 
-#=====================COPY WORDS=====================
+#=====================COPY STUDY_ITEMS=====================
 next_state.update({
-	(COPY_WORDS, GET_USER): {'done': (COPY_WORDS, GET_LANGUAGE),
+	(COPY_STUDY_ITEMS, GET_USER): {'done': (COPY_STUDY_ITEMS, GET_SUBJECT),
 							 'error': IDLE},
-	(COPY_WORDS, GET_LANGUAGE): {'done': (COPY_WORDS, SELECT_TOPICS),
-							   	 'error': (COPY_WORDS, GET_LANGUAGE),
+	(COPY_STUDY_ITEMS, GET_SUBJECT): {'done': (COPY_STUDY_ITEMS, SELECT_TOPICS),
+							   	 'error': (COPY_STUDY_ITEMS, GET_SUBJECT),
 							   	 'no topics': IDLE},
-	(COPY_WORDS, SELECT_TOPICS): {'done': (COPY_WORDS, GET_OVERWRITE),
-						   		  'continue': (COPY_WORDS, SELECT_TOPICS)},
-	(COPY_WORDS, GET_OVERWRITE): {'done': IDLE,
-						   		  'error': (COPY_WORDS, GET_OVERWRITE)}	
+	(COPY_STUDY_ITEMS, SELECT_TOPICS): {'done': (COPY_STUDY_ITEMS, GET_OVERWRITE),
+						   		  'continue': (COPY_STUDY_ITEMS, SELECT_TOPICS)},
+	(COPY_STUDY_ITEMS, GET_OVERWRITE): {'done': IDLE,
+						   		  'error': (COPY_STUDY_ITEMS, GET_OVERWRITE)}	
 })
 
 #=====================SETUP USER=====================

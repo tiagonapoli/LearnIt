@@ -4,18 +4,18 @@ from utilities import utils
 from flashcard import Word
 from utilities.bot_utils import get_id
 import logging
-import bot_language
 
 
-def handle_erase_words(bot, rtd, debug_mode):	
+
+def handle_erase_words(bot, user_manager, debug_mode):	
 
 	#=====================ERASE WORDS=====================
 	@bot.message_handler(func = lambda msg:
-					(rtd.get_user(get_id(msg)).get_state() == fsm.IDLE and
-					 rtd.get_user(get_id(msg)).get_active() == 1), 
+					(user_manager.get_user(get_id(msg)).get_state() == fsm.IDLE and
+					 user_manager.get_user(get_id(msg)).get_active() == 1), 
 					commands = ['erase_words'])
 	def erase_words(msg):
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
@@ -36,13 +36,13 @@ def handle_erase_words(bot, rtd, debug_mode):
 
 
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == (fsm.ERASE_WORDS, fsm.GET_LANGUAGE),
+					user_manager.get_user(get_id(msg)).get_state() == (fsm.ERASE_WORDS, fsm.GET_LANGUAGE),
 					content_types=['text'])
 	def erase_words1(msg):
 		"""
 			Get word's language
 		"""
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
@@ -82,13 +82,13 @@ def handle_erase_words(bot, rtd, debug_mode):
 
 
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == (fsm.ERASE_WORDS, fsm.GET_TOPIC), 
+					user_manager.get_user(get_id(msg)).get_state() == (fsm.ERASE_WORDS, fsm.GET_TOPIC), 
 					content_types=['text'])
 	def erase_words2(msg):
 		"""
 			Get topic
 		"""
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
@@ -120,10 +120,10 @@ def handle_erase_words(bot, rtd, debug_mode):
 
 
 	@bot.callback_query_handler(func=lambda call:
-							rtd.get_user(get_id(call.message)).get_state() == (fsm.ERASE_WORDS, fsm.SELECT_WORDS))
+							user_manager.get_user(get_id(call.message)).get_state() == (fsm.ERASE_WORDS, fsm.SELECT_WORDS))
 
 	def callback_select_words(call):
-		user = rtd.get_user(get_id(call.message))
+		user = user_manager.get_user(get_id(call.message))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))

@@ -1,49 +1,57 @@
-import database_ops.word_ops
 import logging
-from utilities import logging_utils
+import database_ops.study_item_ops
+
 
 class TopicOps():
+
 
 	def __init__(self, conn, cursor, debug_mode):
 		self.logger = logging.getLogger('db_api')
 		self.debug_mode = debug_mode
 		self.conn = conn
 		self.cursor = cursor
+		self.study_item_ops = database_ops.study_item_ops.StudyItemOps(conn,cursor, debug_mode)
 
 
-	def add_topic(self, user_id, language, topic):
-		self.cursor.execute("SELECT topic FROM topics WHERE user_id=%s AND language=%s AND topic=%s;", (user_id, language, topic))
-		row = self.cursor.fetchall()
-
-		if(len(row) > 0):
-			return
-
-		self.cursor.execute("INSERT INTO topics VALUES (%s, %s, %s)", (user_id, language, topic))
-		self.conn.commit()
+	def erase_topic(self, user_id, subject, topic):
+		self.cursor.execute("SELECT study_item_id FROM study_items WHERE user_id=%s AND subject=%s AND topic=%s;", 
+			(user_id, subject, topic))
+		rows = self.cursor.fetchall()
+		for row in rows:
+			self.study_item_ops.erase_study_item(user_id, row[0])
 
 
-
-	def get_all_topics(self, user_id, language):
-		self.cursor.execute("SELECT topic FROM topics WHERE user_id=%s AND language=%s;", (user_id, language))
+	def get_topics(self, user_id, subject):
+		self.cursor.execute("SELECT topic, active FROM topics WHERE user_id=%s and subject=%s;", (user_id, subject))
 		topics = self.cursor.fetchall()
-
 		ret = []
 		for topic in topics:
-			ret.append(topic[0])
+			ret.append((topic[0], topic[1]))
+		return ret
 
-		return ret;
+
+	def get_active_topics(self, user_id, subject):
+		self.cursor.execute("SELECT topic,active FROM topics WHERE user_id=%s and subject=%s and active!=0;", (user_id, subject))
+		topics = self.cursor.fetchall()
+		ret = []
+		for topic in topics:
+			ret.append((topic[0], topic[1]))
+		return ret
 
 
-	def erase_topic_empty_words(self, user_id, language, topic):
-		self.cursor.execute("SELECT * FROM topics WHERE user_id=%s AND language=%s AND topic=%s;", (user_id,language,topic))
+	def is_topic_active(self, user_id, subject, topic):
+		self.cursor.execute("SELECT active FROM topics WHERE user_id=%s and subject=%s AND topic=%s;", (user_id, subject, topic))
+		topics = self.cursor.fetchall()
+		if len(topics) == 0:
+			return None
+		return topics[0][0]
+
+
+	def set_topic_active(self, user_id, subject, topic, active):
+		self.cursor.execute("SELECT study_item_id FROM study_items WHERE user_id=%s AND subject=%s AND topic=%s;", 
+			(user_id, subject, topic))
 		rows = self.cursor.fetchall()
+		for row in rows:
+			self.study_item_ops.set_study_item_active(user_id, row[0], active)
 
-		if len(rows) == 0:
-			self.logger.warning("Topic {},{},{} doesn't exist.".format(user_id,language,topic))
-			return
-
-		self.cursor.execute("DELETE FROM topics WHERE user_id=%s AND language=%s AND topic=%s;", (user_id, language,topic))
-		self.conn.commit()
-
-		self.logger.info("Topic {},{},{} erased.".format(user_id, language, topic))
-		return
+	

@@ -3,22 +3,22 @@ from utilities.bot_utils import get_id
 from utilities import bot_utils
 from utilities import utils
 import logging
-import bot_language
 
 
-def handle_card_answer(bot, rtd, debug_mode):
+
+def handle_card_answer(bot, user_manager, debug_mode):
 
 	#=====================ANSWER CARD=====================
 	@bot.message_handler(func = lambda msg:
-					(rtd.get_user(get_id(msg)).get_state() == fsm.WAITING_ANS and
-					rtd.get_user(get_id(msg)).get_active() == 1), 
+					(user_manager.get_user(get_id(msg)).get_state() == fsm.WAITING_ANS and
+					user_manager.get_user(get_id(msg)).get_active() == 1), 
 					content_types = ['text'])
 	def answer_card(msg):
 		"""
 			Get user answer to card sequence
 		"""
 
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
@@ -62,13 +62,13 @@ def handle_card_answer(bot, rtd, debug_mode):
 
 
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == fsm.WAITING_POLL_ANS,
+					user_manager.get_user(get_id(msg)).get_state() == fsm.WAITING_POLL_ANS,
 					content_types=['text'])
 	def poll_difficulty(msg):
 		"""
 			Get user performance grade
 		"""
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))

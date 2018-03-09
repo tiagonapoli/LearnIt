@@ -2,18 +2,18 @@ import fsm
 from utilities import bot_utils, utils
 from utilities.bot_utils import get_id
 import logging
-import bot_language
 
 
-def handle_erase_languages(bot, rtd, debug_mode):
+
+def handle_erase_languages(bot, user_manager, debug_mode):
 
 	#=====================ERASE LANGUAGES=====================
 	@bot.message_handler(func = lambda msg:
-					(rtd.get_user(get_id(msg)).get_state() == fsm.IDLE and
-					 rtd.get_user(get_id(msg)).get_active() == 1), 
+					(user_manager.get_user(get_id(msg)).get_state() == fsm.IDLE and
+					 user_manager.get_user(get_id(msg)).get_active() == 1), 
 					commands = ['erase_languages'])
 	def erase_languages(msg):
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
@@ -42,9 +42,9 @@ def handle_erase_languages(bot, rtd, debug_mode):
 		
 
 	@bot.callback_query_handler(func=lambda call:
-							rtd.get_user(get_id(call.message)).get_state() == (fsm.ERASE_LANGUAGES, fsm.SELECT_LANGUAGES))
+							user_manager.get_user(get_id(call.message)).get_state() == (fsm.ERASE_LANGUAGES, fsm.SELECT_LANGUAGES))
 	def callback_select_words(call):
-		user = rtd.get_user(get_id(call.message))
+		user = user_manager.get_user(get_id(call.message))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))

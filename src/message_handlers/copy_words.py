@@ -3,21 +3,21 @@ from utilities import utils
 from utilities import bot_utils
 from utilities.bot_utils import get_id
 import logging
-import bot_language
 
 
-def handle_copy_words(bot, rtd, debug_mode):
+
+def handle_copy_words(bot, user_manager, debug_mode):
 
 	#=====================ADD WORD=====================
 	@bot.message_handler(func = lambda msg:
-					(rtd.get_user(get_id(msg)).get_state() == fsm.IDLE and
-					 rtd.get_user(get_id(msg)).get_active() == 1), 
+					(user_manager.get_user(get_id(msg)).get_state() == fsm.IDLE and
+					 user_manager.get_user(get_id(msg)).get_active() == 1), 
 					commands = ['copy_words'])
 	def copy_words(msg):
 		"""
 			Copy words from user
 		"""
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
@@ -30,19 +30,19 @@ def handle_copy_words(bot, rtd, debug_mode):
 
 
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == (fsm.COPY_WORDS, fsm.GET_USER),
+					user_manager.get_user(get_id(msg)).get_state() == (fsm.COPY_WORDS, fsm.GET_USER),
 					content_types=['text'])
 	def get_user(msg):
 		"""
 			Copy words from user: Get user
 		"""
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
 
 		username = utils.treat_username_str(msg.text)
-		valid, user2 = rtd.get_user_by_username(username)
+		valid, user2 = user_manager.get_user_by_username(username)
 		user.temp_user = user2
 
 		if valid == False:
@@ -83,14 +83,14 @@ def handle_copy_words(bot, rtd, debug_mode):
 
 
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == (fsm.COPY_WORDS, fsm.GET_LANGUAGE), 
+					user_manager.get_user(get_id(msg)).get_state() == (fsm.COPY_WORDS, fsm.GET_LANGUAGE), 
 					content_types=['text'])
 	def get_languages(msg):
 		"""
 			Copy words from user: Get languages
 		"""
 		
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
@@ -132,10 +132,10 @@ def handle_copy_words(bot, rtd, debug_mode):
 
 
 	@bot.callback_query_handler(func=lambda call:
-							rtd.get_user(get_id(call.message)).get_state() == (fsm.COPY_WORDS, fsm.SELECT_TOPICS))
+							user_manager.get_user(get_id(call.message)).get_state() == (fsm.COPY_WORDS, fsm.SELECT_TOPICS))
 
 	def callback_select_words(call):
-		user = rtd.get_user(get_id(call.message))
+		user = user_manager.get_user(get_id(call.message))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
@@ -169,14 +169,14 @@ def handle_copy_words(bot, rtd, debug_mode):
 
 
 	@bot.message_handler(func = lambda msg:
-			rtd.get_user(get_id(msg)).get_state() == (fsm.COPY_WORDS, fsm.GET_OVERWRITE), 
+			user_manager.get_user(get_id(msg)).get_state() == (fsm.COPY_WORDS, fsm.GET_OVERWRITE), 
 			content_types=['text'])
 	def overwrite_check(msg):
 		"""
 			Copy words from user: Get languages
 		"""
 		
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
@@ -204,7 +204,7 @@ def handle_copy_words(bot, rtd, debug_mode):
 		text = bot_language.translate('*Overwritten words:*', user) + "\n"
 		count = 0
 		for topic in selected_topics:
-			overwritten_words = rtd.copy_topic(user, user.temp_user, user.temp_language, topic, overwrite)
+			overwritten_words = user_manager.copy_topic(user, user.temp_user, user.temp_language, topic, overwrite)
 
 			if len(overwritten_words) > 0:
 			 	text += bot_language.translate('*Topic: ', user) + utils.treat_msg_to_send(topic, "*") + '*\n'

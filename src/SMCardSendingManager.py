@@ -434,3 +434,12 @@ class UserCardQueue():
 
 
 
+
+
+
+class CardSendingManager:
+
+
+
+
+class UserSendingCardManager:

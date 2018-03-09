@@ -1,12 +1,12 @@
 -----Commands-----
 cancel - Cancel any existing process
 copy_from_user - Copy from other users 
-select_train - Select your active training
-add - Add a card
+add_item - Add a card
 list - List your cards
 review - Review some topics
 erase - Erase
 edit - Edit
+select_trainings - Select your active training
 help - Help and developers contact
 settings - Change bot settings
 start - Sign in to use the bot

@@ -4,23 +4,23 @@ from random import shuffle
 from utilities import utils
 from utilities import bot_utils
 import logging
-import bot_language
 
 
-def handle_topic_review(bot, rtd, debug_mode):
+
+def handle_topic_review(bot, user_manager, debug_mode):
 
 
 
 	#=====================ADD WORD=====================
 	@bot.message_handler(func = lambda msg:
-					(rtd.get_user(get_id(msg)).get_state() == fsm.IDLE and
-					 rtd.get_user(get_id(msg)).get_active() == 1), 
+					(user_manager.get_user(get_id(msg)).get_state() == fsm.IDLE and
+					 user_manager.get_user(get_id(msg)).get_active() == 1), 
 					commands = ['review'])
 	def review(msg):
 		"""
 			Add word: Get word sequence
 		"""
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
@@ -47,13 +47,13 @@ def handle_topic_review(bot, rtd, debug_mode):
 
 
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == (fsm.REVIEW, fsm.GET_LANGUAGE),
+					user_manager.get_user(get_id(msg)).get_state() == (fsm.REVIEW, fsm.GET_LANGUAGE),
 					content_types=['text'])
 	def review1(msg):
 		"""
 			Add word: Get word's language
 		"""
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
@@ -97,13 +97,13 @@ def handle_topic_review(bot, rtd, debug_mode):
 
 
 	@bot.callback_query_handler(func=lambda call:
-							rtd.get_user(get_id(call.message)).get_state() == (fsm.REVIEW, fsm.GET_TOPICS))
+							user_manager.get_user(get_id(call.message)).get_state() == (fsm.REVIEW, fsm.GET_TOPICS))
 
 	def callback_select_words(call):
 		""" 
 			Add word: Create relate menu 
 		"""
-		user = rtd.get_user(get_id(call.message))
+		user = user_manager.get_user(get_id(call.message))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
@@ -146,13 +146,13 @@ def handle_topic_review(bot, rtd, debug_mode):
 
 
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == (fsm.REVIEW, fsm.GET_NUMBER),
+					user_manager.get_user(get_id(msg)).get_state() == (fsm.REVIEW, fsm.GET_NUMBER),
 					content_types=['text'])
 	def review2(msg):
 		"""
 			Add word: Get word's language
 		"""
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))
@@ -176,14 +176,14 @@ def handle_topic_review(bot, rtd, debug_mode):
 
 
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == (fsm.REVIEW, fsm.WAITING_CARD_ANS), 
+					user_manager.get_user(get_id(msg)).get_state() == (fsm.REVIEW, fsm.WAITING_CARD_ANS), 
 					content_types = ['text'])
 	def answer_card(msg):
 		"""
 			Get user answer to card sequence
 		"""
 
-		user = rtd.get_user(get_id(msg))
+		user = user_manager.get_user(get_id(msg))
 		user_id = user.get_id()
 		user.set_state(fsm.LOCKED)
 		logger = logging.getLogger('{}'.format(user_id))

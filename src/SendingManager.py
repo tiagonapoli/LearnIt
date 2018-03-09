@@ -22,9 +22,9 @@ class SendingManager():
 		self.bot = None
 		self.start_bot() 
 
-		self.rtd = RuntimeData(self.debug_mode)
-		self.rtd.get_known_users()
-		self.users = self.rtd.users
+		self.user_manager = RuntimeData(self.debug_mode)
+		self.user_manager.get_known_users()
+		self.users = self.user_manager.users
 		self.user_queues = {}
 
 		self.now = datetime.datetime.now()
@@ -45,8 +45,8 @@ class SendingManager():
 		self.now = datetime.datetime.now()
 		hour = self.now.hour
 
-		self.rtd.get_known_users()
-		self.users = self.rtd.users
+		self.user_manager.get_known_users()
+		self.users = self.user_manager.users
 
 		for user_id, user in self.users.items():
 			if user.get_active() == 0:
@@ -146,7 +146,3 @@ class SendingManagerThread(Thread):
 	def restart_bot(self):
 		self.sending_manager.restart_bot()
 
-
-
-
-	
