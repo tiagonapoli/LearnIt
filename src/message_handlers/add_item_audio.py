@@ -24,7 +24,7 @@ def handle_add_item_audio(bot, user_manager, debug_mode):
 
 		path = ""
 		if msg.audio != None:
-			path = utils.save_audio(msg,
+			path = user.save_audio(msg,
 								data_path, 
 								"{}".format(filename))
 		elif msg.voice != None:

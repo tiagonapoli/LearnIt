@@ -131,6 +131,9 @@ class StudyItemDeck(StudyItemInfo):
 		if self.cards.has_key(card_type):
 			del self.cards[card_type]
 
+	def get_sendable_study_item(self):
+		return self.study_item
+
 	def get_cards(self):
 		ret = []
 		for content_type, card in self.cards.items():

@@ -31,11 +31,11 @@ class SubjectOps():
 
 
 	def get_active_subjects(self, user_id):
-		self.cursor.execute("SELECT subject,active FROM subjects WHERE user_id=%s AND active!=0;", (user_id, ))
+		self.cursor.execute("SELECT subject FROM subjects WHERE user_id=%s AND active!=0;", (user_id, ))
 		subjects = self.cursor.fetchall()
 		ret = []
 		for subject in subjects:
-			ret.append((subject[0], subject[1]))
+			ret.append(subject[0])
 		return ret
 
 

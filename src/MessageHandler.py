@@ -6,14 +6,11 @@ import message_handlers.error_handling
 import message_handlers.add_item
 '''
 import message_handlers.copy_words
-import message_handlers.list_words
 import message_handlers.erase_words
 
-import message_handlers.add_language 
-import message_handlers.list_languages 
-import message_handlers.erase_languages
 '''
 
+import message_handlers.list
 import message_handlers.settings
 import message_handlers.stop
 import message_handlers.help
@@ -89,12 +86,11 @@ class MessageHandler():
 		message_handlers.error_handling.handle_user_dont_exist(self.bot, self.user_manager,self.debug_mode)	
 		message_handlers.cancel.handle_cancel(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.add_item.handle_add_item(self.bot, self.user_manager,self.debug_mode)
+		message_handlers.list.handle_list(self.bot, self.user_manager,self.debug_mode)
 		'''
 		message_handlers.card_answering.handle_card_answer(self.bot, self.user_manager,self.debug_mode)
-		message_handlers.list_languages.handle_list_languages(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.erase_languages.handle_erase_languages(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.copy_words.handle_copy_words(self.bot, self.user_manager,self.debug_mode)
-		message_handlers.list_words.handle_list_words(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.erase_words.handle_erase_words(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.topic_review.handle_topic_review(self.bot, self.user_manager,self.debug_mode)
 		'''

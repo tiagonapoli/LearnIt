@@ -138,8 +138,8 @@ message = { "#setup_user_username_error":
 				 1: "Tópico do item: *%s*"},
 
 			"#study_item":
-				{0: "*Study item:* _{}_",
-				 1: "*Item de estudo:* _{}_"},
+				{0: "*Study item:* _%s_",
+				 1: "*Item de estudo:* _%s_"},
 
 
 			"#add_item_topic_intro": 
@@ -263,16 +263,16 @@ message = { "#setup_user_username_error":
 				 1: "_Não há tópicos ativos nesta matéria. Nada para listar..."},
 
 			"#list_subject_selection":
-				{0: "Active or partially active subjects. Select one for more detail or type /%s to quit this menu",
-				 1: "Matérias ativas ou parcialmente ativas. Selecione uma delas para mais detalhes ou envie-me /%s para sair desse menu"}
+				{0: "_Active or partially active_ *subjects*. Select one for more detail or type /%s *to quit this menu*",
+				 1: "*Matérias* _ativas ou parcialmente ativas_. Selecione uma delas para mais detalhes ou envie-me /%s *para sair desse menu*"},
 
 			"#list_topic_selection":
-				{0: "Active or partially active topics. Select one for more detail or type /%s to go back to the last menu or /%s to quit list option",
-				 1: "Tópicos ativos ou parcialmente ativos. Selecione um deles para mais detalhes ou envie-me /%s para voltar ao menu anterior ou /%s /%s para sair da opção de listagem"}
+				{0: "_Active or partially active_ *topics*. Select one for more detail or type /%s *to go back to the last menu* _or_ /%s *to quit* _ist option",
+				 1: "*Tópicos* _ativos ou parcialmente ativos_. Selecione um deles para mais detalhes ou envie-me /%s *para voltar ao menu anterior* _ou_ /%s *para sair* da opção de listagem"},
 
 			"#list_study_item_selection":
-				{0: "Active study items. Select one for more detail or type /%s to go back to the last menu or /%s to quit list option",
-				 1: "Itens de estudo ativos. Selecione um deles para mais detalhes ou envie-me /%s para voltar ao menu anterior ou /%s para sair da opção de listagem"}
+				{0: "_Active_ *study items*. Select one for more detail or type /%s *to go back to the last menu* _or_ /%s *to quit* list option",
+				 1: "*Itens* _de estudo ativos_. Selecione um deles para mais detalhes ou envie-me /%s *para voltar ao menu anterior* _ou_ /%s *para sair* da opção de listagem"},
 
 
 

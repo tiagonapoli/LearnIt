@@ -9,7 +9,7 @@ CREATE TABLE users(
 	highest_card_id int DEFAULT 0,
 	highest_study_item_id int DEFAULT 0,
 	cards_per_hour int DEFAULT 3,
-	review_questions_per_day int DEFAULT 40,
+	review_cards_per_day int DEFAULT 40,
 	learning_cards_per_day int DEFAULT 5, 
 	card_waiting int DEFAULT 0,
 	card_waiting_type int DEFAULT 0,

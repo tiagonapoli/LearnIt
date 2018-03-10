@@ -105,7 +105,7 @@ next_state.update({
 						'Back': (LIST, GET_SUBJECT),
 						'End': IDLE,
 						'Error': (LIST, GET_TOPIC)},
-	(LIST, GET_STUDY_ITEM): {'Done' : IDLE,
+	(LIST, GET_STUDY_ITEM): {'End' : IDLE,
 							 'Back' : (LIST, GET_TOPIC),
 							 'Error': (LIST, GET_STUDY_ITEM),
 							 'Next' : (LIST, GET_STUDY_ITEM)}

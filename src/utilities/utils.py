@@ -15,10 +15,10 @@ def create_dir_card_archive(user_id, word_id, debug_mode):
 					os.makedirs('../data/{}/{}'.format(user_id, word_id))
 
 
-def study_items_to_string_list(study_items)
+def study_items_to_string_list(study_items):
 	ret = []
 	for item in study_items:
-		ret.append(item.get_study_item())
+		ret.append(item.get_sendable_study_item())
 	return ret
 
 

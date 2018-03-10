@@ -1,3 +1,10 @@
+def markdown_options(options, markdown_options):
+	cnt = 0
+	ret = []
+	for option in options:
+		ret.append(markdown_options + option + markdown_options)
+	return ret
+
 
 def treat_msg_markdown(txt, args):
 	stack = ['']
@@ -19,6 +26,7 @@ def treat_msg_markdown(txt, args):
 						stack.append(char)
 		ret.append(txt[i])
 	ret.append(txt[-1])
+
 	return ''.join(ret) % ret_args
 
 

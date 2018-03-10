@@ -21,8 +21,11 @@ class User:
 		self.bot_controller_factory = bot_controller_factory
 		self.bot_controller = bot_controller_factory.get_bot_controller(user_id, self.native)
 
+
+
 		self.temp_study_item = None
 		self.temp_card = None
+		self.temp_study_items_string_list = None
 		self.temp_study_item_list = None
 		self.temp_topics_list = None
 		self.btn_set = None
@@ -275,9 +278,9 @@ class User:
 	def parse_keyboard_ans(self, msg):
 		return self.bot_controller.parse_keyboard_ans(msg)
 	
-	def send_string_keyboard(self, txt, options, txt_args=(), translate_options=False, add_default_keyboard=True, width=3, parse="Markdown"):
-		return self.bot_controller.send_string_keyboard(txt, options, txt_args, translate_options, add_default_keyboard, width, parse)
-	
+	def send_string_keyboard(self, txt, option, markdown_options=None, txt_args=(), translate_options=False, add_default_keyboard=True, width=3, parse="Markdown"):
+		return self.bot_controller.send_string_keyboard(txt, option, markdown_options, txt_args, translate_options, add_default_keyboard, width, parse)
+
 	def send_selection_inline_keyboard(self, txt, options, txt_args=(), translate_options=False, empty_keyboard_text=None, no_empty_flag=False, width=3, parse="Markdown"):
 		return self.bot_controller.send_selection_inline_keyboard(txt, options, txt_args, translate_options, empty_keyboard_text, no_empty_flag, width, parse)
 	
@@ -292,3 +295,10 @@ class User:
 	
 	def send_voice(self, path, markup=BotMessageSender.keyboard_remove()):
 		return self.bot_controller.send_voice(path, markup)
+
+	def send_navigation_string_keyboard(self, txt, options, end_btn, back_btn=None, markdown_options=None, txt_args=(), translate_options=False, parse="Markdown"):
+		return self.bot_controller.send_navigation_string_keyboard(txt, options, end_btn, back_btn, markdown_options, txt_args, translate_options, parse)
+
+
+	def send_all_cards(self, study_item_deck):
+		return self.bot_controller.send_all_cards(study_item_deck)

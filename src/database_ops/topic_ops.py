@@ -31,11 +31,11 @@ class TopicOps():
 
 
 	def get_active_topics(self, user_id, subject):
-		self.cursor.execute("SELECT topic,active FROM topics WHERE user_id=%s and subject=%s and active!=0;", (user_id, subject))
+		self.cursor.execute("SELECT topic FROM topics WHERE user_id=%s and subject=%s and active!=0;", (user_id, subject))
 		topics = self.cursor.fetchall()
 		ret = []
 		for topic in topics:
-			ret.append((topic[0], topic[1]))
+			ret.append(topic[0])
 		return ret
 
 

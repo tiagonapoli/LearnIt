@@ -36,14 +36,17 @@ def create_inline_keys_sequential(keys):
 		cnt += 1
 	return ret
 
-def create_string_keyboard(keys):
+def create_string_keyboard(keys, modifier=None):
+	if modifier == None:
+		modifier = [""] * len(keys)
+
 	text = ""
 	cnt = 1
 	for key in keys:
 		if type(key) is tuple:
-			text += string_treating.treat_msg_markdown("/{}. ".format(cnt) + "%s" + "\n", (key[0],))
+			text += string_treating.treat_msg_markdown("/{}. ".format(cnt) + modifier[cnt-1] + "%s" + modifier[cnt-1] + "\n", (key[0],))
 		else:
-			text += string_treating.treat_msg_markdown("/{}. ".format(cnt) + "%s" + "\n", (key,))
+			text += string_treating.treat_msg_markdown("/{}. ".format(cnt) + modifier[cnt-1] + "%s" + modifier[cnt-1] + "\n", (key,))
 		cnt += 1
 	return text
 
@@ -101,6 +104,7 @@ class BotMessageSender():
 
 		self.keyboard_id = None
 		self.keyboard_text = None
+		self.markdown_options = None
 		self.keyboard_width = None
 		self.empty_keyboard_text = None
 		self.no_empty_flag = None
@@ -223,7 +227,7 @@ class BotMessageSender():
 
 
 	#ok
-	def send_string_keyboard(self, txt, options, txt_args=(), translate_options=False, add_default_keyboard=True, width=3, parse="Markdown"):
+	def send_string_keyboard(self, txt, option, markdown_options=None, txt_args=(), translate_options=False, add_default_keyboard=True, width=3, parse="Markdown"):
 		if translate_options:
 			options = self.translate_options(options)
 
@@ -233,7 +237,8 @@ class BotMessageSender():
 			markup = create_keyboard(options, width)
 
 		self.keyboard_type = 'string_keyboard'
-		self.keyboard_options = options
+		self.keyboard_options = list(options)
+		self.markdown_options = markdown_options
 
 		tries = self.tries
 		txt = translation.translate(txt, self.language)
@@ -241,7 +246,7 @@ class BotMessageSender():
 			txt = string_treating.treat_msg_markdown(txt, txt_args)
 		else:
 			txt = txt % txt_args
-		txt += "\n" + create_string_keyboard(self.keyboard_options)
+		txt += "\n" + create_string_keyboard(self.keyboard_options, self.markdown_options)
 		while tries > 0:
 			try:
 				self.set_bot()
@@ -253,24 +258,25 @@ class BotMessageSender():
 			time.sleep(self.sleep)
 
 	#ok
-	def send_navigation_string_keyboard(self, txt, options, end_btn, back_btn=None, txt_args=(), translate_options=False, parse="Markdown"):
+	def send_navigation_string_keyboard(self, txt, options, end_btn, back_btn=None, markdown_options=None, txt_args=(), translate_options=False, parse="Markdown"):
 		if translate_options:
 			options = self.translate_options(options)
 
 		markup = keyboard_remove()
 
+		self.keyboard_type = 'navigation_string_keyboard'
+		self.keyboard_options = list(options) 
+		self.markdown_options = markdown_options
 		if back_btn != None:
 			self.keyboard_back_btn = True
 			back_btn = translation.translate(back_btn, self.language)
-			options.append(end_btn)
+			self.keyboard_options.append(back_btn)
 		else:
 			self.keyboard_back_btn = False
 
 		end_btn = translation.translate(end_btn, self.language)
-		options.append(end_btn)
+		self.keyboard_options.append(end_btn)
 		
-		self.keyboard_type = 'navigation_string_keyboard'
-		self.keyboard_options = options 
 
 		tries = self.tries
 		txt = translation.translate(txt, self.language)
@@ -278,7 +284,7 @@ class BotMessageSender():
 			txt = string_treating.treat_msg_markdown(txt, txt_args)
 		else:
 			txt = txt % txt_args
-		txt += "\n" + create_string_keyboard(self.keyboard_options)
+		txt += "\n" + create_string_keyboard(self.keyboard_options, self.markdown_options)
 		while tries > 0:
 			try:
 				self.set_bot()
