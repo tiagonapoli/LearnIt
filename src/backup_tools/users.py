@@ -4,11 +4,15 @@ import os
 import sys
 
 args = sys.argv[1:]
+debug_mode = int(args[1])
 PATH = args[0]
 
 print("USERS")
 try:
-	arq = open("../../credentials/connect_str.txt", "r")
+	if debug_mode == 1:
+		arq = open("../../credentials/connect_str_debug.txt", "r")
+	else:
+		arq = open("../../credentials/connect_str.txt", "r")
 	connect_str = arq.read()
 	DB_NAME = connect_str.split()[0][7:]
 	DB_USER_NAME = connect_str.split()[1][5:]

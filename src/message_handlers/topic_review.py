@@ -2,166 +2,104 @@ import fsm
 from utilities.bot_utils import get_id
 from random import shuffle
 from utilities import utils
-from utilities import bot_utils
 import logging
-import bot_language
 
+def handle_topic_review(bot, user_manager, debug_mode):
 
-def handle_topic_review(bot, rtd, debug_mode):
-
-
-
-	#=====================ADD WORD=====================
+	#=====================TOPIC REVIEW=====================
 	@bot.message_handler(func = lambda msg:
-					(rtd.get_user(get_id(msg)).get_state() == fsm.IDLE and
-					 rtd.get_user(get_id(msg)).get_active() == 1), 
+					(user_manager.get_user(get_id(msg)).get_state() == fsm.IDLE and
+					 user_manager.get_user(get_id(msg)).get_active() == 1), 
 					commands = ['review'])
 	def review(msg):
-		"""
-			Add word: Get word sequence
-		"""
-		user = rtd.get_user(get_id(msg))
-		user_id = user.get_id()
-		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger('{}'.format(user_id))
 
-		known_languages = user.get_languages()
+		user_id = get_id(msg)
+		user = user_manager.get_user(user_id)
+		user.set_state(fsm.LOCKED)
+		logger = user.logger
+
+		known_subjects = user.get_subjects()
+		options = []
+		for subject in known_subjects:
+			options.append(subject[0])
 		
-		
-		if len(known_languages) == 0:
-			bot.send_message(user_id, 
-				bot_language.translate("_Please, add a language first._", user), 
-				parse_mode="Markdown")
+		if len(options) == 0:
+			user.send_message("#no_subjects")
 			user.set_state(fsm.IDLE)
 			return 	
 
-		markup = bot_utils.create_keyboard(known_languages, 2)
-
-		text = bot_language.translate("*Please select the word's language:*", user) + "\n" + bot_utils.create_string_keyboard(known_languages)
-
-		bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
-		user.keyboard_options = known_languages
+		markdown_options = ["*"] * len(options)
+		user.send_string_keyboard("#subject_selection", options, markdown_options=markdown_options)
 		user.set_state(fsm.next_state[fsm.IDLE]['review'])
 
 
-
-
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == (fsm.REVIEW, fsm.GET_LANGUAGE),
+					user_manager.get_user(get_id(msg)).get_state() == (fsm.REVIEW, fsm.GET_SUBJECT),
 					content_types=['text'])
 	def review1(msg):
-		"""
-			Add word: Get word's language
-		"""
-		user = rtd.get_user(get_id(msg))
-		user_id = user.get_id()
-		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger('{}'.format(user_id))
 
-		valid, language = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
+		user_id = get_id(msg)
+		user = user_manager.get_user(user_id)
+		user.set_state(fsm.LOCKED)
+		logger = user.logger
+
+		valid, subject, keyboard_option, keyboard_len = user.parse_keyboard_ans(msg)
 
 		if valid == False:
-			bot.reply_to(msg, 
-				bot_language.translate("Please choose from keyboard", user))
-			user.set_state(fsm.next_state[(fsm.ADD_WORD, fsm.GET_LANGUAGE)]['error'])
+			user.send_message("#choose_from_keyboard", markup=None)
+			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_SUBJECT)]['error'])
 			return
 
-		user.temp_language = language
-		markup = bot_utils.keyboard_remove()
-		topics = user.get_all_topics(language)
+		user.temp_subject = subject
+		known_topics = user.get_topics(subject)
+		topics = []
+		for topic in known_topics:
+			topics.append(topic[0])
 		topics.sort()
 
-		if len(topics) > 0:
-			options = topics
-			btn = bot_utils.create_inline_keys_sequential(options)
-			btn_set = set()
-			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ('End selection', 'DONE'))
-
-			user.btn_set = btn_set
-			user.keyboard_options = btn
-
-			bot.send_message(user_id, 
-				bot_language.translate("_Select the topics that you want to review:_", user),
-				reply_markup=markup, 
-				parse_mode="Markdown")
-			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_LANGUAGE)]['done'])
-
-		else: 
-			markup = bot_utils.keyboard_remove()
-			bot.send_message(user_id, 
-				bot_language.translate("_There are no topics registered in this language yet._", user),
-				reply_markup=markup, 
-				parse_mode="Markdown")
-			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_LANGUAGE)]['no topics'])
-			return
+		user.send_selection_inline_keyboard("#review_select_topics", topics,
+			empty_keyboard_text="#review_select_topics_empty", no_empty_flag=True)
+		user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_SUBJECT)]['done'])
 
 
 	@bot.callback_query_handler(func=lambda call:
-							rtd.get_user(get_id(call.message)).get_state() == (fsm.REVIEW, fsm.GET_TOPICS))
+							user_manager.get_user(get_id(call.message)).get_state() == (fsm.REVIEW, fsm.GET_TOPICS))
 
 	def callback_select_words(call):
-		""" 
-			Add word: Create relate menu 
-		"""
-		user = rtd.get_user(get_id(call.message))
-		user_id = user.get_id()
+
+		user_id = get_id(call.message)
+		user = user_manager.get_user(user_id)
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger('{}'.format(user_id))
+		logger = user.logger
 
-		btn_set = user.btn_set
-		btn_set, done = bot_utils.parse_selection_inline_keyboard_ans(call.data, btn_set)
-		btn = user.keyboard_options
-		
+		done, btn_set, btn = user.parse_keyboard_ans(call)
+
 		if done == True:
-
 			user.cards_to_review = []
 			for i in btn_set:
-				user.cards_to_review.extend(user.get_cards_on_topic(user.temp_language, user.keyboard_options[i][0], False))
+				user.cards_to_review.extend(user.get_cards_on_topic(user.temp_subject, btn[i][0]))
 
-			if len(user.cards_to_review) == 0:
-				markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, (bot_language.translate("End selection", user), "DONE"))
-				try:
-					bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, 
-						text=bot_language.translate("Please, select *at least one* topic to review:", user), 
-						reply_markup=markup, parse_mode="Markdown")
-				except Exception as e:
-					pass
-					#print("CANT EDIT MESSAGE")
-				user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_TOPICS)]['continue'])
-			else:
-				bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
-				options = ['5', '10', '15', '20', '25']
-				markup = bot_utils.create_keyboard(options, 2)
-				text = bot_language.translate("*Please select the number of review cards that you want to receive:*", user) + "\n" + bot_utils.create_string_keyboard(options)
-				bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
-				user.keyboard_options = options
-				user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_TOPICS)]['done'])
+			options = ['5', '10', '15', '20', '25']
+			user.send_string_keyboard("#review_card_number", options)
+			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_TOPICS)]['done'])
 		else:
-			markup = bot_utils.create_selection_inline_keyboard(btn_set, btn, 3, ("End selection", "DONE"))
-			bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id, 
-				text=bot_language.translate("_Select the topics that you want to review:_", user), 
-				reply_markup=markup, 
-				parse_mode="Markdown")
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_TOPICS)]['continue'])
 
 
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == (fsm.REVIEW, fsm.GET_NUMBER),
+					user_manager.get_user(get_id(msg)).get_state() == (fsm.REVIEW, fsm.GET_NUMBER),
 					content_types=['text'])
 	def review2(msg):
-		"""
-			Add word: Get word's language
-		"""
-		user = rtd.get_user(get_id(msg))
-		user_id = user.get_id()
-		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger('{}'.format(user_id))
 
-		valid, number = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
+		user_id = get_id(msg)
+		user = user_manager.get_user(user_id)
+		user.set_state(fsm.LOCKED)
+		logger = user.logger
+
+		valid, number, keyboard_option, keyboard_len = user.parse_keyboard_ans(msg)
 
 		if valid == False:
-			bot.reply_to(msg, 
-				bot_language.translate("Please choose from keyboard", user))
+			user.send_message("#choose_from_keyboard", markup=None)
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_NUMBER)]['error'])
 			return
 
@@ -170,41 +108,30 @@ def handle_topic_review(bot, rtd, debug_mode):
 		user.review_card_number = 1
 		
 		shuffle(user.cards_to_review)
-		utils.send_review_card(bot, user.cards_to_review[0], user, "Review", user.review_card_number, set_card_db=False)
+		user.send_card_query(user.cards_to_review[0], "Review", user.review_card_number)
 		user.temp_card = user.cards_to_review[0]
 		user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_NUMBER)]['done'])
 
 
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == (fsm.REVIEW, fsm.WAITING_CARD_ANS), 
+					user_manager.get_user(get_id(msg)).get_state() == (fsm.REVIEW, fsm.WAITING_CARD_ANS), 
 					content_types = ['text'])
 	def answer_card(msg):
-		"""
-			Get user answer to card sequence
-		"""
 
-		user = rtd.get_user(get_id(msg))
-		user_id = user.get_id()
+		user_id = get_id(msg)
+		user = user_manager.get_user(user_id)
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger('{}'.format(user_id))
+		logger = user.logger
 
 		card = user.temp_card
-		res = utils.treat_special_chars(msg.text.lower())
 		
-		string_lst = card.get_word().split()
-		if string_lst[0] != '&img':
-			if res == card.foreign_word.lower():
-				bot.send_message(user_id, 
-					bot_language.translate("That was correct!", user))
-			else:
-				bot.send_message(user_id, 
-					bot_language.translate("There was a mistake :(", user))
+		correctness = card.answer_comparison(msg.text)
+		if correctness != "":
+			user.send_message(correctness)
 
-		utils.send_foreign_word_ans(bot, card, user)
-
-		cards = user.get_cards_on_word(card.get_word_id())
-		for ans in cards:
-			utils.send_ans_card(bot, ans, card.get_type(), user)
+		user.send_card_answer(card)
+		study_item_deck = user.get_study_item_deck(card.get_study_item_id())
+		user.send_all_cards(study_item_deck, except_type=card.get_question_type())
 		
 		user.counter -= 1
 		user.review_card_number += 1
@@ -215,12 +142,10 @@ def handle_topic_review(bot, rtd, debug_mode):
 			user.pos = 0
 
 		if user.counter > 0:
-			utils.send_review_card(bot, user.cards_to_review[user.pos], user, "Review",  user.review_card_number, set_card_db=False)
+			user.send_card_query(user.cards_to_review[user.pos], "Review", user.review_card_number)
 			user.temp_card = user.cards_to_review[user.pos]
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.WAITING_CARD_ANS)]['continue'])
 		else:
-			bot.send_message(user_id, 
-				bot_language.translate("*Review session done!*", user), 
-				parse_mode="Markdown")
+			user.send_message("#review_done")
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.WAITING_CARD_ANS)]['done'])
 			

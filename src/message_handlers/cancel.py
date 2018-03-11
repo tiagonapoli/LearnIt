@@ -2,31 +2,28 @@ import fsm
 from utilities import bot_utils
 from utilities.bot_utils import get_id
 import logging
-import bot_language
 
 
-def handle_cancel(bot, rtd, debug_mode):
+def handle_cancel(bot, user_manager, debug_mode):
 
 	#=====================CANCEL=====================
-	@bot.message_handler(func = lambda msg: (rtd.get_user(get_id(msg)).not_locked() and
-											 rtd.get_user(get_id(msg)).get_active() == 1),
+	@bot.message_handler(func = lambda msg: (user_manager.get_user(get_id(msg)).not_locked() and
+											 user_manager.get_user(get_id(msg)).get_active() == 1),
 						commands = ['cancel'])
 	def cancel(msg):
 		"""
 			Cancels any ongoing events for the user.
 		"""
-		user = rtd.get_user(get_id(msg))
-		user_id = user.get_id()
+		user_id = get_id(msg)
+		user = user_manager.get_user(user_id)
 		
 		prev_state = user.get_state()
 		user.set_state(fsm.LOCKED)
-		logger = logging.getLogger('{}'.format(user_id))
+		logger = user.logger
 		
-		if (prev_state == fsm.WAITING_ANS or
-			prev_state == fsm.WAITING_POLL_ANS):
+		if (prev_state == fsm.WAITING_ANS or prev_state == fsm.WAITING_POLL_ANS):
 			user.set_card_waiting(0)
 			
-		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id, bot_language.translate("canceled...", user), reply_markup=markup)
+		user.send_message("#cancel")
 		user.set_state(fsm.IDLE)
 	

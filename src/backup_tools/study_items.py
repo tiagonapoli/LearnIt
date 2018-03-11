@@ -4,11 +4,15 @@ import os
 import sys
 
 args = sys.argv[1:]
+debug_mode = int(args[1])
 PATH = args[0]
 
-print("SPECIAL WORDS")
+print("STUDY ITEMS")
 try:
-	arq = open("../../credentials/connect_str.txt", "r")
+	if debug_mode == 1:
+		arq = open("../../credentials/connect_str_debug.txt", "r")
+	else:
+		arq = open("../../credentials/connect_str.txt", "r")
 	connect_str = arq.read()
 	DB_NAME = connect_str.split()[0][7:]
 	DB_USER_NAME = connect_str.split()[1][5:]
@@ -17,8 +21,11 @@ try:
 	conn = psycopg2.connect(connect_str)
 	# create a psycopg2 cursor that can execute queries
 	cursor = conn.cursor()
-	cursor.execute("COPY specialwords FROM '{}/specialwords.csv' WITH CSV HEADER DELIMITER AS ','".format(PATH))
+	cursor.execute("COPY study_items FROM '{}/study_items.csv' WITH CSV HEADER DELIMITER AS ','".format(PATH))
 	conn.commit()
 except Exception as e:
 	print(e)
-	print("EXCEPTION ON SPECIAL WORDS")
+	print("EXCEPTION ON STUDY ITEMS")
+
+
+

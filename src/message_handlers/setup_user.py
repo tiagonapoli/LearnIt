@@ -1,15 +1,11 @@
 import fsm
 from utilities.bot_utils import get_id, get_username
 import logging
-import bot_language
 from utilities import bot_utils
 
 
-def handle_setup_user(bot, rtd, debug_mode):
+def handle_setup_user(bot, user_manager, debug_mode):
 
-	
-
-	
 	#=====================SETUP USER=====================
 	@bot.message_handler(commands = ['start'])
 	def setup_user(msg):
@@ -20,61 +16,51 @@ def handle_setup_user(bot, rtd, debug_mode):
 		username = get_username(msg)
 
 		if username == None:
-			bot.send_message(user_id, 
-				bot_language.translate("Please, create your Telegram Username first. You just have to go to Settings->Info->Username to create it. After you create one, type /start again.", user))
+			bot = user_manager.bot_controller_factory.get_bot_controller(user_id, 0)
+			bot.send_message("#setup_user_username_error")
+			del bot
 			return
 
-		if rtd.check_user_existence(user_id):
-			user = rtd.get_user(get_id(msg))
+
+		if user_manager.check_user_existence(user_id):
+			user = user_manager.get_user(get_id(msg))
 			if user.get_active() == 0:
 				user.set_active(1)
-				bot.send_message(user_id, 
-					bot_language.translate("Welcome back to LearnIt!", user) + "\n" + bot_language.translate("welcome_msg", user))
+				user.send_message("#welcome_back")
 			return
 		
-		m = rtd.add_user(user_id, username, bot)
-		user = rtd.get_user(user_id)
+		m = user_manager.add_user(user_id, username)
+		user = user_manager.get_user(user_id)
 		user.set_state(fsm.LOCKED)
 
-		logger = logging.getLogger('{}'.format(user_id))
+		logger = user.logger
 		logger.warning("New username {} {} ".format(user_id, username))
-		logger = logging.getLogger('bot_sender')
+		logger = logging.getLogger('Bot_Sender')
 		logger.warning("New username {} {} ".format(user_id, username))
-
-		bot.send_message(user_id, bot_language.translate("Welcome to LearnIt!", user) + "\n" + bot_language.translate("welcome_msg", user))
 
 		options = ['English', 'Português']
-		text = "*Please select your mother language:*\n*Por favor, selecione sua língua nativa:*" + "\n" + bot_utils.create_string_keyboard(options)
-		markup = bot_utils.create_keyboard(options, 3)
-
-		bot.send_message(user_id, text, reply_markup=markup, parse_mode="Markdown")
-		user.keyboard_options = options
+		user.send_string_keyboard("#setup_user_mother_language", options)
 		user.set_state(fsm.next_state[fsm.IDLE]['setup user'])
 
+
 	@bot.message_handler(func = lambda msg:
-					rtd.get_user(get_id(msg)).get_state() == (fsm.SETUP_USER, fsm.GET_LANGUAGE),
+					(user_manager.check_user_existence(get_id(msg)) == True and
+					 user_manager.get_user(get_id(msg)).get_state() == (fsm.SETUP_USER, fsm.GET_LANGUAGE)),
 					content_types=['text'])
 	def add_word1(msg):
 		"""
 			Add word: Get word's language
 		"""
-		user = rtd.get_user(get_id(msg))
-		user_id = user.get_id()
+		user = user_manager.get_user(get_id(msg))
 		user.set_state(fsm.LOCKED)
 
-		valid, language = bot_utils.parse_string_keyboard_ans(msg.text, user.keyboard_options)
+		valid, language, keyboard_opt, keyboard_len = user.parse_keyboard_ans(msg)
 
 		if valid == False:
-			bot.reply_to(msg, 
-				bot_language.translate("Please choose from keyboard", user))
+			user.send_message("#setup_user_choose_from_keyboard", markup=None)
 			user.set_state(fsm.next_state[(fsm.SETUP_USER, fsm.GET_LANGUAGE)]['error'])
 			return
 
-		user.set_native_language(bot_language.native_languages[language])
-
-		markup = bot_utils.keyboard_remove()
-		bot.send_message(user_id, 
-			bot_language.translate("OK!", user),
-			reply_markup=markup, 
-			parse_mode="Markdown")
+		user.set_native_language(language)
+		user.send_message("#welcome")
 		user.set_state(fsm.next_state[(fsm.SETUP_USER, fsm.GET_LANGUAGE)]['done'])

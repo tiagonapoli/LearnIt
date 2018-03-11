@@ -5,53 +5,134 @@ import time
 from utilities import utils
 import datetime
 
-USER_LOGGER = logging.INFO
-DB_API = logging.INFO
-LEARNIT_THREAD = logging.INFO
+USER_LOGGER = logging.DEBUG
+DATABASE = logging.DEBUG
+LEARNIT = logging.DEBUG
 USER_LOGGER_CONSOLE = logging.WARNING
-DB_API_CONSOLE = logging.WARNING
-LEARNIT_THREAD_CONSOLE = logging.WARNING
+DATABASE_CONSOLE = logging.WARNING
+LEARNIT_CONSOLE = logging.DEBUG
 BOT_SENDER = logging.WARNING
 
-
-class BotHandler(logging.Handler): # Inherit from logging.Handler
-    
+class BotHandler(logging.Handler): # Inherit from logging.Handler    
 	def send_message(self, msg, exc_text, exc_class):
-		log = open("log.txt", "a")
-		log.write("{} {}\n\n".format(datetime.datetime.now(), exc_class))
-		
-		tries = 10
-		while tries > 0:
-			tries -= 1
-			try:
-				self.bot.send_message(359999978, msg)
-				#self.bot.send_message(113538563, msg)
-				if exc_text != None and len(exc_text) <= 200:
-					self.bot.send_message(359999978, exc_text)
-				#	self.bot.send_message(113538563, exc_text)
-				else:
-					self.bot.send_message(359999978, str(exc_class))
-				#	self.bot.send_message(113538563, str(exc_class))
-				return
-			except Exception as e:
-				log.write("{} {}\n\n".format(datetime.datetime.now(), str(e)))
-				time.sleep(1)
-		log.close()
+		self.user_sender.send_message(msg, translate_flag=False, parse="", markup=None)
+		if exc_text != None and len(exc_text) <= 200:
+			self.user_sender.send_message(exc_text, translate_flag=False, parse="", markup=None)
+		elif exc_class != None:
+			self.user_sender.send_message(str(exc_class), translate_flag=False, parse="", markup=None)
 
-	def __init__(self, bot):
-		self.bot = bot
+	def __init__(self, bot_controller_factory):
+		self.user_sender = bot_controller_factory.get_bot_controller(359999978, 1)
 		logging.Handler.__init__(self)
 
 	def emit(self, record):
 		log_entry = self.format(record)
-		log = open("log.txt", "a")
-		log.write("{}\n".format(record.exc_info))
-		log.close()
 		self.send_message(log_entry, record.exc_text, record.exc_info)
 
-def setup_learnit_thread():
+def setup_learnit():
+	logger = logging.getLogger('LearnIt')
+	if len(logger.handlers) > 0:
+		return
 
-	logger = logging.getLogger('learnit_thread')
+	for handler in logger.handlers[:]:
+		logger.removeHandler(handler)
+
+	PATH = '../logs/LearnIt.log'
+
+	pos = PATH.rfind('/')
+	filename = PATH[pos+1:]
+	PATH = PATH[:pos+1]
+
+	if not os.path.exists(PATH):
+		os.makedirs(PATH)
+	
+	PATH += filename
+		
+	handler_file = logging.FileHandler(PATH, mode='a')
+	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
+									datefmt= '%d/%m %H:%M:%S')
+	handler_file.setFormatter(formatter)
+	handler_file.setLevel(LEARNIT)
+
+	handler_stream = logging.StreamHandler()
+	handler_stream.setLevel(LEARNIT_CONSOLE)
+	formatter = logging.Formatter('%(name)s %(threadName)-25s %(funcName)s %(levelname)-8s %(message)s\n')
+	handler_stream.setFormatter(formatter)
+	
+	logger.addHandler(handler_file)
+	logger.addHandler(handler_stream)
+	logger.setLevel(logging.DEBUG)
+
+def setup_message_handler():
+	logger = logging.getLogger('Message_Handler')
+	if len(logger.handlers) > 0:
+		return
+
+	for handler in logger.handlers[:]:
+		logger.removeHandler(handler)
+
+	PATH = '../logs/Message_Handler.log'
+
+	pos = PATH.rfind('/')
+	filename = PATH[pos+1:]
+	PATH = PATH[:pos+1]
+
+	if not os.path.exists(PATH):
+		os.makedirs(PATH)
+	
+	PATH += filename
+		
+	handler_file = logging.FileHandler(PATH, mode='a')
+	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
+									datefmt= '%d/%m %H:%M:%S')
+	handler_file.setFormatter(formatter)
+	handler_file.setLevel(LEARNIT)
+
+	handler_stream = logging.StreamHandler()
+	handler_stream.setLevel(LEARNIT_CONSOLE)
+	formatter = logging.Formatter('%(name)s %(threadName)-25s %(funcName)s %(levelname)-8s %(message)s\n')
+	handler_stream.setFormatter(formatter)
+	
+	logger.addHandler(handler_file)
+	logger.addHandler(handler_stream)
+	logger.setLevel(logging.DEBUG)
+
+def setup_sending_manager():
+	logger = logging.getLogger('Sending_Manager')
+	if len(logger.handlers) > 0:
+		return
+
+	for handler in logger.handlers[:]:
+		logger.removeHandler(handler)
+
+	PATH = '../logs/Sending_Manager.log'
+
+	pos = PATH.rfind('/')
+	filename = PATH[pos+1:]
+	PATH = PATH[:pos+1]
+
+	if not os.path.exists(PATH):
+		os.makedirs(PATH)
+	
+	PATH += filename
+		
+	handler_file = logging.FileHandler(PATH, mode='a')
+	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
+									datefmt= '%d/%m %H:%M:%S')
+	handler_file.setFormatter(formatter)
+	handler_file.setLevel(LEARNIT)
+
+	handler_stream = logging.StreamHandler()
+	handler_stream.setLevel(LEARNIT_CONSOLE)
+	formatter = logging.Formatter('%(name)s %(threadName)-25s %(funcName)s %(levelname)-8s %(message)s\n')
+	handler_stream.setFormatter(formatter)
+	
+	logger.addHandler(handler_file)
+	logger.addHandler(handler_stream)
+	logger.setLevel(logging.DEBUG)
+		
+def setup_database():
+	logger = logging.getLogger('Database')
 
 	if len(logger.handlers) > 0:
 		return
@@ -59,7 +140,7 @@ def setup_learnit_thread():
 	for handler in logger.handlers[:]:
 		logger.removeHandler(handler)
 
-	PATH = '../logs/LearnIt_thread.log'
+	PATH = '../logs/Database.log'
 	
 	pos = PATH.rfind('/')
 	filename = PATH[pos+1:]
@@ -74,47 +155,10 @@ def setup_learnit_thread():
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
 	handler_file.setFormatter(formatter)
-	handler_file.setLevel(LEARNIT_THREAD)
+	handler_file.setLevel(DATABASE)
 
 	handler_stream = logging.StreamHandler()
-	handler_stream.setLevel(LEARNIT_THREAD_CONSOLE)
-	formatter = logging.Formatter('%(name)-30s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n')
-	handler_stream.setFormatter(formatter)
-	
-	logger.addHandler(handler_file)
-	logger.addHandler(handler_stream)
-	logger.setLevel(logging.DEBUG)
-		
-
-def setup_db_api():
-
-	logger = logging.getLogger('db_api')
-
-	if len(logger.handlers) > 0:
-		return
-
-	for handler in logger.handlers[:]:
-		logger.removeHandler(handler)
-
-	PATH = '../logs/DB_API.log'
-	
-	pos = PATH.rfind('/')
-	filename = PATH[pos+1:]
-	PATH = PATH[:pos+1]
-
-	if not os.path.exists(PATH):
-		os.makedirs(PATH)
-	
-	PATH += filename
-		
-	handler_file = logging.FileHandler(PATH, mode='a')
-	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
-									datefmt= '%d/%m %H:%M:%S')
-	handler_file.setFormatter(formatter)
-	handler_file.setLevel(DB_API)
-
-	handler_stream = logging.StreamHandler()
-	handler_stream.setLevel(DB_API_CONSOLE)
+	handler_stream.setLevel(DATABASE_CONSOLE)
 	formatter = logging.Formatter('%(name)-30s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n')
 	handler_stream.setFormatter(formatter)
 	
@@ -122,14 +166,14 @@ def setup_db_api():
 	logger.addHandler(handler_stream)
 	logger.setLevel(logging.DEBUG)
 
-def setup_bot_sender(bot):
+def setup_bot_sender(bot_controller_factory):
 
-	logger = logging.getLogger('bot_sender')
+	logger = logging.getLogger('Bot_Sender')
 
 	for handler in logger.handlers[:]:
 		logger.removeHandler(handler)
 
-	PATH = '../logs/bot_sender.log'
+	PATH = '../logs/Bot_Sender.log'
 	
 	pos = PATH.rfind('/')
 	filename = PATH[pos+1:]
@@ -153,7 +197,7 @@ def setup_bot_sender(bot):
 	
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
-	handler_bot = BotHandler(bot)
+	handler_bot = BotHandler(bot_controller_factory)
 	handler_bot.setFormatter(formatter)
 	handler_bot.setLevel(BOT_SENDER)
 

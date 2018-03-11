@@ -28,7 +28,7 @@ f.write('dbname=learnit_debug user={} host=localhost password=abcde'.format(user
 f.close()
 
 os.system("sudo -u postgres psql -c 'CREATE DATABASE {};'".format(username))
-os.system("sudo -u postgres psql < create_db.sql")
+os.system("sudo -u postgres psql < ./SQL/create_db.sql")
 
 os.system("sudo -u postgres psql -c 'GRANT ALL PRIVILEGES ON DATABASE learnit to {};'".format(username))
 os.system("sudo -u postgres psql -c 'GRANT ALL PRIVILEGES ON DATABASE learnit_debug to {};'".format(username))
