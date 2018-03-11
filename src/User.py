@@ -188,6 +188,13 @@ class User:
 	def get_topics(self, subject):
 		return self.db.get_topics(self.user_id, subject)
 
+	def get_only_topics(self, subject):
+		ret = []
+		topics = self.get_topics(subject)
+		for topic in topics:
+			ret.append(topic[0])
+		return ret
+
 	def get_active_topics(self, subject):
 		return self.db.get_active_topics(self.user_id, subject)
 
@@ -236,6 +243,13 @@ class User:
 	def get_subjects(self):
 		return self.db.get_subjects(self.user_id)
 
+	def get_only_subjects(self):
+		ret = []
+		subjects = self.get_subjects()
+		for subject in subjects:
+			ret.append(subject[0])
+		return ret
+
 	def get_active_subjects(self):
 		return self.db.get_active_subjects(self.user_id)
 
@@ -278,8 +292,8 @@ class User:
 	def parse_keyboard_ans(self, msg):
 		return self.bot_controller.parse_keyboard_ans(msg)
 	
-	def send_string_keyboard(self, txt, option, markdown_options=None, txt_args=(), translate_options=False, add_default_keyboard=True, width=3, parse="Markdown"):
-		return self.bot_controller.send_string_keyboard(txt, option, markdown_options, txt_args, translate_options, add_default_keyboard, width, parse)
+	def send_string_keyboard(self, txt, option, txt_args=(), markdown_options=None, translate_options=False, add_default_keyboard=True, width=3, parse="Markdown"):
+		return self.bot_controller.send_string_keyboard(txt, option, txt_args, markdown_options, translate_options, add_default_keyboard, width, parse)
 
 	def send_selection_inline_keyboard(self, txt, options, txt_args=(), translate_options=False, empty_keyboard_text=None, no_empty_flag=False, width=3, parse="Markdown"):
 		return self.bot_controller.send_selection_inline_keyboard(txt, options, txt_args, translate_options, empty_keyboard_text, no_empty_flag, width, parse)
@@ -300,5 +314,5 @@ class User:
 		return self.bot_controller.send_navigation_string_keyboard(txt, options, end_btn, back_btn, markdown_options, txt_args, translate_options, parse)
 
 
-	def send_all_cards(self, study_item_deck):
-		return self.bot_controller.send_all_cards(study_item_deck)
+	def send_all_cards(self, study_item_deck, except_type=""):
+		return self.bot_controller.send_all_cards(study_item_deck, except_type)

@@ -4,21 +4,15 @@ import logging
 import message_handlers.cancel
 import message_handlers.error_handling
 import message_handlers.add_item
-'''
-import message_handlers.copy_words
-import message_handlers.erase_words
-
-'''
-
+import message_handlers.copy_from_user
+import message_handlers.erase
 import message_handlers.list
 import message_handlers.settings
 import message_handlers.stop
 import message_handlers.help
 import message_handlers.setup_user
-'''
 import message_handlers.topic_review
 import message_handlers.card_answering
-'''
 import message_handlers.message_not_understood
 
 from utilities import logging_utils, bot_utils, utils
@@ -34,8 +28,8 @@ class MessageHandler():
 		self.debug_mode = debug_mode
 		self.bot_controller_factory = bot_controller_factory
 		self.logger = logging.getLogger('learnit_thread')
-		#self.bot_logger = logging.getLogger('bot_sender')
-		self.bot = bot_utils.open_bot(self.debug_mode, self.logger)
+		self.bot_logger = None
+		self.bot = None
 		self.user_manager = UserManager(self.bot_controller_factory, self.debug_mode)
 		self.user_manager.reset_all_states()
 		self.continue_flag = False
@@ -80,20 +74,18 @@ class MessageHandler():
 			user.set_last_op_time()
 
 		self.bot = bot_utils.open_bot(self.debug_mode, self.logger)
-		#logging_utils.setup_bot_sender()
+		logging_utils.setup_bot_sender(self.bot)
+		self.bot_logger = logging.getLogger('bot_sender')
 
 		message_handlers.setup_user.handle_setup_user(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.error_handling.handle_user_dont_exist(self.bot, self.user_manager,self.debug_mode)	
 		message_handlers.cancel.handle_cancel(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.add_item.handle_add_item(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.list.handle_list(self.bot, self.user_manager,self.debug_mode)
-		'''
 		message_handlers.card_answering.handle_card_answer(self.bot, self.user_manager,self.debug_mode)
-		message_handlers.erase_languages.handle_erase_languages(self.bot, self.user_manager,self.debug_mode)
-		message_handlers.copy_words.handle_copy_words(self.bot, self.user_manager,self.debug_mode)
-		message_handlers.erase_words.handle_erase_words(self.bot, self.user_manager,self.debug_mode)
+		message_handlers.copy_from_user.handle_copy_from_user(self.bot, self.user_manager,self.debug_mode)
+		message_handlers.erase.handle_erase(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.topic_review.handle_topic_review(self.bot, self.user_manager,self.debug_mode)
-		'''
 		message_handlers.settings.handle_settings(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.help.handle_help(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.stop.handle_stop(self.bot, self.user_manager,self.debug_mode)
@@ -110,7 +102,7 @@ class MessageHandler():
 					self.bot.stop_polling()
 					time.sleep(5)
 				self.reset_exception()
-				#self.bot_logger.error("Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
+				self.bot_logger.error("Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
 				self.logger.error("Bot Crashed {}".format(e.__class__.__name__), exc_info=True)	
 				time.sleep(5)
 

@@ -38,7 +38,7 @@ def handle_add_item_text(bot, user_manager, debug_mode):
 			topic = user.temp_study_item.get_topic()
 			
 			options = ['Yes', 'No']
-			user.send_string_keyboard("#add_item_ask_more_items", options, (subject, topic))
+			user.send_string_keyboard("#add_item_ask_more_items", options, (subject, topic), translate_options=True)
 			user.set_state(fsm.next_state[(fsm.ADD_ITEM, fsm.SEND_TEXT)]['done'])
 		else:
 			content_type = user.receive_queue.get()

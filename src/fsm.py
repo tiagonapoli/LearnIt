@@ -6,35 +6,37 @@ LOCKED = 999
 IDLE = 0   
 WAITING_ANS = 1
 ADD_ITEM = 2
-ADD_SUBJECT = 3
-WAITING_POLL_ANS = 5
-GET_SUBJECT = 6
-GET_TOPIC = 7
-GET_STUDY_ITEM = 8
-SEND_IMAGE = 9
-SEND_AUDIO = 11
-SEND_TEXT = 13
-RELATE_MENU = 15
-LIST = 17
-ERASE_STUDY_ITEMS = 18
-SELECT_STUDY_ITEMS = 19
-ERASE_SUBJECTS = 20
-SELECT_SUBJECTS = 21
-REVIEW = 22	
-GET_TOPICS = 23
-GET_NUMBER = 24
-WAITING_CARD_ANS = 25
-SETTINGS = 26
-GET_OPTION = 27
-CARDS_PER_HOUR = 28
-COPY_STUDY_ITEMS = 29
-GET_USER = 30
-SELECT_TOPICS = 31
-GET_IMAGE = 32
-GET_OVERWRITE = 33
-GET_CONTINUE = 34
-SETUP_USER = 35
-GET_LANGUAGE = 36
+WAITING_POLL_ANS = 3
+GET_SUBJECT = 4
+GET_TOPIC = 5
+GET_STUDY_ITEM = 6
+SEND_IMAGE = 7
+SEND_AUDIO = 8
+SEND_TEXT = 9
+RELATE_MENU = 10
+LIST = 11
+ERASE_SUBJECTS = 12
+SELECT_SUBJECTS = 13
+REVIEW = 14
+GET_TOPICS = 15
+GET_NUMBER = 16
+WAITING_CARD_ANS = 17
+SETTINGS = 18
+GET_OPTION = 19
+CARDS_PER_HOUR = 20
+COPY_FROM_USER = 21
+GET_USER = 22
+SELECT_TOPICS = 23
+GET_IMAGE = 24
+GET_OVERWRITE = 25
+GET_CONTINUE = 26
+SETUP_USER = 27
+GET_LANGUAGE = 28
+ERASE = 29
+SUBJECT_ERASE = 30
+TOPIC_ERASE = 31
+ITEM_ERASE = 32
+SELECT = 33
 
 
 '''FSM'''
@@ -45,11 +47,10 @@ next_state = {
 			 'card_query': WAITING_ANS,
       		 'add_item': (ADD_ITEM, GET_SUBJECT),
       		 'list': (LIST, GET_SUBJECT),
-      		 'erase_words': (ERASE_STUDY_ITEMS, GET_SUBJECT),
-      		 'erase_languages': (ERASE_SUBJECTS, SELECT_SUBJECTS),
+      		 'erase': (ERASE, GET_OPTION),
       		 'review' : (REVIEW, GET_SUBJECT),
       		 'settings' : (SETTINGS, GET_OPTION),
-      		 'copy_words': (COPY_STUDY_ITEMS, GET_USER)}
+      		 'copy_from_user': (COPY_FROM_USER, GET_USER)}
 }
 
 
@@ -114,13 +115,22 @@ next_state.update({
 
 #=====================ERASE STUDY_ITEMS=====================
 next_state.update({
-	(ERASE_STUDY_ITEMS, GET_SUBJECT): {'done': (ERASE_STUDY_ITEMS, GET_TOPIC),
-								 'no topics': IDLE,
-								 'error': (ERASE_STUDY_ITEMS, GET_SUBJECT)},
-	(ERASE_STUDY_ITEMS, GET_TOPIC): {'done': (ERASE_STUDY_ITEMS, SELECT_STUDY_ITEMS),
-							  'error': (ERASE_STUDY_ITEMS, GET_TOPIC)},
-	(ERASE_STUDY_ITEMS, SELECT_STUDY_ITEMS): {'continue': (ERASE_STUDY_ITEMS, SELECT_STUDY_ITEMS),
-								  'done': IDLE}
+	(ERASE, GET_OPTION): {'error': (ERASE, GET_OPTION),
+						  'subject': (SUBJECT_ERASE, SELECT),
+						  'topic': (TOPIC_ERASE, GET_SUBJECT),
+						  'study_item': (ITEM_ERASE, GET_SUBJECT)},
+	(SUBJECT_ERASE, SELECT):  {'continue': (SUBJECT_ERASE, SELECT),
+							   'done': IDLE},
+	(TOPIC_ERASE, GET_SUBJECT): {'done': (TOPIC_ERASE, SELECT),
+							  	  'error': (TOPIC_ERASE, GET_SUBJECT)},
+	(TOPIC_ERASE, SELECT): {'continue': (TOPIC_ERASE, SELECT),
+							'done': IDLE},
+	(ITEM_ERASE, GET_SUBJECT): {'done': (ITEM_ERASE, GET_TOPIC),
+							     'error': (ITEM_ERASE, GET_SUBJECT)},
+	(ITEM_ERASE, GET_TOPIC): {'done': (ITEM_ERASE, SELECT),
+							  'error': (ITEM_ERASE, GET_TOPIC)},	
+	(ITEM_ERASE, SELECT): {'continue': (ITEM_ERASE, SELECT),
+						   'done': IDLE}
 })
 
 #=====================ERASE SUBJECTS=====================
@@ -156,15 +166,15 @@ next_state.update({
 
 #=====================COPY STUDY_ITEMS=====================
 next_state.update({
-	(COPY_STUDY_ITEMS, GET_USER): {'done': (COPY_STUDY_ITEMS, GET_SUBJECT),
+	(COPY_FROM_USER, GET_USER): {'done': (COPY_FROM_USER, GET_SUBJECT),
 							 'error': IDLE},
-	(COPY_STUDY_ITEMS, GET_SUBJECT): {'done': (COPY_STUDY_ITEMS, SELECT_TOPICS),
-							   	 'error': (COPY_STUDY_ITEMS, GET_SUBJECT),
+	(COPY_FROM_USER, GET_SUBJECT): {'done': (COPY_FROM_USER, SELECT_TOPICS),
+							   	 'error': (COPY_FROM_USER, GET_SUBJECT),
 							   	 'no topics': IDLE},
-	(COPY_STUDY_ITEMS, SELECT_TOPICS): {'done': (COPY_STUDY_ITEMS, GET_OVERWRITE),
-						   		  'continue': (COPY_STUDY_ITEMS, SELECT_TOPICS)},
-	(COPY_STUDY_ITEMS, GET_OVERWRITE): {'done': IDLE,
-						   		  'error': (COPY_STUDY_ITEMS, GET_OVERWRITE)}	
+	(COPY_FROM_USER, SELECT_TOPICS): {'done': (COPY_FROM_USER, GET_OVERWRITE),
+						   		  'continue': (COPY_FROM_USER, SELECT_TOPICS)},
+	(COPY_FROM_USER, GET_OVERWRITE): {'done': IDLE,
+						   		  'error': (COPY_FROM_USER, GET_OVERWRITE)}	
 })
 
 #=====================SETUP USER=====================

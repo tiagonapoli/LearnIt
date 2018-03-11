@@ -223,11 +223,13 @@ class BotMessageSender():
 			return self.parse_string_keyboard_ans(msg.text) + (len(self.keyboard_options), )
 		elif self.keyboard_type == 'navigation_string_keyboard':
 			return self.parse_navigation_string_keyboard_ans(msg.text) + (len(self.keyboard_options), )
+		elif self.keyboard_type == 'simple_keyboard':
+			return self.parse_simple_keyboard_ans(msg.text) + (len(self.keyboard_options), )
 
 
 
 	#ok
-	def send_string_keyboard(self, txt, option, markdown_options=None, txt_args=(), translate_options=False, add_default_keyboard=True, width=3, parse="Markdown"):
+	def send_string_keyboard(self, txt, options, txt_args=(), markdown_options=None, translate_options=False, add_default_keyboard=True, width=3, parse="Markdown"):
 		if translate_options:
 			options = self.translate_options(options)
 

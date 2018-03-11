@@ -162,6 +162,10 @@ message = { "#setup_user_username_error":
 				{0: "Please, don't use / or \ or _ or *. Send the language again:",
 				 1: "Por favor, não use / ou \ ou _ ou *. Me envie a linguagem novamente:"},
 
+			"#add_item_initial_hint":
+				{0: "_Hint: The process to add a word is way easier on Telegram Desktop_",
+				 1: "_Dica: O processo para adicionar palavra é muito mais fácil e rápido no Telegram Desktop_"},
+
 			"#add_item_ask_study_item":
 				{0: "*Send item to add* (in _%s_)",
 				 1: "*Me envie o item a adicionar* (em _%s_)"},	
@@ -242,6 +246,14 @@ message = { "#setup_user_username_error":
 				{0: "_Would you like to add more items in_ *%s*_, in topic_ *%s*_?_",
 				 1: "_Você gostaria de adicionar mais itens em_ *%s*_, no tópico_ *%s*_?_"},
 
+			'Yes': 
+				{0: 'Yes',
+				 1: 'Sim'},
+
+			'No': 
+				{0: 'No',
+				 1: 'Não'},
+
 			"#ok":
 				{0: "_OK!_",
 				 1: "_OK!_"},
@@ -256,324 +268,217 @@ message = { "#setup_user_username_error":
 
 			"#no_active_subjects":
 				{0: "_There are no active subjects. Nothing to list..._",
-				 1: "_Não há matérias ativas. Nada para listar..."},
+				 1: "_Não há matérias ativas. Nada para listar..._"},
 
 			"#no_active_topics":
 				{0: "_There are no active topics in this subject. Nothing to list..._",
-				 1: "_Não há tópicos ativos nesta matéria. Nada para listar..."},
+				 1: "_Não há tópicos ativos nesta matéria. Nada para listar..._"},
 
 			"#list_subject_selection":
-				{0: "_Active or partially active_ *subjects*. Select one for more detail or type /%s *to quit this menu*",
-				 1: "*Matérias* _ativas ou parcialmente ativas_. Selecione uma delas para mais detalhes ou envie-me /%s *para sair desse menu*"},
+				{0: "_Active or partially active_ *subjects*. Select one for more detail.",
+				 1: "*Matérias* _ativas ou parcialmente ativas_. Selecione uma delas para mais detalhes."},
 
 			"#list_topic_selection":
-				{0: "_Active or partially active_ *topics*. Select one for more detail or type /%s *to go back to the last menu* _or_ /%s *to quit* _ist option",
-				 1: "*Tópicos* _ativos ou parcialmente ativos_. Selecione um deles para mais detalhes ou envie-me /%s *para voltar ao menu anterior* _ou_ /%s *para sair* da opção de listagem"},
+				{0: "_Active or partially active_ *topics*. Select one for more detail.",
+				 1: "*Tópicos* _ativos ou parcialmente ativos_. Selecione um deles para mais detalhes."},
 
 			"#list_study_item_selection":
-				{0: "_Active_ *study items*. Select one for more detail or type /%s *to go back to the last menu* _or_ /%s *to quit* list option",
-				 1: "*Itens* _de estudo ativos_. Selecione um deles para mais detalhes ou envie-me /%s *para voltar ao menu anterior* _ou_ /%s *para sair* da opção de listagem"},
+				{0: "_Active_ *study items*. Select one for more detail.",
+				 1: "*Itens* _de estudo ativos_. Selecione um deles para mais detalhes."},
 
+			"#no_subjects":
+				{0: "_There are no subjects registered yet..._",
+				 1: "_Não há matérias cadastradas ainda..._"},
 
+			"#subject_selection":
+				{0: "_Select the subject:_",
+				 1: "_Selecione a matéria:_"},
 
-			"%s already exists": 
-				{0: "%s already exists",
-				 1: "%s já existe"},	
+			"#topic_selection":
+				{0: "_Select the topic:_",
+				 1: "_Selecione o tópico:_"},
 
+			"#review_select_topics":
+				{0: "_Select the topics to review:_",
+				 1: "_Selecione os tópicos a revisar:_"},
 				
-
-			
-
-			"_Hint: The process to add a word is way easier on Telegram Desktop_": 
-				{0: "_Hint: The process to add a word is way easier on Telegram Desktop_",
-				 1: "_Dica: O processo para adicionar palavra é muito mais fácil e rápido no Telegram Desktop_"},	
-			
-
-	
-
-
-
-
-			
-
-
-	
-
-		
-	
-
-			
-
-			
-
-	
-
-	
-
-			'Yes': 
-				{0: 'Yes',
-				 1: 'Sim'},
-
-			'No': 
-				{0: 'No',
-				 1: 'Não'},
-
-			
-
-
-
-			"Your answer was correct!": 
-				{0: "Your answer was correct!",
-				 1: "Sua resposta está correta!"},
-
-			"There was a mistake in your answer :(": 
-				{0: "There was a mistake in your answer :(",
-				 1: "Houve um erro em sua resposta :("},
-
-			"_Please grade your performance to answer the card_\n": 
-				{0: "_Please grade your performance to answer the card_\n",
-				 1: "_Por favor, dê uma nota à sua performance para responder o cartão_\n"},
-
-			'Please, send the Telegram username of the user you want to copy some words from, in the format @username (or just username)': 
-				{0: 'Please, send the Telegram username of the user you want to copy some words from',
-				 1: 'Por favor, envie o nome de usuário Telegram da pessoa que você quer copiar palavras'},
-
-			"Invalid username. Please, if you still want to copy from a user, send /copy_words again.": 
-				{0: "Invalid username. Please, if you still want to copy from a user, send /copy_words again.",
-				 1: "Usuário inválido. Se você ainda quer copiar de algum usuário, me envie /copy_words novamente."},
-
-			"You can't copy from yourself! Please, if you still want to copy from a user, send /copy_words again.": 
-				{0: "You can't copy from yourself! Please, if you still want to copy from a user, send /copy_words again.",
-				 1: "Você não pode copiar de si mesmo! Se você ainda quer copiar de algum usuário, me envie /copy_words novamente."},
-
-			"This user is not public. Please, if you still want to copy from a user, send /copy_words again.": 
-				{0: "This user is not public. Please, if you still want to copy from a user, send /copy_words again.",
-				 1: "Esse usuário não é público. Se você ainda quer copiar de algum usuário, me envie /copy_words novamente."},
-
-			"The user _%s_ does not have any language": 
-				{0: "The user _%s_ does not have any language",
-				 1: "O usuário _%s_ não tem nenhuma língua registrada"},
-
-			"*Please select the language:*": 
-				{0: "*Please select the language:*",
-				 1: "*Selecione a linguagem:*"},
-
-			"Select the topics you want to copy:": 
-				{0: "Select the topics you want to copy:",
-				 1: "Selecione os tópicos que você deseja copiar:"},
-
-			"_There are no topics registered in this language yet._": 
-				{0: "_There are no topics registered in this language yet._",
-				 1: "_Não há tópicos registrados nessa linguagem ainda_"},
-
-			"In case some words to be copied already exist in your words, *should we overwrite?* If you already copied from this user and topic maybe you don't want to overwrite _(If we overwrite you lose all learning data about that word)_": 
-				{0: "In case some words to be copied already exist in your words, *should we overwrite?* If you already copied from this user and topic maybe you don't want to overwrite _(If we overwrite you lose all learning data about that word)_",
-				 1: "Em caso alguma palavra a ser copiada já exista na sua lista, eu *deveria sobrescrever?* Se você já copiou desse usuário e tópico talvez você não queira sobrescrever_(Se sobrescrever você perde todos os dados de aprendizado daquela palavra)_"},
-
-			'*Overwritten words:*': 
-				{0: '*Overwritten words:*',
-				 1: '*Palavras sobrescritas:*'},
-
-			'*Topic: ': 
-				{0: '*Topic: ',
-				 1: '*Tópico: '},
-
-			'There were no overwritten words!': 
-				{0: 'There were no overwritten words!',
-				 1: 'Não houve palavras sobrescritas!'},
-
-			"_Select languages to erase:_": 
-				{0: "_Select languages to erase:_",
-				 1: "_Selecione as linguagens a apagar:_"},
-
-			"_Erased languages:_": 
-				{0: "_Erased languages:_",
-				 1: "_Linguagens apagadas:_"},
-
-			"Select languages to erase:": 
-				{0: "Select languages to erase:",
-				 1: "Selecione as linguagens a apagar:"},
-
-			"*Please select the language:*": 
-				{0: "*Please select the language:*",
-				 1: "*Selecione a linguagem:*"},
-
-			"*Select the word's topic:*": 
-				{0: "*Select the word's topic:*",
-				 1: "*Selecione o tópico da palavra:*"},
-
-			"_Please choose from options._": 
-				{0: "_Please choose from options._",
-				 1: "_Por favor, selecione das opções fornecidas._"},
-
-			"_Select words to erase:_": 
-				{0: "_Select words to erase:_",
-				 1: "_Selecione as palavras a apagar:_"},
-
-			"_Erased words:_": 
-				{0: "_Erased words:_",
-				 1: "_Palavras apagadas:_"},
-
-
-
-			"_Languages:_": 
-				{0: "_Languages:_",
-				 1: "_Linguages:_"},
-
-			"_No languages registered yet..._": 
-				{0: "_No languages registered yet..._",
-				 1: "_Não há linguagens registradas ainda..._"},
-
-			"*Select the word's topic.*": 
-				{0: "*Select the word's topic.*",
-				 1: "*Selecione o tópico da palavra.*"},
-
-			"*Please choose from options.*": 
-				{0: "*Please choose from options.*",
-				 1: "*Por favor, selecione das opções fornecidas.*"},
-
-			"*Select the word you want to see the related media* _(to exit this menu, select_ /%s_)_:": 
-				{0: "*Select the word you want to see the related media* _(to exit this menu, select_ /%s_)_:",
-				 1: "*Selecione a palvra que deseja ver com detalhe* _(para sair desse menu, selecione_ /%s_)_:"},
-
-			"OK!": 
-				{0: "OK!",
-				 1: "OK!"},
-
-			"*Word:* _%s_": 
-				{0: "*Word:* _%s_",
-				 1: "*Palavra:* _%s_"},
-
-			"Oops, didn't understand your message": 
-				{0: "Oops, didn't understand your message",
-				 1: "Oops, não entendi sua mensagem"},
-
-			'Cards per hour': 
-				{0: 'Cards per hour',
-				 1: 'Cartões por hora'},
-
-			'Set profile public': 
-				{0: 'Set profile public',
-				 1: 'Tornar perfil público'},
-
-			'Set profile private': 
-				{0: 'Set profile private',
-				 1: 'Tornar perfil privado'},
-
-
-
-
-
-
-
-			"Please, create your Telegram Username first. You just have to go to Settings->Info->Username to create it. After you create one, type /start again.": 
-				{0: "Please, create your Telegram Username first. You just have to go to Settings->Info->Username to create it. After you create one, type /start again.",
-				 1: "Por favor, crie seu nome de usuário de Telegram primeiro. Você só tem quer ir em Configurações do Telegram -> Informações -> Nome de usuário. Depois de criar um, digite /start novamente."},
-
-			"Welcome back to LearnIt!": 
-				{0: "*Welcome back to LearnIt!*",
-				 1: "*Bem-vindo de volta ao LearnIt!*"},
-
-			"welcome_msg": 
-				{0: welcome,
-				 1: welcome_pt},
-
-			"Welcome to LearnIt!": 
-				{0: "*Welcome to LearnIt!*",
-				 1: "*Bem vindo ao LearnIt!*"},
-
-			"_Select the topics that you want to review:_": 
-				{0: "_Select the topics that you want to review:_",
-				 1: "_Selecione os tópicos que deseja revisar:_"},
-
-			"Please, select *at least one* topic to review:": 
-				{0: "Please, select *at least one* topic to review:",
-				 1: "Por favor, selecione *pelo menos um* tópico que deseja revisar:"},
-
-			"*Please select the number of review cards that you want to receive:*": 
-				{0: "*Please select the number of review cards that you want to receive:*",
-				 1: "*Por favor, selecione o número de cartões de revisão que deseja receber:*"},
-
-			"That was correct!": 
-				{0: "That was correct!",
-				 1: "Correto!"},
-
-			"There was a mistake :(": 
-				{0: "There was a mistake :(",
-				 1: "Houve um erro :("},
-
-			"*Review session done!*": 
-				{0: "*Review session done!*",
-				 1: "*Revisão terminada!*"},
-
-			"*Answer:* ": 
-				{0: "*Answer:* ",
-				 1: "*Resposta:* "},
-
-			"*Answer:* _%s_":
-				{0: "*Answer:* _%s_",
-				 1: "*Resposta:* _%s_"},
-
-			"*Image question:*": 
+			"#review_select_topics_empty":
+				{0: "_Select_ *at least one* _topic to review:_",
+				 1: "_Selecione_ *pelo menos um* _tópico a revisar:_"},
+
+			"#review_card_number":
+				{0: "_Select how many cards you want to receive:_",
+				 1: "_Selecione quantas cartas deseja receber:_"},		
+
+			"#image_question": 
 				{0: "*Image question:*",
 				 1: "*Pergunta com imagem:*"},
 
-			"*Audio question:*": 
+			"#audio_question": 
 				{0: "*Audio question:*",
 				 1: "*Pergunta com áudio:*"},
 
-			"*Text question:*": 
+			"#text_question": 
 				{0: "*Text question:*",
 				 1: "*Pergunta com texto:*"},
 
-			"*%s card%s!*": 
+			"#card_type": 
 				{0: "*%s card%s!*",
 				 1: "*Cartão de %s %s!*"},
 
-			"Try to relate the next message to something you know in *%s/%s*. When you remeber or when you are ready, *send me any message*": 
+			"#answer_type_1": 
+				{0: "*Answer:* ",
+				 1: "*Resposta:* "},
+
+			"#answer_type_0":
+				{0: "*Answer:* _%s_",
+				 1: "*Resposta:* _%s_"},
+
+			"#card_query_study_type_1": 
 				{0: "Try to relate the next message to something you know in *%s/%s*. When you remeber or when you are ready, *send me any message*",
 				 1: "Tente relacionar a próxima mensagem com algo que você aprendeu em *%s/%s*. Quando você lembrar ou estiver pronto, *envie-me qualquer mensagem*"},
 
-			"Transcribe the audio in _%s_, topic _%s_": 
+			"#card_query_audio": 
 				{0: "Transcribe the audio in _%s_, topic _%s_",
 				 1: "Transcreva o áudio em _%s_, tópico _%s_"},
 
-			"Relate the text to something in _%s_, topic _%s_": 
+			"#card_query_text": 
 				{0: "Relate the text to something in _%s_, topic _%s_",
 				 1: "Relacione o texto a algo em _%s_, tópico _%s_"},
 
-			"Relate the image to something in _%s_, topic _%s_":
+			"#card_query_image":
 				{0: "Relate the image to something in _%s_, topic _%s_",
 				 1: "Relacione a imagem a algo em _%s_, tópico _%s_"},
 
-			'Change bot language': 
-				{0: 'Change bot language',
-				 1: 'Mudar o idioma do bot'},
+			"#correct_answer": 
+				{0: "_That was correct!_",
+				 1: "_Correto!_"},
 
-			'an image': 
-				{0: 'an image',
-				 1: 'uma imagem'},
+			"#incorrect_answer": 
+				{0: "_There was a mistake in your answer_ :(",
+				 1: "_Houve um erro na sua resposta_ :("},
 
-			'an audio': 
-				{0: 'an audio',
-				 1: 'um áudio'},
+			"#review_done": 
+				{0: "*Review session done!*",
+				 1: "*Revisão terminada!*"},
 
-			'a text': 
-				{0: 'a text',
-				 1: 'um texto'},
+			"#grade_your_performance": 
+				{0: "_Please grade your performance to answer the card_\n",
+				 1: "_Por favor, dê uma nota à sua performance para responder o cartão_\n"},
 
-
-			"poll_text": 
+			"#poll_text": 
 				{0: poll_text,
 				 1: poll_text_pt},
 
-			'*BotMessageSender testings*':
-				{0: '*BotMessageSender testings*',
-				 1: '*Testes BotMessageSender*'},
+			"#copy_get_telegram_username":
+				{0: 'Please, send the Telegram username of the user you want to copy some words from',
+				 1: 'Por favor, envie o nome de usuário Telegram da pessoa que você quer copiar palavras'},
 
-			"Select words to erase:":
-				{0: "Select words to erase:",
-				 1: "Selecione as palavras para apagar:"}
+			"#invalid_username": 
+				{0: "Invalid username. Please, if you still want to copy from a user, send /copy\_from\_user again.",
+				 1: "Usuário inválido. Se você ainda quer copiar de algum usuário, me envie /copy\_from\_user novamente."},
+
+			"#invalid_yourself_username": 
+				{0: "You can't copy from yourself! Please, if you still want to copy from a user, send /copy\_from\_user again.",
+				 1: "Você não pode copiar de si mesmo! Se você ainda quer copiar de algum usuário, me envie /copy\_from\_user novamente."},
+
+			"#invalid_private_username": 
+				{0: "This user is not public. Please, if you still want to copy from a user, send /copy\_from\_user again.",
+				 1: "Esse usuário não é público. Se você ainda quer copiar de algum usuário, me envie /copy\_from\_user novamente."},
+	
+			"#copy_no_subjects": 
+				{0: "The user _%s_ does not have any subjects",
+				 1: "O usuário _%s_ não tem nenhuma matéria registrada"},
+						
+			'#overwritten_items': 
+				{0: '*Overwritten items:*',
+				 1: '*Itens sobrescritos:*'},
+
+			'#copied_items': 
+				{0: '*New copied items:*',
+				 1: '*Novos itens copiados:*'},
+
+			'#copy_results': 
+				{0: '*Copy results:*',
+				 1: '*Resultados da cópia:*'},
+
+
+		
+			'#topic':
+				{0: "*Topic:* _%s_",
+				 1: "*Tópico:* _%s_"},
+
+			"#no_overwritten_items": 
+				{0: 'There were no overwritten words!',
+				 1: 'Não houve palavras sobrescritas!'},
+
+			"#ask_overwrite":
+				{0: "In case some words to be copied already exist in your words, *should we overwrite?* If you already copied from this user and topic maybe you don't want to overwrite _(If we overwrite you lose all learning data about that word)_",
+				 1: "Em caso alguma palavra a ser copiada já exista na sua lista, eu *deveria sobrescrever?* Se você já copiou desse usuário e tópico talvez você não queira sobrescrever_(Se sobrescrever você perde todos os dados de aprendizado daquela palavra)_"},
+
+			"#copy_select_topics": 
+				{0: "Select the topics you want to copy:",
+				 1: "Selecione os tópicos que você deseja copiar:"},
+
+			'Subjects': 
+				{0: "Subjects",
+				 1: "Matérias"},
+
+			'Topics':
+				{0: "Topics",
+				 1: "Tópicos"}, 
+
+			'Study Items':
+				{0: "Study Items",
+				 1: "Itens de estudo"},
+
+			"#ask_what_to_erase":
+				{0: "What would you like to erase?",
+				 1: "O que você gostaria de apagar?"},
+		
+			"#erase_select_study_items":
+				{0: "Select the items you want to erase:",
+				 1: "Selecione os itens que deseja apagar:"}, 
+
+			"#erase_select_topics":
+				{0: "Select the topics you want to erase:",
+				 1: "Selecione os tópicos que deseja apagar:"}, 
+
+			"#erase_select_subjects":
+				{0: "Select the subjects you want to erase:",
+				 1: "Selecione as matérias que deseja apagar:"}, 
+
+			"#items_erased":
+				{0: "*Items erased:*",
+				 1: "*Itens apagados:*"}, 
+
+			"#topics_erased":
+				{0: "*Topics erased:*",
+				 1: "*Tópicos apagados:*"}, 
+
+			"#subjects_erased":
+				{0: "*Subjects erased:*",
+				 1: "*Matérias apagadas:*"},
+
+			'Cards per hour':
+				{0: "Cards per hour",
+				 1: "Cartões por hora"},
+
+			'Set profile public': 
+				{0: "Set profile public",
+				 1: "Tornar perfil público"},
+
+			'Set profile private':
+				{0: "Set profile private",
+				 1: "Tornar perfil privado"},
+
+			'Change bot language':
+				{0: "Change bot language",
+				 1: "Trocar o idioma do bot"}
+
+
+
+
 }
 
 

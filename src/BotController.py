@@ -78,28 +78,29 @@ class BotController(BotMessageSender):
 			self.logger.error("Error in save voice {}".format(self.user_id), exc_info=True)
 			return None	
 
-	def send_all_cards(self, study_item_deck):
+	def send_all_cards(self, study_item_deck, except_type=""):
 		for card_type, card in study_item_deck.cards.items():
-			self.send_card_question(card)
+			if card.get_question_type() != except_type:
+				self.send_card_question(card)
 
 	def send_card_answer(self, card):
 		item_type, study_item = card.get_study_item()
 		if item_type == 1:
-			self.send_message("*Answer:* ")
+			self.send_message("#answer_type_1")
 			return self.send_photo(study_item)
 		else:
-			return self.send_message("*Answer:* _%s_", txt_args=(study_item, ))
+			return self.send_message("#answer_type_0", txt_args=(study_item, ))
 
 	def send_card_question(self, card):
 		question_type, question = card.get_question()
 		if question_type == 'image':
-			self.send_message("*Image question:*")
+			self.send_message("#image_question")
 			self.send_photo(question)
 		elif question_type == 'audio':
-			self.send_message("*Audio question:*")
+			self.send_message("#audio_question")
 			self.send_voice(question)
 		elif question_type == 'text':
-			self.send_message("*Text question:*", txt_args=(" " + question, ))
+			self.send_message("#text_question", txt_args=(" " + question, ))
 			self.send_message(question, translate_flag=False)
 
 	def send_card_query(self, card, card_type = 'Review', number = None):
@@ -112,20 +113,20 @@ class BotController(BotMessageSender):
 			subject = card.get_subject()
 			topic = card.get_topic()
 
-			self.send_message("*%s card%s!*", txt_args=(card_type, number))
+			self.send_message("#card_type", txt_args=(card_type, number))
 				
 			study_item_type, study_item = card.get_study_item()
 			question_type, question = card.get_question()
 
 			if study_item_type == 1:
-				self.send_message("Try to relate the next message to something you know in *%s/%s*. When you remeber or when you are ready, *send me any message*",
+				self.send_message("#card_query_study_type_1",
 					txt_args=(subject, topic))
 			elif question_type == 'image':
-				self.send_message("Relate the image to something in _%s_, topic _%s_", txt_args=(subject, topic))
+				self.send_message("#card_query_image", txt_args=(subject, topic))
 			elif question_type == 'audio':
-				self.send_message("Transcribe the audio in _%s_, topic _%s_", txt_args=(subject, topic))
+				self.send_message("#card_query_audio", txt_args=(subject, topic))
 			elif question_type == 'text':
-				self.send_message("Relate the text to something in _%s_, topic _%s_", txt_args=(subject, topic))
+				self.send_message("#card_query_text", txt_args=(subject, topic))
 
 			if question_type == 'image':
 				self.send_photo(question)
@@ -133,7 +134,6 @@ class BotController(BotMessageSender):
 				self.send_voice(question)
 			elif question_type == 'text':
 				self.send_message(question, translate_flag=False, parse='')
-
 
 
 

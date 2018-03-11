@@ -1,5 +1,6 @@
 import time
 import datetime
+from utilities import string_treating
 
 class TimeControl(object):
 
@@ -187,6 +188,16 @@ class Card(TimeControl, StudyItemInfo):
 
 	def __lt__(self,other):
 		return self.next_date > other.next_date
+
+	def answer_comparison(self, ans):
+		ans = string_treating.treat_special_chars(ans.lower())
+		if self.study_item_type == 1:
+			return ""
+		elif ans == self.study_item.lower():
+			return "#correct_answer"
+		else:
+			return "#incorrect_answer"
+
 
 	def set_question(self, question, question_type):
 		self.question = question

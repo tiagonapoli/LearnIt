@@ -68,7 +68,7 @@ class CardOps():
 			return []
 		cards = []
 		for row in rows:
-			cards.append(Card.from_list(card))
+			cards.append(Card.from_list(row))
 		return cards
 
 

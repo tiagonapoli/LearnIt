@@ -35,8 +35,8 @@ def handle_setup_user(bot, user_manager, debug_mode):
 
 		logger = user.logger
 		logger.warning("New username {} {} ".format(user_id, username))
-		#logger = logging.getLogger('bot_sender')
-		#logger.warning("New username {} {} ".format(user_id, username))
+		logger = logging.getLogger('bot_sender')
+		logger.warning("New username {} {} ".format(user_id, username))
 
 		options = ['English', 'Português']
 		user.send_string_keyboard("#setup_user_mother_language", options)

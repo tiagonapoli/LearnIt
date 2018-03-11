@@ -1,6 +1,9 @@
 from Database import Database
 from User import User
+from utilities import utils
+import datetime
 import fsm
+import os
 
 class UserManager: 
 
@@ -57,7 +60,8 @@ class UserManager:
 		return (user_id in self.users.keys())
 
 	def copy_topic(self, user_dest, user_source, subject, topic, overwrite):
-		ret = []
+		overwritten = []
+		copied = []
 		study_items = user_source.get_study_items_on_topic(subject, topic)
 		user_id = user_dest.get_id()
 
@@ -68,6 +72,16 @@ class UserManager:
 			deck.user_id = user_dest.user_id
 			deck.study_item_id = cnt_study_item
 			cnt_study_item += 1
+			deck.active = 1
+
+			exist, aux_study_item_id = user_dest.check_study_item_existence(deck.subject, deck.topic, deck.study_item)
+
+			if exist == True and overwrite == False:
+				continue
+
+			if exist == True and overwrite == True:
+				overwritten.append(deck.get_sendable_study_item())
+				user_dest.erase_study_item(aux_study_item_id)
 
 			if deck.study_item_type == 1:
 				prev_path = deck.study_item
@@ -79,9 +93,11 @@ class UserManager:
 				os.system("cp -TRv {} {}".format(prev_path, next_path))
 
 			for content, card in deck.cards.items():
+
 				card.user_id = user_dest.get_id()
 				card.card_id = cnt_card
 				cnt_card += 1
+				card.active = 1
 				card.study_item_id = deck.study_item_id
 
 				card.attempts = 1  
@@ -91,7 +107,7 @@ class UserManager:
 
 				question_type, question = card.get_question()
 				if question_type == 'text':
-					break
+					continue
 
 				prev_path = question
 				next_path = '../data/{}/{}/{}'.format(user_id, deck.study_item_id, card.card_id) + utils.get_file_extension(question)
@@ -101,15 +117,12 @@ class UserManager:
 				card.question = next_path
 				utils.create_dir_card_archive(user_id, deck.study_item_id, self.debug_mode)
 				os.system("cp -TRv {} {}".format(prev_path, next_path))
-
-			exist, aux_study_item_id = user_dest.check_study_item_existence(deck.subject, deck.topic, deck.study_item)
-			if exist == True and overwrite == True:
-				ret.append(deck.get_study_item())
-				user_dest.erase_word(aux_study_item_id)
 			
 			user_dest.add_study_item_deck(deck)
+			if exist == False:
+				copied.append(deck.get_sendable_study_item())
 
-		return ret
+		return copied, overwritten
 
 
 	def backup(self, PATH):

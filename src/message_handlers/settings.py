@@ -46,7 +46,7 @@ def handle_settings(bot, user_manager, debug_mode):
 		valid, option, keyboard_option, keyboard_len = user.parse_keyboard_ans(msg)
 
 		if valid == False:
-			user.send_message("#choose_from_keyboard")
+			user.send_message("#choose_from_keyboard", markup=None)
 			user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.GET_OPTION)]['error'])
 			return
 
@@ -84,7 +84,7 @@ def handle_settings(bot, user_manager, debug_mode):
 		valid, cards_per_hour, keyboard_option, keyboard_len = user.parse_keyboard_ans(msg)
 
 		if valid == False:
-			user.send_message("#choose_from_keyboard")
+			user.send_message("#choose_from_keyboard", markup=None)
 			user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.CARDS_PER_HOUR)]['error'])
 			return
 
@@ -108,7 +108,7 @@ def handle_settings(bot, user_manager, debug_mode):
 		valid, language, keyboard_options, keyboard_len = user.parse_keyboard_ans(msg)
 
 		if valid == False:
-			user.send_message("#choose_from_keyboard")
+			user.send_message("#choose_from_keyboard", markup=None)
 			user.set_state(fsm.next_state[(fsm.SETTINGS, fsm.GET_LANGUAGE)]['error'])
 			return
 

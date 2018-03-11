@@ -69,12 +69,16 @@ def handle_add_item(bot, user_manager, debug_mode):
 		logger = user.logger
 
 		known_subjects = user.get_subjects()
+		options = []
+		for option in known_subjects:
+			options.append(option[0])
 
+		user.send_message("#add_item_initial_hint")
 		user.send_message("#add_item_subject_intro")
 		if len(known_subjects) == 0:
-			user.send_string_keyboard("#add_item_no_subjects", known_subjects)
+			user.send_string_keyboard("#add_item_no_subjects", options)
 		else:
-			user.send_string_keyboard("#list_subjects", known_subjects)		
+			user.send_string_keyboard("#list_subjects", options)		
 		user.set_state(fsm.next_state[fsm.IDLE]['add_item'])
 
 
@@ -95,7 +99,10 @@ def handle_add_item(bot, user_manager, debug_mode):
 		user.send_message("#item_subject", (subject,))
 		user.send_message("#add_item_topic_intro")
 
-		topics = user.get_topics(subject)
+		known_topics = user.get_topics(subject)
+		topics = []
+		for topic in known_topics:
+			topics.append(topic[0])
 		topics.sort()
 
 		if len(topics) > 0:
@@ -260,7 +267,7 @@ def handle_add_item(bot, user_manager, debug_mode):
 
 		valid, should_continue, keyboard_option, keyboard_len = user.parse_keyboard_ans(msg)
 		if valid == False:
-			user.send_message("#choose_from_keyboard")
+			user.send_message("#choose_from_keyboard", markup=None)
 			user.set_state(fsm.next_state[(fsm.ADD_ITEM, fsm.GET_CONTINUE)]['error'])
 			return
 			
