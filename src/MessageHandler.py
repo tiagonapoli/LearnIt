@@ -14,8 +14,9 @@ import message_handlers.setup_user
 import message_handlers.topic_review
 import message_handlers.card_answering
 import message_handlers.message_not_understood
+import message_handlers.select_training
 
-from utilities import logging_utils, bot_utils, utils
+from utilities import logging_utils, utils
 from UserManager import UserManager
 from BotController import BotControllerFactory
 from threading import Thread
@@ -27,8 +28,8 @@ class MessageHandler():
 		self.max_idle_time = max_idle_time
 		self.debug_mode = debug_mode
 		self.bot_controller_factory = bot_controller_factory
-		self.logger = logging.getLogger('learnit_thread')
-		self.bot_logger = None
+		self.logger = logging.getLogger('Message_Handler')
+		self.bot_logger = logging.getLogger('Bot_Sender')
 		self.bot = None
 		self.user_manager = UserManager(self.bot_controller_factory, self.debug_mode)
 		self.user_manager.reset_all_states()
@@ -48,39 +49,34 @@ class MessageHandler():
 		if self.bot != None:
 			self.bot.stop_polling()
 
-
 	def stop(self):
 		self.continue_flag = False
 		if self.bot != None:
 			self.bot.stop_polling()
 
-
 	def reset_exception(self):
-		self.setup_bot()
 		self.user_manager.reset_all_states_exception()
-
 
 	def backup(self):
 		self.user_manager.reset_all_states_turn_off()
-		utils.backup(self.bot, self.user_manager,self.debug_mode)
-	
+		utils.backup(self.user_manager,self.debug_mode)
 
 	def setup_bot(self):
-		self.logger.warning("Setup message handler")
+		self.logger.warning("Restart Message Handler Bot")
+		#self.bot_logger.warning("Restart Message Handler Bot")
+
 		del self.bot
 		self.bot = None
+		self.bot = self.bot_controller_factory.get_simple_bot()
 
 		for user_id, user in self.user_manager.users.items():
 			user.set_last_op_time()
-
-		self.bot = bot_utils.open_bot(self.debug_mode, self.logger)
-		logging_utils.setup_bot_sender(self.bot)
-		self.bot_logger = logging.getLogger('bot_sender')
 
 		message_handlers.setup_user.handle_setup_user(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.error_handling.handle_user_dont_exist(self.bot, self.user_manager,self.debug_mode)	
 		message_handlers.cancel.handle_cancel(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.add_item.handle_add_item(self.bot, self.user_manager,self.debug_mode)
+		message_handlers.select_training.handle_select_training(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.list.handle_list(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.card_answering.handle_card_answer(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.copy_from_user.handle_copy_from_user(self.bot, self.user_manager,self.debug_mode)
@@ -102,8 +98,8 @@ class MessageHandler():
 					self.bot.stop_polling()
 					time.sleep(5)
 				self.reset_exception()
-				self.bot_logger.error("Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
-				self.logger.error("Bot Crashed {}".format(e.__class__.__name__), exc_info=True)	
+				self.bot_logger.error("Message Handler Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
+				self.logger.error("Message Handler Bot Crashed {}".format(e.__class__.__name__), exc_info=True)	
 				time.sleep(5)
 
 
@@ -113,7 +109,7 @@ class MessageHandlerThread(Thread):
 		Thread.__init__(self)
 		self.message_handler = message_handler
 
-	def safe_stop(self):
+	def stop(self):
 		self.message_handler.stop()
 	
 	def run(self):

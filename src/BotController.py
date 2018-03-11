@@ -2,11 +2,15 @@ import os
 import translation
 from BotMessageSender import BotMessageSender
 from utilities import utils
+import telebot
 
 class BotControllerFactory():
 
 	def __init__(self, token):
 		self.token = token
+
+	def get_simple_bot(self):
+		return telebot.TeleBot(self.token)
 
 	def get_bot_controller(self, user_id, language):
 		return BotController(self.token, user_id, language)
@@ -129,12 +133,12 @@ class BotController(BotMessageSender):
 				self.send_message("#card_query_text", txt_args=(subject, topic))
 
 			if question_type == 'image':
-				self.send_photo(question)
+				success = self.send_photo(question)
 			elif question_type == 'audio':
-				self.send_voice(question)
+				success = self.send_voice(question)
 			elif question_type == 'text':
-				self.send_message(question, translate_flag=False, parse='')
-
+				success = self.send_message(question, translate_flag=False, parse='')
+			return success
 
 
 if __name__ == '__main__':

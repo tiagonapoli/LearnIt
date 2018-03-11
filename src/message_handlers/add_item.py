@@ -35,9 +35,9 @@ def save_word(user):
 	active_item = 0
 	if active_topic == None and active_subject == None:
 		active_item = 1
-	elif active_topic == None and active_subject > 0:
+	elif active_topic == None and active_subject != None and active_subject > 0:
 		active_item = 1
-	elif active_topic > 0 and active_subject > 0:
+	elif active_topic != None and active_subject != None and active_topic > 0 and active_subject > 0:
 		active_item = 1
 
 	study_item_deck.active = active_item

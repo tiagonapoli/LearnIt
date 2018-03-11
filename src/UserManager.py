@@ -41,7 +41,7 @@ class UserManager:
 		"""Sets the states of all users to the initial state"""
 		for user_id, user in self.users.items():
 			if user.get_state() != fsm.IDLE:
-				user.send_message("The bot is turning off, the operation is being canceled. Sorry for the inconvenience.")
+				user.send_message("#bot_turn_off")
 			user.set_state(fsm.IDLE)
 			user.set_card_waiting(0)
 

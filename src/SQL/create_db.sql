@@ -11,12 +11,12 @@ CREATE TABLE users(
 	state1 int DEFAULT 0,
 	state2 int DEFAULT -1,
 	highest_card_id int DEFAULT 0,
-	highest_question_id int DEFAULT 0,
+	highest_study_item_id int DEFAULT 0,
 	cards_per_hour int DEFAULT 3,
-	review_questions_per_day int DEFAULT 40,
+	review_cards_per_day int DEFAULT 40,
 	learning_cards_per_day int DEFAULT 5, 
-	question_waiting int DEFAULT 0,
-	question_waiting_type int DEFAULT 0,
+	card_waiting int DEFAULT 0,
+	card_waiting_type int DEFAULT 0,
 	grade_waiting_for_process int DEFAULT 0
 );
 
@@ -57,22 +57,21 @@ CREATE TABLE study_items(
 CREATE TABLE cards(
 	user_id int,
 	study_item_id int,
-	card_id int,
 	active int DEFAULT 1,
 	subject varchar(50),
 	topic varchar(50),
 	study_item varchar(300),
 	study_item_type int, 
+	card_id int,
 	question varchar(300),
-	question_type int,
+	question_type varchar(10),
 	
 	attempts int,
 	easiness_factor double precision,
 	interval double precision,
 	next_date date,
 
-	UNIQUE(user_id, card_id),
-	primary key (user_id, study_item_id, card_id),
+	primary key (user_id, card_id),
 	foreign key (user_id, study_item_id) references study_items(user_id, study_item_id) ON DELETE CASCADE	
 
 );
@@ -88,12 +87,12 @@ CREATE TABLE users(
 	state1 int DEFAULT 0,
 	state2 int DEFAULT -1,
 	highest_card_id int DEFAULT 0,
-	highest_question_id int DEFAULT 0,
+	highest_study_item_id int DEFAULT 0,
 	cards_per_hour int DEFAULT 3,
-	review_questions_per_day int DEFAULT 40,
+	review_cards_per_day int DEFAULT 40,
 	learning_cards_per_day int DEFAULT 5, 
-	question_waiting int DEFAULT 0,
-	question_waiting_type int DEFAULT 0,
+	card_waiting int DEFAULT 0,
+	card_waiting_type int DEFAULT 0,
 	grade_waiting_for_process int DEFAULT 0
 );
 
@@ -134,23 +133,21 @@ CREATE TABLE study_items(
 CREATE TABLE cards(
 	user_id int,
 	study_item_id int,
-	card_id int,
 	active int DEFAULT 1,
 	subject varchar(50),
 	topic varchar(50),
 	study_item varchar(300),
 	study_item_type int, 
+	card_id int,
 	question varchar(300),
-	question_type int,
+	question_type varchar(10),
 	
 	attempts int,
 	easiness_factor double precision,
 	interval double precision,
 	next_date date,
 
-	UNIQUE(user_id, card_id),
-	primary key (user_id, study_item_id, card_id),
+	primary key (user_id, card_id),
 	foreign key (user_id, study_item_id) references study_items(user_id, study_item_id) ON DELETE CASCADE	
 
 );
-

@@ -33,7 +33,7 @@ def handle_card_answer(bot, user_manager, debug_mode):
 		
 		options = ['0', '1', '2', '3', '4', '5']
 		user.send_message("#grade_your_performance")
-		user.send_simple_keyboard("#poll_text", options)
+		user.send_string_keyboard("#poll_text", options, first_option_value=0)
 		user.set_state(fsm.next_state[fsm.WAITING_ANS])
 
 

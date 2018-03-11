@@ -37,6 +37,7 @@ SUBJECT_ERASE = 30
 TOPIC_ERASE = 31
 ITEM_ERASE = 32
 SELECT = 33
+SELECT_TRAINING = 34
 
 
 '''FSM'''
@@ -50,7 +51,8 @@ next_state = {
       		 'erase': (ERASE, GET_OPTION),
       		 'review' : (REVIEW, GET_SUBJECT),
       		 'settings' : (SETTINGS, GET_OPTION),
-      		 'copy_from_user': (COPY_FROM_USER, GET_USER)}
+      		 'copy_from_user': (COPY_FROM_USER, GET_USER),
+      		 'select_training': (SELECT_TRAINING, GET_SUBJECT)}
 }
 
 
@@ -150,6 +152,15 @@ next_state.update({
 							'done' : (REVIEW, WAITING_CARD_ANS)},
 	(REVIEW, WAITING_CARD_ANS) : {'continue' : (REVIEW, WAITING_CARD_ANS),
 								  'done' : IDLE}
+})
+
+#=====================SELECT TRAINING=====================
+next_state.update({
+	(SELECT_TRAINING, GET_SUBJECT) : {'error' : (SELECT_TRAINING, GET_SUBJECT),
+							  		  'no topics' : IDLE,
+							  		  'done' : (SELECT_TRAINING, GET_TOPICS)},
+	(SELECT_TRAINING, GET_TOPICS) : {'continue' : (SELECT_TRAINING, GET_TOPICS),
+									 'done' : IDLE},
 })
 
 

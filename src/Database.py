@@ -208,11 +208,11 @@ class Database():
 			if not os.path.exists(PATH + "/tables/"):
 				os.mkdir(PATH + "/tables/")
 			aux_path = PATH + "/tables"
-			os.system("psql -U postgres -d {} -c \"Copy (Select * From users) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/users.csv".format(self.DB_NAME, aux_path))
-			os.system("psql -U postgres -d {} -c \"Copy (Select * From cards) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/cards.csv".format(self.DB_NAME, aux_path))
-			os.system("psql -U postgres -d {} -c \"Copy (Select * From subjects) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/subjects.csv".format(self.DB_NAME, aux_path))
-			os.system("psql -U postgres -d {} -c \"Copy (Select * From topics) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/topics.csv".format(self.DB_NAME, aux_path))
-			os.system("psql -U postgres -d {} -c \"Copy (Select * From study_items) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/study_items.csv".format(self.DB_NAME, aux_path))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From users) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/users.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From cards) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/cards.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From subjects) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/subjects.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From topics) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/topics.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
+			os.system("psql -U {} -d {} -c \"Copy (Select * From study_items) To STDOUT With CSV HEADER DELIMITER ',';\" > {}/study_items.csv".format(self.DB_USER_NAME, self.DB_NAME, aux_path))
 			return "Backup made successfully"
 		except Exception as e:
 			print(e);

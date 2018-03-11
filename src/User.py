@@ -10,8 +10,8 @@ class User:
 
 	def __init__(self, user_id, database_reference, bot_controller_factory):
 		logging_utils.setup_user_logger(user_id)
+		self.logger = logging.getLogger('{}'.format(user_id))
 
-		self.logger = logging.getLogger(str(user_id))
 		self.last_op_time = time.time()
 		self.db = database_reference
 		self.user_id = user_id
@@ -28,7 +28,6 @@ class User:
 		self.temp_study_items_string_list = None
 		self.temp_study_item_list = None
 		self.temp_topics_list = None
-		self.btn_set = None
 		self.receive_queue = None
 		self.cards_to_review = None
 		self.temp_subject = None
@@ -292,11 +291,13 @@ class User:
 	def parse_keyboard_ans(self, msg):
 		return self.bot_controller.parse_keyboard_ans(msg)
 	
-	def send_string_keyboard(self, txt, option, txt_args=(), markdown_options=None, translate_options=False, add_default_keyboard=True, width=3, parse="Markdown"):
-		return self.bot_controller.send_string_keyboard(txt, option, txt_args, markdown_options, translate_options, add_default_keyboard, width, parse)
+	def send_string_keyboard(self, txt, options, txt_args=(), markdown_options=None, translate_options=False, add_default_keyboard=True, first_option_value=1, width=3, parse="Markdown"):
+		return self.bot_controller.send_string_keyboard(txt, options, txt_args, markdown_options, translate_options, add_default_keyboard, first_option_value, width, parse)
 
-	def send_selection_inline_keyboard(self, txt, options, txt_args=(), translate_options=False, empty_keyboard_text=None, no_empty_flag=False, width=3, parse="Markdown"):
-		return self.bot_controller.send_selection_inline_keyboard(txt, options, txt_args, translate_options, empty_keyboard_text, no_empty_flag, width, parse)
+	def send_selection_inline_keyboard(self, txt, options, txt_args=(), translate_options=False, empty_keyboard_text=None, no_empty_flag=False, btn_set=None, width=3, parse="Markdown"):
+		if btn_set == None:
+			btn_set = set()
+		return self.bot_controller.send_selection_inline_keyboard(txt, options, txt_args, translate_options, empty_keyboard_text, no_empty_flag, btn_set, width, parse)
 	
 	def edit_selection_inline_keyboard(self, txt, parse="Markdown"):		
 		return self.bot_controller.edit_selection_inline_keyboard(txt, parse)
@@ -310,8 +311,8 @@ class User:
 	def send_voice(self, path, markup=BotMessageSender.keyboard_remove()):
 		return self.bot_controller.send_voice(path, markup)
 
-	def send_navigation_string_keyboard(self, txt, options, end_btn, back_btn=None, markdown_options=None, txt_args=(), translate_options=False, parse="Markdown"):
-		return self.bot_controller.send_navigation_string_keyboard(txt, options, end_btn, back_btn, markdown_options, txt_args, translate_options, parse)
+	def send_navigation_string_keyboard(self, txt, options, end_btn, back_btn=None, markdown_options=None, txt_args=(), translate_options=False, first_option_value=1, parse="Markdown"):
+		return self.bot_controller.send_navigation_string_keyboard(txt, options, end_btn, back_btn, markdown_options, txt_args, translate_options, first_option_value, parse)
 
 
 	def send_all_cards(self, study_item_deck, except_type=""):

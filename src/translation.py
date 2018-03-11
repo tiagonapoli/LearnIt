@@ -22,24 +22,24 @@ poll_text_pt = ("*5* - _resposta perfeita, sem qualquer hesitação_\n" +
 				 "*1* - _resposta incorreta; a resposta certa foi lembrada agora_\n" +
 				 "*0* - _total esquecimento._")
 
-help_msg = ("Use the command /add\_language to add the languages you are interested in learning and then use the command /add\_word to add words you are interested in memorizing, " + 
-			"or just use the command /copy\_words to copy words from other users. " +
+help_msg = ("Use the command /add\_item to add items you are interested in learning " + 
+			"or just use the command /copy\_from\_user to copy items from other users. " +
 			"During any process you can use /cancel to cancel the ongoing events, if you made a mistake, for example.\n" +
 		   "If you have questions or want to support the project, please contact one of the developers:" +
 		   "\n*Tiago Napoli*\nTelegram: t.me/tiagonapoli\nEmail: napoli.tiago@hotmail.com\n" + 
 		   "\n*Gabriel Camargo*\nTelegram: t.me/gabriel\_camargo\nEmail: gacamargo1.000@gmail.com\n")
 
-help_msg_pt = ("Use o comando /add\_language para adicionar línguas ou matérias nas quais você está interessado em aprender, e depois use o comando /add\_word para adicionar palavras para aprender e memorizar, " +
-			"ou use /copy\_words para copiar cards prontos de outros usuários. Durante qualquer processo, use /cancel para cancelar qualquer evento, se você cometeu algum erro, por exemplo" +
+help_msg_pt = ("Use o comando /add\_item para adicionar itens que você está interessado em aprender " +
+			"ou use /copy\_from\_user para copiar cards prontos de outros usuários. Durante qualquer processo, use /cancel para cancelar qualquer evento, se você cometeu algum erro, por exemplo" +
 		   "Se você tiver dúvidas, sugestões ou quiser apoiar o projeto, contate um dos desenvolvedores:" +
 		   "\n*Tiago Napoli*\nTelegram: t.me/tiagonapoli\nEmail: napoli.tiago@hotmail.com\n" + 
 		   "\n*Gabriel Camargo*\nTelegram: t.me/gabriel\_camargo\nEmail: gacamargo1.000@gmail.com\n")
 
-welcome = ("Use the command /add\_language to add the languages you are interested in learning and then use the command /add\_word to add words you are interested in memorizing, " +
-			"or just use the command /copy\_words to copy words from other users. During any process you can use /cancel to cancel the ongoing events, if you made a mistake, for example.")
+welcome = ("Use the command /add\_item to add items you are interested in learning " +
+			"or just use the command /copy\_from\_user to copy items from other users. During any process you can use /cancel to cancel the ongoing events, if you made a mistake, for example.")
 
-welcome_pt = ("Use o comando /add\_language para adicionar línguas ou matérias nas quais você está interessado em aprender, e depois use o comando /add\_word para adicionar palavras para aprender e memorizar, " +
-			"ou use /copy\_words para copiar cards prontos de outros usuários. Durante qualquer processo, use /cancel para cancelar qualquer evento, se você cometeu algum erro, por exemplo")
+welcome_pt = ("Use o comando /add\_item para adicionar itens que você está interessado em aprender " +
+			"ou use /copy\_from\_user para copiar cards prontos de outros usuários. Durante qualquer processo, use /cancel para cancelar qualquer evento, se você cometeu algum erro, por exemplo")
 
 message = { "#setup_user_username_error":
 				{0: "Please, create your Telegram Username first. You just have to go to Settings->Info->Username to create it. After you create one, type /start again.\nPor favor, crie seu nome de usuário Telegram primeiro. Vá até às configurações do Telegram->Informações->Nome de usuário. Depois de criar, digite /start novamente.",
@@ -401,8 +401,6 @@ message = { "#setup_user_username_error":
 			'#copy_results': 
 				{0: '*Copy results:*',
 				 1: '*Resultados da cópia:*'},
-
-
 		
 			'#topic':
 				{0: "*Topic:* _%s_",
@@ -474,9 +472,23 @@ message = { "#setup_user_username_error":
 
 			'Change bot language':
 				{0: "Change bot language",
-				 1: "Trocar o idioma do bot"}
+				 1: "Trocar o idioma do bot"},
 
+			'#bot_turn_off':
+				{0: "The bot is turning off, the operation is being canceled. Sorry for the inconvenience.",
+				 1: "O bot está sendo desligado, a operação será cancelada. Desculpe pela inconveniência."},
 
+			"#select_training_select_topics":
+				{0: "_Select the topics you want to be active for your training (Unselected will be unactive):__",
+				 1: "_Selectione os tópicos que deseja que fiquem ativos para treinamento (Os não selecionados ficarão inativos:_"},
+
+			"#active_topics_listing":
+				{0: "_Active topics on %s:_",
+				 1: "_Tópicos ativos em %s:_"},
+
+			"#no_active_topics":
+				{0: "*There are no active topics*",
+				 1: "*Não há tópicos ativos*"}
 
 
 }

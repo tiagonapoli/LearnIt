@@ -1,5 +1,5 @@
 import os
-import telebot
+import datetime
 
 def get_file_extension(filename):
 	path, extension = os.path.splitext(filename)
@@ -22,7 +22,7 @@ def study_items_to_string_list(study_items):
 	return ret
 
 
-def backup(db, debug_mode):
+def backup(user_manager, debug_mode):
 	if debug_mode:
 		PATH =  "../backup_debug/" + datetime.datetime.now().strftime("%d-%m-%Y.%H-%M") + "/"
 	else:
@@ -31,7 +31,7 @@ def backup(db, debug_mode):
 		os.makedirs(PATH)
 	print("BACKUP PATH= " + PATH)
 	try:
-		print(db.backup(PATH))
+		print(user_manager.backup(PATH))
 		if debug_mode:
 			os.system("cp -TRv ../data_debug/ {}data".format(PATH))
 		else:

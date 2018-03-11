@@ -106,13 +106,15 @@ class CardOps():
 
 
 	def set_supermemo_data(self, card):
-		if self.check_card_existence(card.get_user(), card):
+		if self.check_card_existence(card.get_user(), card.get_card_id()):
 			self.cursor.execute("UPDATE cards SET attempts=%s, easiness_factor=%s, interval=%s, next_date=%s WHERE user_id=%s AND card_id=%s;",
 								(card.attempts, card.ef, card.interval, card.next_date.strftime('%Y-%m-%d'), card.user_id, card.card_id))
 			self.conn.commit()
 
 	
 	def is_card_active(self, user_id, card_id):
+		if self.check_card_existence(user_id, card_id) == False:
+			return 0
 		self.cursor.execute("SELECT active FROM cards WHERE user_id=%s and card_id=%s;", (user_id, card_id))
 		card = self.cursor.fetchall()
 		return card[0][0]
