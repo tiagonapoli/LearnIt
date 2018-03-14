@@ -40,9 +40,9 @@ def create_string_keyboard(keys, modifier=None, first_option_value=1):
 	cnt = first_option_value
 	for key in keys:
 		if type(key) is tuple:
-			text += string_treating.treat_msg_markdown("/{}. ".format(cnt) + modifier[cnt-1] + "%s" + modifier[cnt-1] + "\n", (key[0],))
+			text += string_treating.treat_msg_markdown("/{:02d}. ".format(cnt) + modifier[cnt-1] + "%s" + modifier[cnt-1] + "\n", (key[0],))
 		else:
-			text += string_treating.treat_msg_markdown("/{}. ".format(cnt) + modifier[cnt-1] + "%s" + modifier[cnt-1] + "\n", (key,))
+			text += string_treating.treat_msg_markdown("/{:02d}. ".format(cnt) + modifier[cnt-1] + "%s" + modifier[cnt-1] + "\n", (key,))
 		cnt += 1
 	return text
 
@@ -168,7 +168,7 @@ class BotMessageSender():
 					if ans == key:
 						return 'Next', key, cnt
 				cnt += 1
-			return 'Erro', ans, -1
+			return 'Error', ans, -1
 			 
 		ans = ans[1:]
 		try:
@@ -245,7 +245,7 @@ class BotMessageSender():
 		txt = translation.translate(txt, self.language)
 		if parse == 'Markdown':
 			txt = string_treating.treat_msg_markdown(txt, txt_args)
-		else:
+		elif len(txt_args) > 0:
 			txt = txt % txt_args
 		txt += "\n" + create_string_keyboard(self.keyboard_options, self.markdown_options, self.first_option_value)
 		while tries > 0:
@@ -284,7 +284,7 @@ class BotMessageSender():
 		txt = translation.translate(txt, self.language)
 		if parse == 'Markdown':
 			txt = string_treating.treat_msg_markdown(txt, txt_args)
-		else:
+		elif len(txt_args) > 0:
 			txt = txt % txt_args
 		txt += "\n" + create_string_keyboard(self.keyboard_options, self.markdown_options, self.first_option_value)
 		while tries > 0:
@@ -327,7 +327,7 @@ class BotMessageSender():
 
 		if parse == 'Markdown':
 			txt = string_treating.treat_msg_markdown(txt, txt_args)
-		else:
+		elif len(txt_args) > 0:
 			txt = txt % txt_args
 
 		while tries > 0:
@@ -364,7 +364,7 @@ class BotMessageSender():
 
 		if parse == 'Markdown':
 			txt = string_treating.treat_msg_markdown(txt, txt_args)
-		else:
+		elif len(txt_args) > 0:
 			txt = txt % txt_args
 		while tries > 0:
 			try:

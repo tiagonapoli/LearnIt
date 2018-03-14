@@ -21,7 +21,9 @@ class User:
 		self.bot_controller_factory = bot_controller_factory
 		self.bot_controller = bot_controller_factory.get_bot_controller(user_id, self.native)
 
-
+		self.last_user_wake = time.time()
+		self.max_menu_idle_time = 1800
+		self.max_card_answer_idle_time = 6 * 3600
 
 		self.temp_study_item = None
 		self.temp_card = None
@@ -36,6 +38,25 @@ class User:
 		self.review_card_number = None
 		self.pos = None
 
+	def maybe_wake_user_up(self):
+		now = time.time()
+		sleep_time = now - self.last_user_wake
+		state = self.get_state()
+		self.logger.debug("HOLD STATE {}".format(sleep_time))
+		if state != fsm.IDLE:
+			if state == fsm.WAITING_ANS and sleep_time > self.max_card_answer_idle_time:
+				self.logger.info("Too much time with card on hold {}".format(sleep_time))
+				self.send_message("#too_much_time_waiting_ans")
+				self.set_card_waiting(0)
+				self.set_state(fsm.IDLE)
+			elif state != fsm.WAITING_ANS and sleep_time >  self.max_menu_idle_time:
+				self.logger.info("Too much time on menu {}".format(sleep_time))
+				self.send_message("#too_much_time_on_menu")
+				self.set_card_waiting(0)
+				self.set_state(fsm.IDLE)
+
+
+
 	def get_username(self):
 		return self.username
 
@@ -43,7 +64,10 @@ class User:
 		return self.native
 
 	def set_last_op_time(self):
-		self.last_op_time = time.time()		
+		self.last_op_time = time.time()	
+
+	def set_last_user_wake(self):
+		self.last_user_wake = time.time()	
 
 	def get_last_op_time(self):
 		return self.last_op_time
@@ -80,6 +104,8 @@ class User:
 		self.db.set_state(self.user_id, state[0], state[1])
 		#print("{} NEW STATE {} {} {}   {}".format(self.user_id, state[0], state[1], state[2], time.time()))
 		self.set_last_op_time()
+		self.set_last_user_wake()
+
 
 	def not_locked(self):
 		return self.get_state() != fsm.LOCKED

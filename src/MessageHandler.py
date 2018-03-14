@@ -20,6 +20,7 @@ from utilities import logging_utils, utils
 from UserManager import UserManager
 from BotController import BotControllerFactory
 from threading import Thread
+import fsm
 
 
 class MessageHandler():
@@ -39,8 +40,10 @@ class MessageHandler():
 		now = time.time()
 		ret = 99999999
 		for user_id, user in self.user_manager.users.items():
-			if ret > now - user.get_last_op_time():
-				ret = now - user.get_last_op_time()
+			idle_time = now - user.get_last_op_time()
+			user.maybe_wake_user_up()
+			if ret > idle_time:
+				ret = idle_time
 		if ret == 99999999:
 			ret = 0
 		return self.max_idle_time - ret

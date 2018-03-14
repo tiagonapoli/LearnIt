@@ -276,7 +276,6 @@ class ReviewQueue():
 
 	def __init__(self):
 		self.queue = []
-		self.cards_set = set()
 		self.cards_sent = 0
 		self.max_size = 15
 
@@ -290,11 +289,16 @@ class ReviewQueue():
 
 
 	def update(self, expired_cards):
+
+		cards_set = set()
+		for card in self.queue:
+			cards_set.add(card.get_card_id())
+		
 		for card in expired_cards:
 			if len(self.queue) == self.max_size:
 				break
 
-			if not (card.get_card_id() in self.cards.set):
+			if not (card.get_card_id() in cards_set):
 				self.queue.append(card)
 
 		shuffle(self.queue)
@@ -311,8 +315,4 @@ class ReviewQueue():
 
 		card = self.queue.pop()
 		self.cards_sent += 1
-		try:
-			self.cards_set.remove(card.get_card_id())
-		except:
-			print("Deu ruim no pop review")
 		return (card, self.cards_sent)

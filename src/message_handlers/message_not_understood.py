@@ -13,7 +13,7 @@ def handle_message_not_understood(bot, user_manager, debug_mode):
 		"""
 		user_id = get_id(msg)
 		user = user_manager.get_user(get_id(msg))
-		user.send_message("#message_not_understood")
+		user.send_message("#message_not_understood", txt_args=(msg.text, ))
 
 	@bot.callback_query_handler(func=lambda call: (True and
 												   user_manager.get_user(get_id(call.message)).get_active() == 1))

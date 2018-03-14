@@ -69,11 +69,6 @@ class UserSendingCardManager():
 		if self.last_hour != hour:
 			self.hourly_init()
 
-		now = time.time()
-		if now - self.last_update >= self.update_interval:
-			self.logger.info("Update sending queue")
-			self.update()
-
 		self.do_grading()
 		if self.user.get_state() == fsm.IDLE:
 			self.user.set_state(fsm.LOCKED)
@@ -89,7 +84,7 @@ class UserSendingCardManager():
 			card_id = card.get_card_id()
 			if self.user.is_card_active(card_id) > 0:
 				success = self.user.send_card_query(card, card_type, number)
-				self.logger.debug("Send Learning card {}".format(card_id))
+				self.logger.debug("Send {} card {}".format(card_type, card_id))
 			else:
 				success = False
 			if success:
@@ -103,6 +98,11 @@ class UserSendingCardManager():
 				self.user.set_state(fsm.next_state[fsm.IDLE]['card_query'])
 			else:
 				self.user.set_state(fsm.IDLE)
+
+		now = time.time()
+		if now - self.last_update >= self.update_interval:
+			self.logger.info("Update sending queue")
+			self.update()
 
 
 	def finish_learn_card(self, card):

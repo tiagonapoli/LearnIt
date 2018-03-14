@@ -70,8 +70,8 @@ message = { "#setup_user_username_error":
 				 1: "LearnIt está em desenvolvimento, por isso algumas vezes nós fazemos alguns experimentos e reiniciamos certas coisas, talvez por isso seu usuário não esteja em nosso banco de dados. Para consertar, envie-me /start"},
 
 			"#message_not_understood":
-				{0: "Oops, didn't understand your message...",
-				 1: "Oops, não entendi sua mensagem..."},
+				{0: "Oops, didn't understand your message '%s' (use /cancel if you need)...",
+				 1: "Oops, não entendi sua mensagem '%s' (se precisar, use /cancel)..."},
 
 			"#help_msg": 
 				{0: help_msg,
@@ -488,8 +488,15 @@ message = { "#setup_user_username_error":
 
 			"#no_active_topics":
 				{0: "*There are no active topics*",
-				 1: "*Não há tópicos ativos*"}
+				 1: "*Não há tópicos ativos*"},
 
+			"#too_much_time_waiting_ans":
+				{0: "Oops, maybe you forgot to answer the card. This will be canceled, maybe you will receive a new one in the future :)",
+				 1: "Oops, talvez você se esqueceu de responder o cartão. Ele será cancelado, talvez você recebe um novo em breve :)"},
+
+			"#too_much_time_on_menu":
+				{0: "Oops, maybe you forgot to quit this menu, we will do that for you...",
+				 1: "Oops, talvez você se esqueceu de sair desse menu, vamos fazer isso por você..."}
 
 }
 
