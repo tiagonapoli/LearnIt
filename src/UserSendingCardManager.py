@@ -70,6 +70,13 @@ class UserSendingCardManager():
 			self.hourly_init()
 
 		self.do_grading()
+		now = time.time()
+		state = self.user.get_state()
+		if now - self.last_update >= self.update_interval and state != fsm.WAITING_POLL_ANS and state != fsm.WAITING_ANS and state != fsm.LOCKED:
+			self.do_grading()
+			self.logger.info("Update sending queue")
+			self.update()
+		
 		if self.user.get_state() == fsm.IDLE:
 			self.user.set_state(fsm.LOCKED)
 			
@@ -98,13 +105,6 @@ class UserSendingCardManager():
 				self.user.set_state(fsm.next_state[fsm.IDLE]['card_query'])
 			else:
 				self.user.set_state(fsm.IDLE)
-
-		now = time.time()
-		state = self.user.get_state()
-		if now - self.last_update >= self.update_interval and state != fsm.WAITING_POLL_ANS and state != fsm.WAITING_ANS:
-			self.do_grading()
-			self.logger.info("Update sending queue")
-			self.update()
 
 
 	def finish_learn_card(self, card):
