@@ -278,7 +278,6 @@ class ReviewQueue():
 		self.queue = []
 		self.cards_sent = 0
 		self.max_size = 15
-		self.last_card = 0
 
 
 	def __str__(self):
@@ -288,7 +287,6 @@ class ReviewQueue():
 
 	def init_day(self):
 		self.cards_sent = 0
-		self.last_card = 0
 
 
 	def update(self, expired_cards):
@@ -301,7 +299,7 @@ class ReviewQueue():
 			if len(self.queue) == self.max_size:
 				break
 
-			if not (card.get_card_id() in cards_set) and card.get_card_id() != self.last_card:
+			if not (card.get_card_id() in cards_set):
 				self.queue.append(card)
 
 		shuffle(self.queue)
