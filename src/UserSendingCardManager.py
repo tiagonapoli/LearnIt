@@ -100,7 +100,9 @@ class UserSendingCardManager():
 				self.user.set_state(fsm.IDLE)
 
 		now = time.time()
-		if now - self.last_update >= self.update_interval:
+		state = self.user.get_state()
+		if now - self.last_update >= self.update_interval and state != fsm.WAITING_POLL_ANS and state != fsm.WAITING_ANS:
+			self.do_grading()
 			self.logger.info("Update sending queue")
 			self.update()
 
