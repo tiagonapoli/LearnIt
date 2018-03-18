@@ -5,6 +5,7 @@ from LearnIt import LearnIt
 from MessageHandler import MessageHandler
 from SendingManager import SendingManager
 from BotController import BotControllerFactory
+import time
 
 class Console():
 
@@ -106,7 +107,7 @@ class Console():
 			self.turn_on()
 			try:
 				while True:
-					pass
+					time.sleep(3600)
 			except KeyboardInterrupt:
 				pass
 		self.turn_off()	
