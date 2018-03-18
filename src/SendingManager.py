@@ -20,6 +20,7 @@ class SendingManager():
 		self.users = self.user_manager.users
 		self.user_card_manager = {}
 		self.cycles = 0
+		self.init_time = 180
 
 
 	def upd_users(self):
@@ -36,6 +37,11 @@ class SendingManager():
 
 	def run(self):
 		self.continue_flag = True
+
+
+		self.logger.warning("Wait {} seconds to initialize sending manager".format(self.init_time))
+		time.sleep(self.init_time)
+
 		while self.continue_flag:
 			try:
 				self.logger.warning("Sending Manager Woke Up - Cycles: {}".format(self.cycles))

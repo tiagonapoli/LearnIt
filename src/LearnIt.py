@@ -24,6 +24,7 @@ class LearnIt(Thread):
 		self.logger = logging.getLogger('LearnIt')
 		self.message_handler_thread = MessageHandlerThread(message_handler)
 		self.sending_manager_thread = SendingManagerThread(sending_manager)
+		self.backup_time = 3600 * 8
 
 	def start_message_handler(self):
 		self.message_handler_thread.start()
@@ -47,6 +48,11 @@ class LearnIt(Thread):
 		self.start_message_handler()
 		self.start_sending_manager()
 
+	def backup(self):
+		self.logger.warning("Start backup")
+		self.message_handler_thread.backup()
+		self.logger.warning("Ended backup")
+
 	def safe_stop(self):
 
 		self.continue_flag = False
@@ -57,10 +63,7 @@ class LearnIt(Thread):
 		self.stop_sending_manager()
 		self.stop_message_handler()
 
-		self.logger.warning("Start backup")
-		self.message_handler_thread.backup()
-		self.logger.warning("Ended backup")
-
+		self.backup()
 
 		self.logger.warning("Waiting message handler to stop")
 		if self.message_handler_thread.is_alive():
@@ -75,6 +78,7 @@ class LearnIt(Thread):
 	def run(self):
 		self.logger.warning("Running LearniIt")
 		self.default()
+		time_ini = time.time()
 		while self.continue_flag:
 			self.locked = True
 			self.logger.info("Check if idle time exceeded")
@@ -89,6 +93,13 @@ class LearnIt(Thread):
 			else:
 				self.locked = False
 				time.sleep(sleep)
+
+			time_fim = time.time()
+			self.logger.info("Time last backup: {}".format(time_fim - time_ini))
+			if time_fim - time_ini > self.backup_time:
+				time_ini = time.time()
+				self.backup()
+
 
 
 

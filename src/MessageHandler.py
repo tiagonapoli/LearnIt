@@ -56,12 +56,12 @@ class MessageHandler():
 		self.continue_flag = False
 		if self.bot != None:
 			self.bot.stop_polling()
+		self.user_manager.reset_all_states_turn_off()
 
 	def reset_exception(self):
 		self.user_manager.reset_all_states_exception()
 
 	def backup(self):
-		self.user_manager.reset_all_states_turn_off()
 		utils.backup(self.user_manager,self.debug_mode)
 
 	def setup_bot(self):

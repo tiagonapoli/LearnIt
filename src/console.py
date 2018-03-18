@@ -103,6 +103,7 @@ class Console():
 		if self.gui:
 			self.interactive()
 		else:
+			self.turn_on()
 			try:
 				while True:
 					pass

@@ -119,7 +119,7 @@ class BotMessageSender():
 			self.bot = telebot.TeleBot(self.token)
 			self.last_set_bot = time.time()
 			fim = time.time()
-			print("SET BOTMESSAGESENNDER TIME {}".format(fim-now))
+
 
 	def translate_options(self, lst):
 		ret = []
@@ -380,40 +380,46 @@ class BotMessageSender():
 	#ok
 	def send_photo(self, path, markup=keyboard_remove()):
 		tries = self.tries
-		arq = open(path, 'rb')
 		while tries > 0:
 			try:
+				arq = open(path, 'rb')
 				signal.alarm(20)
 				self.set_bot()
 				self.bot.send_photo(self.user_id, arq, reply_markup=markup)
-				arq.close()
 				signal.alarm(0)
+				arq.close()
 				return True
 			except:
+				try:
+					arq.close()
+				except:
+					self.logger.error("Error in send photo {} - {}".format(self.user_id, path), exc_info=True)
 				self.logger.error("Error in send photo {} - {}".format(self.user_id, path), exc_info=True)
 			tries -= 1
 			time.sleep(self.sleep)
-		arq.close()
 		return False
 
 
 	#ok
 	def send_voice(self, path, markup=keyboard_remove()):
 		tries = self.tries
-		arq = open(path, 'rb')
 		while tries > 0:
 			try:
+				arq = open(path, 'rb')
 				signal.alarm(20)
 				self.set_bot()
 				self.bot.send_voice(self.user_id, arq, reply_markup=markup)
-				arq.close()
 				signal.alarm(0)
+				arq.close()
 				return True
 			except:
-				self.logger.error("Error in send photo {} - {}".format(self.user_id, path), exc_info=True)
+				try:
+					arq.close()
+				except:
+					self.logger.error("Error in send voice {} - {}".format(self.user_id, path), exc_info=True)
+				self.logger.error("Error in send voice {} - {}".format(self.user_id, path), exc_info=True)
 			tries -= 1
 			time.sleep(self.sleep)
-		arq.close()
 		return False
 
 
@@ -424,13 +430,13 @@ if __name__ == '__main__':
 
 	message_sender = BotMessageSender('495750247:AAFVO7YqWCl2QKov6PselFnAlL_RRBtfWco', 359999978, 1)
 
-	message_sender.send_message('*BotMessageSender testings*') 
+	message_sender.send_message('*BotMessageSender testings*', translate_flag=False) 
 	message_sender.send_message('*BotMessage %s Sender testings*', txt_args=("*Negrito!*", ), translate_flag=False)
-	message_sender.send_message('*BotMessageSender testings*', parse='') 
-	message_sender.send_photo('/home/tiago/Pictures/Trees_JeroenVanNieuwenhoveFlickr.jpg')
-	message_sender.send_voice('/home/tiago/Music/sound-9.mp3')
-	message_sender.send_selection_inline_keyboard("%s already exists", ['Yes', 'No'], txt_args=('_Nao italico_',))
+	message_sender.send_message('*BotMessageSender testings*', parse='', translate_flag=False) 
+	message_sender.send_photo('/home/tiagonapoli/Pictures/Trees_JeroenVanNieuwenhoveFlickr.jpg')
+	message_sender.send_voice('/home/tiagonapoli/Music/sound-9.mp3')
+	message_sender.send_selection_inline_keyboard("#topic", ['Yes', 'No'], txt_args=('_Nao italico_',))
 	message_sender.send_selection_inline_keyboard('Send image', ['Yes', 'No'], translate_options=True)
-	message_sender.send_string_keyboard("Word's topic: *%s*", ['Yes', 'No'], txt_args=('Neg_*_rito',))
-	message_sender.send_string_keyboard('Image received successfuly', ['Yes', 'No'], translate_options=True)
+	message_sender.send_string_keyboard("#topic", ['Yes', 'No'], txt_args=('Neg_*_rito',))
+	message_sender.send_string_keyboard('#image_received', ['Yes', 'No'], translate_options=True)
 

@@ -10,7 +10,7 @@ DATABASE = logging.DEBUG
 LEARNIT = logging.DEBUG
 USER_LOGGER_CONSOLE = logging.WARNING
 DATABASE_CONSOLE = logging.WARNING
-LEARNIT_CONSOLE = logging.DEBUG
+LEARNIT_CONSOLE = logging.WARNING
 BOT_SENDER = logging.WARNING
 
 class BotHandler(logging.Handler): # Inherit from logging.Handler    
@@ -48,7 +48,7 @@ def setup_learnit():
 	
 	PATH += filename
 		
-	handler_file = logging.FileHandler(PATH, mode='a')
+	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
 	handler_file.setFormatter(formatter)
@@ -82,7 +82,7 @@ def setup_message_handler():
 	
 	PATH += filename
 		
-	handler_file = logging.FileHandler(PATH, mode='a')
+	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
 	handler_file.setFormatter(formatter)
@@ -116,7 +116,7 @@ def setup_sending_manager():
 	
 	PATH += filename
 		
-	handler_file = logging.FileHandler(PATH, mode='a')
+	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
 	handler_file.setFormatter(formatter)
@@ -151,7 +151,7 @@ def setup_database():
 	
 	PATH += filename
 		
-	handler_file = logging.FileHandler(PATH, mode='a')
+	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
 	handler_file.setFormatter(formatter)
@@ -184,7 +184,7 @@ def setup_bot_sender(bot_controller_factory):
 	
 	PATH += filename
 		
-	handler_file = logging.FileHandler(PATH, mode='a')
+	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
 	handler_file.setFormatter(formatter)
@@ -227,7 +227,7 @@ def setup_user_logger(user_id):
 	
 	PATH += filename
 		
-	handler_file = logging.FileHandler(PATH, mode='a')
+	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
 	handler_file.setFormatter(formatter)
