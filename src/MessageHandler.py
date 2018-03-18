@@ -92,6 +92,8 @@ class MessageHandler():
 
 	def run(self):
 		self.continue_flag = True
+		self.bot_logger.warning("Message Handler on")
+
 		while self.continue_flag:
 			try:
 				self.setup_bot()					
@@ -104,6 +106,8 @@ class MessageHandler():
 				self.bot_logger.error("Message Handler Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
 				self.logger.error("Message Handler Bot Crashed {}".format(e.__class__.__name__), exc_info=True)	
 				time.sleep(5)
+		
+		self.bot_logger.warning("Message Handler off")
 
 
 class MessageHandlerThread(Thread):

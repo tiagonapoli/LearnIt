@@ -1,11 +1,18 @@
 #! /usr/bin/python3
 import sys
 import os
+import signal
 from LearnIt import LearnIt
 from MessageHandler import MessageHandler
 from SendingManager import SendingManager
 from BotController import BotControllerFactory
 import time
+
+def signal_term_handler(signal, frame):
+	console.turn_off()
+	sys.exit(0)
+ 
+signal.signal(signal.SIGTERM, signal_term_handler)
 
 class Console():
 

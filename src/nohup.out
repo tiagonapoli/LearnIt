@@ -1,0 +1,294 @@
+LearnIt Thread-1                  run WARNING  Running LearniIt
+
+Message_Handler Thread-2                  setup_bot WARNING  Restart Message Handler Bot
+
+Sending_Manager Thread-3                  run WARNING  Wait 180 seconds to initialize sending manager
+
+LearnIt Thread-1                  restart_bot_message_handler WARNING  Set to restart message handler bot
+
+LearnIt Thread-1                  restart_bot_message_handler WARNING  Set to restart message handler bot
+
+LearnIt MainThread                safe_stop WARNING  LearnIt Safe Stop!
+
+LearnIt MainThread                stop_sending_manager WARNING  Requested sending manager to stop
+
+LearnIt MainThread                stop_message_handler WARNING  Requested message handler to stop
+
+LearnIt MainThread                backup WARNING  Start backup
+
+LearnIt MainThread                backup WARNING  Ended backup
+
+LearnIt MainThread                safe_stop WARNING  Waiting message handler to stop
+
+LearnIt MainThread                safe_stop WARNING  Message handler stopped!
+
+LearnIt MainThread                safe_stop WARNING  Waiting send manager to stop
+
+Installed: True
+Max time idle: 10
+Sleep time: 10
+
+System turning on
+System turned on
+System turning off...
+Saved data
+BACKUP PATH= ../backup_debug/17-03-2018.23-02/
+Backup made successfully
+Traceback (most recent call last):
+  File "./console.py", line 131, in <module>
+    console.run()
+  File "./console.py", line 113, in run
+    self.turn_off()	
+  File "./console.py", line 69, in turn_off
+    self.learnit.safe_stop()
+  File "/home/tiagonapoli/repo/LearnIt/src/LearnIt.py", line 74, in safe_stop
+    self.sending_manager_thread.join()
+  File "/usr/lib/python3.5/threading.py", line 1054, in join
+    self._wait_for_tstate_lock()
+  File "/usr/lib/python3.5/threading.py", line 1070, in _wait_for_tstate_lock
+    elif lock.acquire(block, timeout):
+KeyboardInterrupt
+Exception ignored in: <module 'threading' from '/usr/lib/python3.5/threading.py'>
+Traceback (most recent call last):
+  File "/usr/lib/python3.5/threading.py", line 1288, in _shutdown
+    t.join()
+  File "/usr/lib/python3.5/threading.py", line 1054, in join
+    self._wait_for_tstate_lock()
+  File "/usr/lib/python3.5/threading.py", line 1070, in _wait_for_tstate_lock
+    elif lock.acquire(block, timeout):
+KeyboardInterrupt
+LearnIt Thread-1                  run WARNING  Running LearniIt
+
+Message_Handler Thread-2                  setup_bot WARNING  Restart Message Handler Bot
+
+Sending_Manager Thread-3                  run WARNING  Wait 180 seconds to initialize sending manager
+
+LearnIt Thread-1                  restart_bot_message_handler WARNING  Set to restart message handler bot
+
+Message_Handler Thread-2                  setup_bot WARNING  Restart Message Handler Bot
+
+LearnIt MainThread                safe_stop WARNING  LearnIt Safe Stop!
+
+LearnIt MainThread                stop_sending_manager WARNING  Requested sending manager to stop
+
+LearnIt MainThread                stop_message_handler WARNING  Requested message handler to stop
+
+LearnIt MainThread                backup WARNING  Start backup
+
+cp: cannot stat '../data_debug/': No such file or directory
+LearnIt MainThread                backup WARNING  Ended backup
+
+LearnIt MainThread                safe_stop WARNING  Waiting message handler to stop
+
+Installed: True
+Max time idle: 10
+Sleep time: 10
+
+System turning on
+System turned on
+System turning off...
+Saved data
+BACKUP PATH= ../backup_debug/17-03-2018.23-02/
+Backup made successfully
+Traceback (most recent call last):
+  File "./console.py", line 131, in <module>
+    console.run()
+  File "./console.py", line 113, in run
+    self.turn_off()	
+  File "./console.py", line 69, in turn_off
+    self.learnit.safe_stop()
+  File "/home/tiagonapoli/repo/LearnIt/src/LearnIt.py", line 70, in safe_stop
+    self.message_handler_thread.join()
+  File "/usr/lib/python3.5/threading.py", line 1054, in join
+    self._wait_for_tstate_lock()
+  File "/usr/lib/python3.5/threading.py", line 1070, in _wait_for_tstate_lock
+    elif lock.acquire(block, timeout):
+KeyboardInterrupt
+Exception ignored in: <module 'threading' from '/usr/lib/python3.5/threading.py'>
+Traceback (most recent call last):
+  File "/usr/lib/python3.5/threading.py", line 1288, in _shutdown
+    t.join()
+  File "/usr/lib/python3.5/threading.py", line 1054, in join
+    self._wait_for_tstate_lock()
+  File "/usr/lib/python3.5/threading.py", line 1070, in _wait_for_tstate_lock
+    elif lock.acquire(block, timeout):
+KeyboardInterrupt
+LearnIt Thread-1                  run WARNING  Running LearniIt
+
+Sending_Manager Thread-3                  run WARNING  Wait 180 seconds to initialize sending manager
+
+Bot_Sender                     Thread-2 run WARNING  Message Handler on
+
+Message_Handler Thread-2                  setup_bot WARNING  Restart Message Handler Bot
+
+LearnIt Thread-1                  restart_bot_message_handler WARNING  Set to restart message handler bot
+
+LearnIt MainThread                safe_stop WARNING  LearnIt Safe Stop!
+
+LearnIt MainThread                stop_sending_manager WARNING  Requested sending manager to stop
+
+LearnIt MainThread                stop_message_handler WARNING  Requested message handler to stop
+
+LearnIt MainThread                backup WARNING  Start backup
+
+cp: cannot stat '../data_debug/': No such file or directory
+LearnIt MainThread                backup WARNING  Ended backup
+
+LearnIt MainThread                safe_stop WARNING  Waiting message handler to stop
+
+Bot_Sender                     Thread-2 run WARNING  Message Handler off
+
+LearnIt MainThread                safe_stop WARNING  Message handler stopped!
+
+LearnIt MainThread                safe_stop WARNING  Waiting send manager to stop
+
+Installed: True
+Max time idle: 10
+Sleep time: 10
+
+System turning on
+System turned on
+System turning off...
+Saved data
+BACKUP PATH= ../backup_debug/17-03-2018.23-06/
+Backup made successfully
+Traceback (most recent call last):
+  File "./console.py", line 131, in <module>
+    console.run()
+  File "./console.py", line 113, in run
+    self.turn_off()	
+  File "./console.py", line 69, in turn_off
+    self.learnit.safe_stop()
+  File "/home/tiagonapoli/repo/LearnIt/src/LearnIt.py", line 74, in safe_stop
+    self.sending_manager_thread.join()
+  File "/usr/lib/python3.5/threading.py", line 1054, in join
+    self._wait_for_tstate_lock()
+  File "/usr/lib/python3.5/threading.py", line 1070, in _wait_for_tstate_lock
+    elif lock.acquire(block, timeout):
+KeyboardInterrupt
+Exception ignored in: <module 'threading' from '/usr/lib/python3.5/threading.py'>
+Traceback (most recent call last):
+  File "/usr/lib/python3.5/threading.py", line 1288, in _shutdown
+    t.join()
+  File "/usr/lib/python3.5/threading.py", line 1054, in join
+    self._wait_for_tstate_lock()
+  File "/usr/lib/python3.5/threading.py", line 1070, in _wait_for_tstate_lock
+    elif lock.acquire(block, timeout):
+KeyboardInterrupt
+LearnIt Thread-1                  run WARNING  Running LearniIt
+
+Sending_Manager Thread-3                  run WARNING  Wait 180 seconds to initialize sending manager
+
+Bot_Sender                     Thread-2 run WARNING  Message Handler on
+
+Message_Handler Thread-2                  setup_bot WARNING  Restart Message Handler Bot
+
+LearnIt Thread-1                  restart_bot_message_handler WARNING  Set to restart message handler bot
+
+Installed: True
+Max time idle: 10
+Sleep time: 10
+
+System turning on
+System turned on
+Traceback (most recent call last):
+  File "./console.py", line 138, in <module>
+    console.run()
+  File "./console.py", line 117, in run
+    time.sleep(3600)
+  File "./console.py", line 12, in signal_term_handler
+    console.force_off()
+AttributeError: 'Console' object has no attribute 'force_off'
+LearnIt Thread-1                  restart_bot_message_handler WARNING  Set to restart message handler bot
+
+Message_Handler Thread-2                  setup_bot WARNING  Restart Message Handler Bot
+
+LearnIt Thread-1                  restart_bot_message_handler WARNING  Set to restart message handler bot
+
+LearnIt Thread-1                  restart_bot_message_handler WARNING  Set to restart message handler bot
+
+Message_Handler Thread-2                  setup_bot WARNING  Restart Message Handler Bot
+
+LearnIt Thread-1                  restart_bot_message_handler WARNING  Set to restart message handler bot
+
+Exception ignored in: <module 'threading' from '/usr/lib/python3.5/threading.py'>
+Traceback (most recent call last):
+  File "/usr/lib/python3.5/threading.py", line 1288, in _shutdown
+    t.join()
+  File "/usr/lib/python3.5/threading.py", line 1054, in join
+    self._wait_for_tstate_lock()
+  File "/usr/lib/python3.5/threading.py", line 1070, in _wait_for_tstate_lock
+    elif lock.acquire(block, timeout):
+  File "./console.py", line 12, in signal_term_handler
+    console.force_off()
+AttributeError: 'Console' object has no attribute 'force_off'
+Installed: True
+Max time idle: 10
+Sleep time: 10
+
+System turning on
+System turned on
+>> LearnIt Thread-1                  run WARNING  Running LearniIt
+
+Sending_Manager Thread-3                  run WARNING  Wait 180 seconds to initialize sending manager
+
+Traceback (most recent call last):
+  File "./console.py", line 138, in <module>
+    console.run()
+  File "./console.py", line 112, in run
+    self.interactive()
+  File "./console.py", line 92, in interactive
+    inp = input().split()
+OSError: [Errno 9] Bad file descriptor
+Bot_Sender                     Thread-2 run WARNING  Message Handler on
+
+Message_Handler Thread-2                  setup_bot WARNING  Restart Message Handler Bot
+
+LearnIt Thread-1                  restart_bot_message_handler WARNING  Set to restart message handler bot
+
+Message_Handler Thread-2                  setup_bot WARNING  Restart Message Handler Bot
+
+LearnIt Thread-1                  restart_bot_message_handler WARNING  Set to restart message handler bot
+
+Exception ignored in: <module 'threading' from '/usr/lib/python3.5/threading.py'>
+Traceback (most recent call last):
+  File "/usr/lib/python3.5/threading.py", line 1288, in _shutdown
+    t.join()
+  File "/usr/lib/python3.5/threading.py", line 1054, in join
+    self._wait_for_tstate_lock()
+  File "/usr/lib/python3.5/threading.py", line 1070, in _wait_for_tstate_lock
+    elif lock.acquire(block, timeout):
+KeyboardInterrupt
+LearnIt Thread-1                  run WARNING  Running LearniIt
+
+Sending_Manager Thread-3                  run WARNING  Wait 180 seconds to initialize sending manager
+
+Bot_Sender                     Thread-2 run WARNING  Message Handler on
+
+Message_Handler Thread-2                  setup_bot WARNING  Restart Message Handler Bot
+
+LearnIt Thread-1                  restart_bot_message_handler WARNING  Set to restart message handler bot
+
+LearnIt Thread-1                  restart_bot_message_handler WARNING  Set to restart message handler bot
+
+Message_Handler Thread-2                  setup_bot WARNING  Restart Message Handler Bot
+
+LearnIt MainThread                safe_stop WARNING  LearnIt Safe Stop!
+
+LearnIt MainThread                stop_sending_manager WARNING  Requested sending manager to stop
+
+LearnIt MainThread                stop_message_handler WARNING  Requested message handler to stop
+
+LearnIt MainThread                backup WARNING  Start backup
+
+cp: cannot stat '../data_debug/': No such file or directory
+LearnIt MainThread                backup WARNING  Ended backup
+
+LearnIt MainThread                safe_stop WARNING  Waiting message handler to stop
+
+Bot_Sender                     Thread-2 run WARNING  Message Handler off
+
+LearnIt MainThread                safe_stop WARNING  Message handler stopped!
+
+LearnIt MainThread                safe_stop WARNING  Waiting send manager to stop
+
