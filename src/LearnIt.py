@@ -8,7 +8,7 @@ from MessageHandler import MessageHandlerThread
 from SendingManager import SendingManagerThread
 from utilities import logging_utils
 from threading import Thread
-
+import gc
 
 class LearnIt(Thread):
 
@@ -25,6 +25,7 @@ class LearnIt(Thread):
 		self.message_handler_thread = MessageHandlerThread(message_handler)
 		self.sending_manager_thread = SendingManagerThread(sending_manager)
 		self.backup_time = 3600 * 8
+		self.gc_time = 3600
 
 	def start_message_handler(self):
 		self.message_handler_thread.start()
@@ -79,6 +80,7 @@ class LearnIt(Thread):
 		self.logger.warning("Running LearniIt")
 		self.default()
 		time_ini = time.time()
+		gc_ini = time.time()
 		while self.continue_flag:
 			self.locked = True
 			self.logger.info("Check if idle time exceeded")
@@ -99,6 +101,14 @@ class LearnIt(Thread):
 			if time_fim - time_ini > self.backup_time:
 				time_ini = time.time()
 				self.backup()
+
+			gc_fim = time.time()
+			self.logger.warning("Time last garbage collection: {}".format(gc_fim - gc_ini))
+			if gc_fim - gc_ini > self.gc_time:
+				self.logger.warning("Garbage collection")
+				gc.collect()
+				gc_ini = time.time()
+
 
 
 

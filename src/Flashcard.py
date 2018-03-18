@@ -25,7 +25,7 @@ class TimeControl(object):
 	def go_next_state(self,q):
 		self.attempts += 1
 		if self.attempts == 2:
-			self.interval = 2
+			self.interval = 3
 		else:
 			self.interval = self.interval * self.ef
 		self.ef = self.ef-0.8+0.28*q-0.02*q*q
