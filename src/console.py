@@ -8,16 +8,17 @@ from SendingManager import SendingManager
 from BotController import BotControllerFactory
 import time
 
-def signal_term_handler(signal, frame):
-	console.turn_off()
-	sys.exit(0)
- 
-signal.signal(signal.SIGTERM, signal_term_handler)
-
 class Console():
 
+	def end_func(self, signum, frame):
+		print(">>>>>>>>>Exit console<<<<<<<<")
+		self.continue_flag = False
 
 	def __init__(self, debug_mode, gui):
+		signal.signal(signal.SIGINT, self.end_func)
+		signal.signal(signal.SIGTERM, self.end_func)
+		self.continue_flag = True
+
 		self.debug_mode = debug_mode
 		self.gui = gui
 		self.message_handler = None
@@ -27,12 +28,13 @@ class Console():
 		self.SENDING_MANAGER_SLEEP_TIME = 120
 		self.INSTALLED = False
 		self.read_data()
+		self.save_data()
 
 		print("Installed: {}\nMax time idle: {}\nSleep time: {}\n".format(self.INSTALLED, self.MESSAGE_HANDLER_MAX_IDLE_TIME, self.SENDING_MANAGER_SLEEP_TIME))
 
 		if self.INSTALLED == False:
 			self.install()
-			
+
 		arq = None
 		if debug_mode:
 			arq = open("../credentials/bot_debug_token.txt", "r")
@@ -74,6 +76,9 @@ class Console():
 		self.save_data()
 		print("Saved data")
 		self.learnit.safe_stop()
+		if self.learnit.is_alive():
+			print("Waiting for learnit to stop")
+			self.learnit.join()
 
 	def turn_on(self):
 		print("System turning on")
@@ -105,19 +110,28 @@ class Console():
 					self.learnit.restart_bot_sending_manager()
 					self.learnit.restart_bot_message_handler()
 		except KeyboardInterrupt as e:
-			pass	
+			pass
+
+	def restart(self):
+		if self.continue_flag == False:
+			return
+		print(">>>>>>>>Restart system!<<<<<<<<<<")
+		self.turn_off()
+		if self.continue_flag == False:
+			return
+		self.turn_on()
 
 	def run(self):
 		if self.gui:
 			self.interactive()
 		else:
 			self.turn_on()
-			try:
-				while True:
-					time.sleep(3600)
-			except KeyboardInterrupt:
-				pass
-		self.turn_off()	
+			while self.continue_flag:
+				time.sleep(12 * 3600)
+				print("Check for restart")
+				sys.stdout.flush()
+				self.restart()
+		self.turn_off()
 
 
 

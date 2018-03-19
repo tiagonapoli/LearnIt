@@ -13,7 +13,7 @@ class SendingManager():
 	def __init__(self, sleep, bot_controller_factory, debug_mode):
 		self.continue_flag = False
 		self.sleep = sleep
-		self.debug_mode = debug_mode	
+		self.debug_mode = debug_mode
 		self.bot_logger = logging.getLogger('Bot_Sender')
 		self.logger = logging.getLogger('Sending_Manager')
 		self.user_manager = UserManager(bot_controller_factory, self.debug_mode)
@@ -73,4 +73,3 @@ class SendingManagerThread(Thread):
 
 	def run(self):
 		self.sending_manager.run()
-

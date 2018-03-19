@@ -1,4 +1,4 @@
-import logging 
+import logging
 import telebot
 import os
 import time
@@ -8,12 +8,15 @@ import datetime
 USER_LOGGER = logging.DEBUG
 DATABASE = logging.DEBUG
 LEARNIT = logging.DEBUG
+
 USER_LOGGER_CONSOLE = logging.WARNING
 DATABASE_CONSOLE = logging.WARNING
 LEARNIT_CONSOLE = logging.WARNING
 BOT_SENDER = logging.WARNING
 
-class BotHandler(logging.Handler): # Inherit from logging.Handler    
+
+
+class BotHandler(logging.Handler): # Inherit from logging.Handler
 	def send_message(self, msg, exc_text, exc_class):
 		self.user_sender.send_message(msg, translate_flag=False, parse="", markup=None)
 		if exc_text != None and len(exc_text) <= 200:
@@ -45,9 +48,9 @@ def setup_learnit():
 
 	if not os.path.exists(PATH):
 		os.makedirs(PATH)
-	
+
 	PATH += filename
-		
+
 	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
@@ -58,7 +61,7 @@ def setup_learnit():
 	handler_stream.setLevel(LEARNIT_CONSOLE)
 	formatter = logging.Formatter('%(name)s %(threadName)-25s %(funcName)s %(levelname)-8s %(message)s\n')
 	handler_stream.setFormatter(formatter)
-	
+
 	logger.addHandler(handler_file)
 	logger.addHandler(handler_stream)
 	logger.setLevel(logging.DEBUG)
@@ -79,9 +82,9 @@ def setup_message_handler():
 
 	if not os.path.exists(PATH):
 		os.makedirs(PATH)
-	
+
 	PATH += filename
-		
+
 	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
@@ -92,7 +95,7 @@ def setup_message_handler():
 	handler_stream.setLevel(LEARNIT_CONSOLE)
 	formatter = logging.Formatter('%(name)s %(threadName)-25s %(funcName)s %(levelname)-8s %(message)s\n')
 	handler_stream.setFormatter(formatter)
-	
+
 	logger.addHandler(handler_file)
 	logger.addHandler(handler_stream)
 	logger.setLevel(logging.DEBUG)
@@ -113,9 +116,9 @@ def setup_sending_manager():
 
 	if not os.path.exists(PATH):
 		os.makedirs(PATH)
-	
+
 	PATH += filename
-		
+
 	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
@@ -126,11 +129,11 @@ def setup_sending_manager():
 	handler_stream.setLevel(LEARNIT_CONSOLE)
 	formatter = logging.Formatter('%(name)s %(threadName)-25s %(funcName)s %(levelname)-8s %(message)s\n')
 	handler_stream.setFormatter(formatter)
-	
+
 	logger.addHandler(handler_file)
 	logger.addHandler(handler_stream)
 	logger.setLevel(logging.DEBUG)
-		
+
 def setup_database():
 	logger = logging.getLogger('Database')
 
@@ -141,16 +144,16 @@ def setup_database():
 		logger.removeHandler(handler)
 
 	PATH = '../logs/Database.log'
-	
+
 	pos = PATH.rfind('/')
 	filename = PATH[pos+1:]
 	PATH = PATH[:pos+1]
 
 	if not os.path.exists(PATH):
 		os.makedirs(PATH)
-	
+
 	PATH += filename
-		
+
 	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
@@ -161,7 +164,7 @@ def setup_database():
 	handler_stream.setLevel(DATABASE_CONSOLE)
 	formatter = logging.Formatter('%(name)-30s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n')
 	handler_stream.setFormatter(formatter)
-	
+
 	logger.addHandler(handler_file)
 	logger.addHandler(handler_stream)
 	logger.setLevel(logging.DEBUG)
@@ -174,16 +177,16 @@ def setup_bot_sender(bot_controller_factory):
 		logger.removeHandler(handler)
 
 	PATH = '../logs/Bot_Sender.log'
-	
+
 	pos = PATH.rfind('/')
 	filename = PATH[pos+1:]
 	PATH = PATH[:pos+1]
 
 	if not os.path.exists(PATH):
 		os.makedirs(PATH)
-	
+
 	PATH += filename
-		
+
 	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
@@ -194,7 +197,7 @@ def setup_bot_sender(bot_controller_factory):
 	handler_stream.setLevel(BOT_SENDER)
 	formatter = logging.Formatter('%(name)-30s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n')
 	handler_stream.setFormatter(formatter)
-	
+
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
 	handler_bot = BotHandler(bot_controller_factory)
@@ -217,16 +220,16 @@ def setup_user_logger(user_id):
 		logger.removeHandler(handler)
 
 	PATH = '../logs/{}.log'.format(user_id)
-	
+
 	pos = PATH.rfind('/')
 	filename = PATH[pos+1:]
 	PATH = PATH[:pos+1]
 
 	if not os.path.exists(PATH):
 		os.makedirs(PATH)
-	
+
 	PATH += filename
-		
+
 	handler_file = logging.FileHandler(PATH, mode='w')
 	formatter = logging.Formatter('%(asctime)s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n',
 									datefmt= '%d/%m %H:%M:%S')
@@ -237,9 +240,7 @@ def setup_user_logger(user_id):
 	handler_stream.setLevel(USER_LOGGER_CONSOLE)
 	formatter = logging.Formatter('%(name)-30s %(threadName)s %(funcName)s %(levelname)-8s %(message)s\n')
 	handler_stream.setFormatter(formatter)
-	
+
 	logger.addHandler(handler_file)
 	logger.addHandler(handler_stream)
 	logger.setLevel(logging.DEBUG)
-	
-

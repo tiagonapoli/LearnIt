@@ -1,3 +1,3 @@
 #!/bin/bash
 cd src
-reset && ./console.py
+reset && nohup ./console.py --no-gui &

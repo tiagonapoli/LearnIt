@@ -90,7 +90,7 @@ class LearnIt(Thread):
 				self.restart_bot_message_handler()
 				sleep = self.message_handler_thread.get_max_idle_time()
 				self.logger.info("LearnIt Sleep {}".format(sleep))
-				self.locked = False			
+				self.locked = False
 				time.sleep(sleep)
 			else:
 				self.locked = False
@@ -103,20 +103,8 @@ class LearnIt(Thread):
 				self.backup()
 
 			gc_fim = time.time()
-			self.logger.warning("Time last garbage collection: {}".format(gc_fim - gc_ini))
+			self.logger.info("Time last garbage collection: {}".format(gc_fim - gc_ini))
 			if gc_fim - gc_ini > self.gc_time:
 				self.logger.warning("Garbage collection")
 				gc.collect()
 				gc_ini = time.time()
-
-
-
-
-
-	
-
-
-
-
-
-	
