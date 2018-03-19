@@ -475,8 +475,8 @@ message = { "#setup_user_username_error":
 				 1: "Trocar o idioma do bot"},
 
 			'#bot_turn_off':
-				{0: "The bot is turning off, the operation is being canceled. Sorry for the inconvenience.",
-				 1: "O bot está sendo desligado, a operação será cancelada. Desculpe pela inconveniência."},
+				{0: "The bot is restarting, the operation is being canceled. Sorry for the inconvenience.",
+				 1: "O bot está sendo reiniciado, a operação será cancelada. Desculpe pela inconveniência."},
 
 			"#select_training_select_topics":
 				{0: "_Select the topics you want to be active for your training (Unselected will be unactive):__",
