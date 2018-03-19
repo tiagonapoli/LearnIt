@@ -26,11 +26,12 @@ class Console():
 		self.learnit = None
 		self.MESSAGE_HANDLER_MAX_IDLE_TIME = 180
 		self.SENDING_MANAGER_SLEEP_TIME = 120
+		self.RESTART_TIME = 12 * 3600
 		self.INSTALLED = False
 		self.read_data()
 		self.save_data()
 
-		print("Installed: {}\nMax time idle: {}\nSleep time: {}\n".format(self.INSTALLED, self.MESSAGE_HANDLER_MAX_IDLE_TIME, self.SENDING_MANAGER_SLEEP_TIME))
+		print("Installed: {}\nMax time idle: {}\nSleep time: {}\nRestart time: {}\n".format(self.INSTALLED, self.MESSAGE_HANDLER_MAX_IDLE_TIME, self.SENDING_MANAGER_SLEEP_TIME, self.RESTART_TIME))
 
 		if self.INSTALLED == False:
 			self.install()
@@ -50,7 +51,7 @@ class Console():
 
 	def save_data(self):
 		f = open('../config.ini', 'w')
-		f.write("{} {} {}".format(self.INSTALLED, self.SENDING_MANAGER_SLEEP_TIME, self.MESSAGE_HANDLER_MAX_IDLE_TIME))
+		f.write("{} {} {} {}".format(self.INSTALLED, self.SENDING_MANAGER_SLEEP_TIME, self.MESSAGE_HANDLER_MAX_IDLE_TIME, self.RESTART_TIME))
 		f.close()
 
 
@@ -59,7 +60,7 @@ class Console():
 			f = open('../config.ini', 'r')
 			data = f.read().split()
 			f.close()
-			if len(data) < 3:
+			if len(data) < 4:
 				return
 
 			if data[0] == 'True':
@@ -68,6 +69,7 @@ class Console():
 				self.INSTALLED = False
 			self.SENDING_MANAGER_SLEEP_TIME = int(data[1])
 			self.MESSAGE_HANDLER_MAX_IDLE_TIME = int(data[2])
+			self.RESTART_TIME = int(data[3])
 		except FileNotFoundError:
 			print("config.ini doesn't exist...")
 
@@ -127,7 +129,7 @@ class Console():
 		else:
 			self.turn_on()
 			while self.continue_flag:
-				time.sleep(12 * 3600)
+				time.sleep(self.RESTART_TIME)
 				print("Check for restart")
 				sys.stdout.flush()
 				self.restart()
