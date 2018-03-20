@@ -1,5 +1,5 @@
 # LearnIt
-LearnIt is a Telegram Bot, with handle @LearnItbot, initally created to help people to memorize other languages’ vocabulary, but expanded from languages to anything you can put in cards to memorize!.<br />
+LearnIt is a Telegram Bot, with handle @LearnItbot, initally created to help people to memorize other languages’ vocabulary, but expanded from languages to anything you can put in cards to memorize!<br />
 <br />
 The main ideia is: if you know a word and don't want to forget it, you can add the word and relate it to a text, image and/or audio. After it, the bot will occasionally send you content you added (audio, image and/or text), and then ask you what the content is representing. Then you can answer the question and the bot will tell you wheter your answer is correct or not, and give you the correct answer in case what you sent was wrong. <br />
 <br />
