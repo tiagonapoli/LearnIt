@@ -45,7 +45,6 @@ class UserSendingCardManager():
 		self.logger.info("Hourly Init")
 		hour =  datetime.datetime.now().hour
 		self.last_hour = hour
-		self.sending_queue.hourly_init()
 		if hour != 0:
 			self.initialized_for_day = False
 		else:
@@ -76,11 +75,11 @@ class UserSendingCardManager():
 			self.do_grading()
 			self.logger.info("Update sending queue")
 			self.update()
-		
+
 		if self.user.get_state() == fsm.IDLE:
 			self.user.set_state(fsm.LOCKED)
-			
-			self.logger.debug("Grades map:\n{}".format(map_to_str(self.grades_for_day)))			
+
+			self.logger.debug("Grades map:\n{}".format(map_to_str(self.grades_for_day)))
 			self.logger.debug("Sending queue state:\n{}".format(str(self.sending_queue)))
 
 			card, number, card_type = self.sending_queue.pop()
@@ -156,44 +155,3 @@ class UserSendingCardManager():
 			elif waiting_type == REVIEW:
 				aux_card.calc_next_date(grade)
 				self.user.set_supermemo_data(aux_card)
-
-
-
-
-	
-
-	
-
-
-
-
-
-
-
-	
-
-
-
-
-
-
-
-
- 
-
-
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-

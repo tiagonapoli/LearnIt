@@ -57,11 +57,11 @@ def create_inline_keyboard(keys, width = 3, done_button = None):
 	keyboard = []
 	for i in range(0, len(keys)):
 		keyboard.append(create_inline_key_button(keys[i][0], keys[i][1]))
-	
+
 	markup.add(*keyboard)
 
 	if done_button != None:
-		markup.row(create_inline_key_button(done_button[0], done_button[1]))			
+		markup.row(create_inline_key_button(done_button[0], done_button[1]))
 	return markup
 
 def create_keyboard(keys, width = 3, done_button = None):
@@ -88,10 +88,10 @@ class BotMessageSender():
 	def __init__(self, token, user_id, language):
 		self.token = token
 		self.user_id = user_id
-		self.tries = 20
-		self.sleep = 0.5
+		self.tries = 3
+		self.sleep = 1
 		self.language = language
-		self.logger = logging.getLogger('BotMessageSender.log') 
+		self.logger = logging.getLogger('BotMessageSender.log')
 
 		self.keyboard_options = None
 		self.keyboard_type = None
@@ -112,9 +112,10 @@ class BotMessageSender():
 
 
 	#ok
-	def set_bot(self):		
+	def set_bot(self):
 		now = time.time()
 		if now - self.last_set_bot >= self.max_idle_time:
+			self.bot.stop_instance()
 			del self.bot
 			self.bot = telebot.TeleBot(self.token)
 			self.last_set_bot = time.time()
@@ -142,7 +143,7 @@ class BotMessageSender():
 						return True, key, cnt
 				cnt += 1
 			return False, ans, -1
-			 
+
 		ans = ans[1:]
 		try:
 			number = int(ans)
@@ -169,12 +170,12 @@ class BotMessageSender():
 						return 'Next', key, cnt
 				cnt += 1
 			return 'Error', ans, -1
-			 
+
 		ans = ans[1:]
 		try:
 			number = int(ans)
 			number -= self.first_option_value
-			
+
 			if number == len(self.keyboard_options)-1:
 				return 'End', self.keyboard_options[number], number
 
@@ -267,7 +268,7 @@ class BotMessageSender():
 
 		self.first_option_value = first_option_value
 		self.keyboard_type = 'navigation_string_keyboard'
-		self.keyboard_options = list(options) 
+		self.keyboard_options = list(options)
 		self.markdown_options = markdown_options
 		if back_btn != None:
 			self.keyboard_back_btn = True
@@ -278,7 +279,7 @@ class BotMessageSender():
 
 		end_btn = translation.translate(end_btn, self.language)
 		self.keyboard_options.append(end_btn)
-		
+
 
 		tries = self.tries
 		txt = translation.translate(txt, self.language)
@@ -430,13 +431,12 @@ if __name__ == '__main__':
 
 	message_sender = BotMessageSender('495750247:AAFVO7YqWCl2QKov6PselFnAlL_RRBtfWco', 359999978, 1)
 
-	message_sender.send_message('*BotMessageSender testings*', translate_flag=False) 
+	message_sender.send_message('*BotMessageSender testings*', translate_flag=False)
 	message_sender.send_message('*BotMessage %s Sender testings*', txt_args=("*Negrito!*", ), translate_flag=False)
-	message_sender.send_message('*BotMessageSender testings*', parse='', translate_flag=False) 
+	message_sender.send_message('*BotMessageSender testings*', parse='', translate_flag=False)
 	message_sender.send_photo('/home/tiagonapoli/Pictures/Trees_JeroenVanNieuwenhoveFlickr.jpg')
 	message_sender.send_voice('/home/tiagonapoli/Music/sound-9.mp3')
 	message_sender.send_selection_inline_keyboard("#topic", ['Yes', 'No'], txt_args=('_Nao italico_',))
 	message_sender.send_selection_inline_keyboard('Send image', ['Yes', 'No'], translate_options=True)
 	message_sender.send_string_keyboard("#topic", ['Yes', 'No'], txt_args=('Neg_*_rito',))
 	message_sender.send_string_keyboard('#image_received', ['Yes', 'No'], translate_options=True)
-

@@ -1,6 +1,7 @@
 from random import shuffle
 from collections import deque
 import datetime
+import time
 
 
 def sending_queue_to_str(dequeue):
@@ -36,11 +37,10 @@ class SendingQueue():
 		self.user = user
 
 		self.cards_per_hour = None
-		self.learn_cnt_hourly = 0
-		self.learn_total_hourly = 0
-
-		self.review_cnt_hourly = 0
-		self.review_total_hourly = 0
+		self.last_pop_time = time.time()
+		self.order = ['Learning', 'Review', 'Learning', 'Review']
+		self.order_cnt = 0
+		shuffle(self.order)
 
 		self.learn_queue = LearningQueue()
 		self.review_queue = ReviewQueue()
@@ -49,41 +49,17 @@ class SendingQueue():
 		self.init_day()
 
 	def __str__(self):
-		txt = "Cards per hour:{} ReviewHour: {}/{}  LearnHour: {}/{}\n".format(self.cards_per_hour, self.review_cnt_hourly, self.review_total_hourly, self.learn_cnt_hourly, self.learn_total_hourly)
+		txt = "Cards per hour:{} interval: {:0.1f}/{:0.1f}\n".format(self.cards_per_hour, time.time()-self.last_pop_time, 3600/self.cards_per_hour)
+		txt += "Order [{}]: ".format(self.order_cnt) + str(self.order) + "\n"
 		txt += "SendingQueue: " + sending_queue_to_str(self.queue) + "\n"
 		txt += str(self.learn_queue)
 		txt += str(self.review_queue)
 		return txt
 
-
-
-	def hourly_init(self):
-		now = datetime.datetime.now()
-		hour = now.hour
-
-		self.learn_cnt_hourly = 0
-		self.review_cnt_hourly = 0
-		
-		qtd = self.cards_per_hour
-		if qtd == 1:
-			if hour % 2 == 0:
-				self.learn_total_hourly = 1
-			else:
-				self.learn_total_hourly = 0
-			remaining = qtd - self.learn_total_hourly
-			self.review_total_hourly = remaining
-		else:
-			self.learn_total_hourly = int(0.5 * qtd)
-			remaining = qtd - self.learn_total_hourly
-			self.review_total_hourly = remaining
-
-
 	def init_day(self):
 		self.learn_queue.init_day()
 		self.review_queue.init_day()
 		self.update()
-		self.hourly_init()
-
 
 	def update(self):
 		now = datetime.datetime.now()
@@ -102,13 +78,13 @@ class SendingQueue():
 		self.learn_queue.update(expired_learning_cards)
 		self.review_queue.update(expired_review_cards)
 
-
 	def pop(self):
 		self.prepare_queue()
 
 		if len(self.queue) == 0:
 			return (None, -1, -1)
 
+		self.last_pop_time = time.time()
 		return self.queue.popleft()
 
 	def remove_card(self, card):
@@ -121,35 +97,14 @@ class SendingQueue():
 			self.queue.append(aux_queue.popleft())
 		self.learn_queue.remove_card(card)
 
-
 	def prepare_queue(self):
-		now = datetime.datetime.now()
-		minute = now.minute
 
-		total = self.learn_total_hourly + self.review_total_hourly
-		total_sent = self.learn_cnt_hourly + self.review_cnt_hourly
-		send_time_ini = int(60 * total_sent/total)
+		interval = 3600 / self.cards_per_hour
+		now = time.time()
 
-		# self.logger.info("Hourly process: {}/{}".format(total_sent, total))
-		# self.logger.debug("Remaining cards: L={}  R={}".format(self.get_remaining_learn_cards(), len(self.now_review_stack)))
-		# self.logger.debug("Queue: " + sending_queue_to_str(self._queue))
-		# self.logger.debug("learn now:" + stack_to_str(self.now_learn_stack)) 
-		# self.logger.debug("learn next:" + stack_to_str(self.next_learn_stack)) 
-		# self.logger.debug("review now:" + stack_to_str(self.now_review_stack)) 
-		# self.logger.debug("min: {}  send_time_ini: {}".format(minute, send_time_ini))
+		if now - self.last_pop_time > interval and len(self.queue) < self.max_size:
 
-
-		if send_time_ini <= minute and len(self.queue) < self.max_size:
-	
-			if self.learn_queue.size() > 0 or self.review_queue.size() > 0:			
-				if self.review_cnt_hourly < self.review_total_hourly and self.review_queue.size() == 0:
-					self.learn_total_hourly += 1
-					self.review_total_hourly -= 1
-				elif self.learn_cnt_hourly < self.learn_total_hourly and self.learn_queue.size() == 0:
-					self.learn_total_hourly -= 1
-					self.review_total_hourly += 1
-
-			if self.learn_cnt_hourly < self.learn_total_hourly and self.learn_queue.size() > 0:
+			if self.order[self.order_cnt] == 'Learning' and self.learn_queue.size() > 0:
 				card, number = self.learn_queue.pop()
 				if card == None:
 					return
@@ -162,12 +117,10 @@ class SendingQueue():
 
 				if self.user.is_card_active(card.get_card_id()) > 0:
 					self.queue.append((card, number, 'Learning'))
-					self.learn_cnt_hourly += 1
 				else:
 					self.learn_queue.remove_card(card)
 
-
-			elif self.review_cnt_hourly < self.review_total_hourly and self.review_queue.size() > 0:
+			elif self.order[self.order_cnt] == 'Review' and self.review_queue.size() > 0:
 				card, number = self.review_queue.pop()
 				if card == None:
 					return
@@ -175,10 +128,14 @@ class SendingQueue():
 					card, number = self.review_queue.pop()
 					if card == None:
 						return
-				
+
 				if self.user.is_card_active(card.get_card_id()) > 0:
 					self.queue.append((card, number, 'Review'))
-					self.review_cnt_hourly += 1
+
+			self.order_cnt += 1
+			if self.order_cnt == len(self.order):
+				self.order_cnt = 0
+				shuffle(self.order)
 
 
 
@@ -206,7 +163,7 @@ class LearningQueue():
 		if expired_cards != None:
 			self.expired_cards = expired_cards
 			self.cards_set = set()
-		
+
 		study_items_set = set()
 
 		for card in self.queue:
@@ -294,7 +251,7 @@ class ReviewQueue():
 		cards_set = set()
 		for card in self.queue:
 			cards_set.add(card.get_card_id())
-		
+
 		for card in expired_cards:
 			if len(self.queue) == self.max_size:
 				break

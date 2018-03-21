@@ -15,7 +15,6 @@ LEARNIT_CONSOLE = logging.WARNING
 BOT_SENDER = logging.WARNING
 
 
-
 class BotHandler(logging.Handler): # Inherit from logging.Handler
 	def send_message(self, msg, exc_text, exc_class):
 		self.user_sender.send_message(msg, translate_flag=False, parse="", markup=None)

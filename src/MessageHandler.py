@@ -21,6 +21,7 @@ from UserManager import UserManager
 from BotController import BotControllerFactory
 from threading import Thread
 import fsm
+import gc
 
 
 class MessageHandler():
@@ -68,15 +69,16 @@ class MessageHandler():
 		self.logger.warning("Restart Message Handler Bot")
 		#self.bot_logger.warning("Restart Message Handler Bot")
 
-		del self.bot
-		self.bot = None
+		if self.bot != None:
+			self.bot.stop_instance()
+			del self.bot
 		self.bot = self.bot_controller_factory.get_simple_bot()
 
 		for user_id, user in self.user_manager.users.items():
 			user.set_last_op_time()
 
 		message_handlers.setup_user.handle_setup_user(self.bot, self.user_manager,self.debug_mode)
-		message_handlers.error_handling.handle_user_dont_exist(self.bot, self.user_manager,self.debug_mode)	
+		message_handlers.error_handling.handle_user_dont_exist(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.cancel.handle_cancel(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.add_item.handle_add_item(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.select_training.handle_select_training(self.bot, self.user_manager,self.debug_mode)
@@ -90,23 +92,26 @@ class MessageHandler():
 		message_handlers.stop.handle_stop(self.bot, self.user_manager,self.debug_mode)
 		message_handlers.message_not_understood.handle_message_not_understood(self.bot, self.user_manager,self.debug_mode)
 
+
 	def run(self):
 		self.continue_flag = True
 		self.bot_logger.warning("Message Handler on")
-
+		cycles = 0
 		while self.continue_flag:
 			try:
-				self.setup_bot()					
-				self.bot.polling()	
+				if cycles % 2 == 0:
+					self.logger.warning("Collect garbage")
+					gc.collect()
+				self.setup_bot()
+				cycles += 1
+				self.bot.polling()
 			except Exception as e:
-				if self.bot != None:
-					self.bot.stop_polling()
-					time.sleep(5)
+				self.restart_bot()
 				self.reset_exception()
 				self.bot_logger.error("Message Handler Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
-				self.logger.error("Message Handler Bot Crashed {}".format(e.__class__.__name__), exc_info=True)	
+				self.logger.error("Message Handler Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
 				time.sleep(5)
-		
+
 		self.bot_logger.warning("Message Handler off")
 
 
@@ -118,7 +123,7 @@ class MessageHandlerThread(Thread):
 
 	def stop(self):
 		self.message_handler.stop()
-	
+
 	def run(self):
 		self.message_handler.run()
 
@@ -136,5 +141,13 @@ class MessageHandlerThread(Thread):
 
 if __name__ == '__main__':
 	import BotController
-	message_handler = MessageHandler(60, BotControllerFactory('540185672:AAHDW57BvDSqRtXKXWfbRL44Ik1JIuXzYeg'), 1)
-	message_handler.run()
+	message_handler = MessageHandler(3, BotControllerFactory('540185672:AAHDW57BvDSqRtXKXWfbRL44Ik1JIuXzYeg'), 1)
+	message_handler_thread = MessageHandlerThread(message_handler)
+	message_handler_thread.start()
+
+	while True:
+		aux = message_handler_thread.idle_time_exceed()
+		print(aux)
+		if message_handler_thread.idle_time_exceed() < 0:
+			message_handler_thread.restart_bot()
+		time.sleep(1)

@@ -23,7 +23,7 @@ class BotController(BotMessageSender):
 
 
 	def save_image(self, image_msg, path, image_name):
-		try: 
+		try:
 			self.set_bot()
 			f = image_msg.photo[-1].file_id
 			arq = self.bot.get_file(f)
@@ -45,7 +45,7 @@ class BotController(BotMessageSender):
 
 
 	def save_audio(self, audio_msg, path, audio_name):
-		try: 
+		try:
 			self.set_bot()
 			f = audio_msg.audio.file_id
 			arq = self.bot.get_file(f)
@@ -63,11 +63,11 @@ class BotController(BotMessageSender):
 			return path + audio_name + "." + tipo
 		except Exception as e:
 			self.logger.error("Error in save audio {}".format(self.user_id), exc_info=True)
-			return None	
+			return None
 
 
 	def save_voice(self, voice_msg, path, voice_name):
-		try: 
+		try:
 			self.set_bot()
 			f = voice_msg.voice.file_id
 			arq = self.bot.get_file(f)
@@ -80,7 +80,7 @@ class BotController(BotMessageSender):
 			return path + voice_name + "." + tipo
 		except Exception as e:
 			self.logger.error("Error in save voice {}".format(self.user_id), exc_info=True)
-			return None	
+			return None
 
 	def send_all_cards(self, study_item_deck, except_type=""):
 		for card_type, card in study_item_deck.cards.items():
@@ -108,7 +108,7 @@ class BotController(BotMessageSender):
 			self.send_message(question, translate_flag=False)
 
 	def send_card_query(self, card, card_type = 'Review', number = None):
-			
+
 			if number == None:
 				number = ""
 			else:
@@ -118,7 +118,7 @@ class BotController(BotMessageSender):
 			topic = card.get_topic()
 
 			self.send_message("#card_type", txt_args=(card_type, number))
-				
+
 			study_item_type, study_item = card.get_study_item()
 			question_type, question = card.get_question()
 
@@ -145,12 +145,12 @@ if __name__ == '__main__':
 
 	from Flashcard import StudyItemDeck, Card
 
-	sender_factory = BotController('495750247:AAFVO7YqWCl2QKov6PselFnAlL_RRBtfWco')
+	sender_factory = BotControllerFactory('495750247:AAFVO7YqWCl2QKov6PselFnAlL_RRBtfWco')
 
 	message_sender = sender_factory.get_bot_controller(359999978, 0)
 
 	deck_text = StudyItemDeck(42, 1, 1, 'Portugues', 'Comida', 'Carne*', 0)
-	card = Card(42, 1, 1, 'Portugues', 'Comida', 'Car_ne', 0, 1, 'Meat', 'text') 
+	card = Card(42, 1, 1, 'Portugues', 'Comida', 'Car_ne', 0, 1, 'Meat', 'text')
 	deck_text.set_card(card)
 
 	message_sender.send_card_query(deck_text.cards['text'])
@@ -159,7 +159,7 @@ if __name__ == '__main__':
 
 	deck_img = StudyItemDeck(42, 1, 1, 'Portugues', 'Comida', '/home/tiago/Pictures/Trees_JeroenVanNieuwenhoveFlickr.jpg', 1)
 	deck_img = StudyItemDeck(42, 1, 1, 'Portugues', 'Comida', '/home/tiago/Pictures/Trees_JeroenVanNieuwenhoveFlickr.jpg', 1)
-	card = Card(42, 1, 1, 'Portugues', 'Comida', '/home/tiago/Pictures/Trees_JeroenVanNieuwenhoveFlickr.jpg', 1, 2, 'Meat', 'text') 
+	card = Card(42, 1, 1, 'Portugues', 'Comida', '/home/tiago/Pictures/Trees_JeroenVanNieuwenhoveFlickr.jpg', 1, 2, 'Meat', 'text')
 	deck_img.set_card(card)
 
 	message_sender.send_message("TESTE 2", translate_flag=False)
