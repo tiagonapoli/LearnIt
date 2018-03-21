@@ -13,13 +13,13 @@ class BotControllerFactory():
 		return telebot.TeleBot(self.token)
 
 	def get_bot_controller(self, user_id, language):
-		return BotController(self.token, user_id, language)
+		return BotController(self.token, user_id, language, False)
 
 
 class BotController(BotMessageSender):
 
-	def __init__(self, token, user_id, language):
-		BotMessageSender.__init__(self, token, user_id, language)
+	def __init__(self, token, user_id, language, threaded=True):
+		BotMessageSender.__init__(self, token, user_id, language, threaded)
 
 
 	def save_image(self, image_msg, path, image_name):

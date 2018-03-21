@@ -6,11 +6,11 @@ import signal
 from utilities import string_treating
 
 class SendTimeoutException(Exception):   # custom exception
-    def __str__(self):
-    	return "Sending Timeout Exception"
+	def __str__(self):
+		return "Sending Timeout Exception"
 
 def timeout_handler(signum, frame):   # raises exception when signal sent
-    raise SendTimeoutException
+	raise SendTimeoutException
 
 signal.signal(signal.SIGALRM, timeout_handler)
 
@@ -85,8 +85,9 @@ def create_keyboard(keys, width = 3, done_button = None):
 
 class BotMessageSender():
 
-	def __init__(self, token, user_id, language):
+	def __init__(self, token, user_id, language, threaded=True):
 		self.token = token
+		self.threaded = threaded
 		self.user_id = user_id
 		self.tries = 3
 		self.sleep = 1
@@ -106,7 +107,7 @@ class BotMessageSender():
 		self.no_empty_flag = None
 		self.btn_set = None
 
-		self.bot = telebot.TeleBot(self.token)
+		self.bot = telebot.TeleBot(self.token, threaded=self.threaded)
 		self.last_set_bot = time.time()
 		self.max_idle_time = 40
 
@@ -117,10 +118,12 @@ class BotMessageSender():
 		if now - self.last_set_bot >= self.max_idle_time:
 			self.bot.stop_instance()
 			del self.bot
-			self.bot = telebot.TeleBot(self.token)
+			self.bot = telebot.TeleBot(self.token, threaded=self.threaded)
 			self.last_set_bot = time.time()
 			fim = time.time()
 
+	def stop_instance(self):
+		self.bot.stop_instance()
 
 	def translate_options(self, lst):
 		ret = []
@@ -335,7 +338,7 @@ class BotMessageSender():
 			try:
 				self.set_bot()
 				self.bot.edit_message_text(chat_id=self.user_id, message_id=self.keyboard_id, text=txt,
-				    		 reply_markup=markup, parse_mode=parse)
+							 reply_markup=markup, parse_mode=parse)
 				return
 			except:
 				self.logger.error("Error in edit selection inline keyboard {}".format(self.user_id), exc_info=True)

@@ -18,6 +18,7 @@ def handle_setup_user(bot, user_manager, debug_mode):
 		if username == None:
 			bot = user_manager.bot_controller_factory.get_bot_controller(user_id, 0)
 			bot.send_message("#setup_user_username_error")
+			bot.stop_instance()
 			del bot
 			return
 
@@ -28,7 +29,7 @@ def handle_setup_user(bot, user_manager, debug_mode):
 				user.set_active(1)
 				user.send_message("#welcome_back")
 			return
-		
+
 		m = user_manager.add_user(user_id, username)
 		user = user_manager.get_user(user_id)
 		user.set_state(fsm.LOCKED)

@@ -64,10 +64,10 @@ class User:
 		return self.native
 
 	def set_last_op_time(self):
-		self.last_op_time = time.time()	
+		self.last_op_time = time.time()
 
 	def set_last_user_wake(self):
-		self.last_user_wake = time.time()	
+		self.last_user_wake = time.time()
 
 	def get_last_op_time(self):
 		return self.last_op_time
@@ -161,7 +161,7 @@ class User:
 
 	def set_study_item_active(self, study_item_id, active):
 		return self.db.set_study_item_active(self.user_id, study_item_id, active)
-		
+
 	def check_study_item_existence(self, subject, topic, study_item):
 		return self.db.check_study_item_existence(self.user_id, subject, topic, study_item)
 
@@ -283,7 +283,7 @@ class User:
 
 	def set_subject_active(self, subject, active):
 		return self.db.set_subject_active(self.user_id, subject, active)
-	
+
 	'''
 	========================================================
 				  	BOT CONTROLLER DELEGATION
@@ -297,26 +297,26 @@ class User:
 		return self.bot_controller.save_audio(audio_msg, path, audio_name)
 
 	def save_voice(self, voice_msg, path, voice_name):
-		return self.bot_controller.save_voice(voice_msg, path, voice_name)	
+		return self.bot_controller.save_voice(voice_msg, path, voice_name)
 
 	def send_card_answer(self, card):
-		return self.bot_controller.send_card_answer(card)		
+		return self.bot_controller.send_card_answer(card)
 
 	def send_card_question(self, card):
 		return self.bot_controller.send_card_question(card)
 
 	def send_card_query(self, card, card_type = 'Review', number = None):
-		return self.bot_controller.send_card_query(card, card_type, number)		
+		return self.bot_controller.send_card_query(card, card_type, number)
 
 	def parse_string_keyboard_ans(ans):
-		return self.bot_controller.parse_string_keyboard_ans(ans)	
-	
+		return self.bot_controller.parse_string_keyboard_ans(ans)
+
 	def parse_selection_inline_keyboard_ans(callback_data):
 		return self.bot_controller.parse_selection_inline_keyboard_ans(callback_data)
-	
+
 	def parse_keyboard_ans(self, msg):
 		return self.bot_controller.parse_keyboard_ans(msg)
-	
+
 	def send_string_keyboard(self, txt, options, txt_args=(), markdown_options=None, translate_options=False, add_default_keyboard=True, first_option_value=1, width=3, parse="Markdown"):
 		return self.bot_controller.send_string_keyboard(txt, options, txt_args, markdown_options, translate_options, add_default_keyboard, first_option_value, width, parse)
 
@@ -324,16 +324,16 @@ class User:
 		if btn_set == None:
 			btn_set = set()
 		return self.bot_controller.send_selection_inline_keyboard(txt, options, txt_args, translate_options, empty_keyboard_text, no_empty_flag, btn_set, width, parse)
-	
-	def edit_selection_inline_keyboard(self, txt, parse="Markdown"):		
+
+	def edit_selection_inline_keyboard(self, txt, parse="Markdown"):
 		return self.bot_controller.edit_selection_inline_keyboard(txt, parse)
-	
+
 	def send_message(self, txt, txt_args=(), markup=BotMessageSender.keyboard_remove(), translate_flag=True, parse='Markdown', disable_web_preview=True):
 		return self.bot_controller.send_message(txt, txt_args, markup, translate_flag, parse, disable_web_preview)
 
 	def send_photo(self, path, markup=BotMessageSender.keyboard_remove()):
-		return self.bot_controller.send_photo(path, markup)	
-	
+		return self.bot_controller.send_photo(path, markup)
+
 	def send_voice(self, path, markup=BotMessageSender.keyboard_remove()):
 		return self.bot_controller.send_voice(path, markup)
 

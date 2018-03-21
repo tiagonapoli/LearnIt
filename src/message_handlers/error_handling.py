@@ -10,6 +10,7 @@ def handle_user_dont_exist(bot, user_manager, debug_mode):
 		user_id = get_id(msg)
 		bot = user_manager.bot_controller_factory.get_bot_controller(user_id, 0)
 		bot.send_message("#user_dont_exist_error_handling")
+		bot.stop_instance()
 
 	#=====================USER DOESN'T EXIST - CALLBACK=====================
 	@bot.callback_query_handler(func = lambda call:	user_manager.check_user_existence(get_id(call.message)) == False)
@@ -17,7 +18,4 @@ def handle_user_dont_exist(bot, user_manager, debug_mode):
 		user_id = get_id(call.message)
 		bot = user_manager.bot_controller_factory.get_bot_controller(user_id, 0)
 		bot.send_message("#user_dont_exist_error_handling")
-
-
-
-		
+		bot.stop_instance()
