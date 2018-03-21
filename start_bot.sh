@@ -1,3 +1,3 @@
 #!/bin/bash
 cd src
-reset && nohup ./console.py --no-gui &
+reset && nohup ./LearnIt.py &
