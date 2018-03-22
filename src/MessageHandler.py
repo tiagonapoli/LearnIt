@@ -19,7 +19,7 @@ import message_handlers.select_training
 from utilities import logging_utils, utils
 from UserManager import UserManager
 from BotController import BotControllerFactory
-from threading import Thread
+import threading
 import fsm
 import gc
 
@@ -35,7 +35,7 @@ class MessageHandler():
 		self.bot = None
 		self.user_manager = UserManager(self.bot_controller_factory, self.debug_mode)
 		self.user_manager.reset_all_states()
-		self.continue_flag = False
+		self.__stop = threading.Event()
 
 	def idle_time_exceed(self):
 		now = time.time()
@@ -54,7 +54,7 @@ class MessageHandler():
 			self.bot.stop_polling()
 
 	def stop(self):
-		self.continue_flag = False
+		self.__stop.set()
 		if self.bot != None:
 			self.bot.stop_polling()
 		self.user_manager.reset_all_states_turn_off()
@@ -67,13 +67,11 @@ class MessageHandler():
 
 	def setup_bot(self):
 		self.logger.warning("Restart Message Handler Bot")
-		#self.bot_logger.warning("Restart Message Handler Bot")
-
+		self.bot_logger.warning("Restart Message Handler Bot")
 		if self.bot != None:
 			self.bot.stop_instance()
 			del self.bot
 		self.bot = self.bot_controller_factory.get_simple_bot()
-
 		for user_id, user in self.user_manager.users.items():
 			user.set_last_op_time()
 
@@ -94,10 +92,10 @@ class MessageHandler():
 
 
 	def run(self):
-		self.continue_flag = True
+		self.__stop.clear()
 		self.bot_logger.warning("Message Handler on")
 		cycles = 0
-		while self.continue_flag:
+		while not self.__stop.wait(3):
 			try:
 				if cycles % 2 == 0:
 					self.logger.warning("Collect garbage")
@@ -110,15 +108,14 @@ class MessageHandler():
 				self.reset_exception()
 				self.bot_logger.error("Message Handler Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
 				self.logger.error("Message Handler Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
-				time.sleep(5)
 
 		self.bot_logger.warning("Message Handler off")
 
 
-class MessageHandlerThread(Thread):
+class MessageHandlerThread(threading.Thread):
 
 	def __init__(self, message_handler):
-		Thread.__init__(self)
+		threading.Thread.__init__(self, name="MessageHandlerThread")
 		self.message_handler = message_handler
 
 	def stop(self):

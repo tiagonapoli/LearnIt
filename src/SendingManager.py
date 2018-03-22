@@ -1,28 +1,26 @@
 #! /usr/bin/python3
 import datetime
 import time
-from threading import Thread
 from UserManager import UserManager
 from UserSendingCardManager import UserSendingCardManager
 from utilities import logging_utils
 import logging
 import gc
+import threading
 
 
 class SendingManager():
 
 	def __init__(self, sleep, bot_controller_factory, debug_mode):
-		self.continue_flag = False
+		self.__stop = threading.Event()
 
 		self.sleep = sleep
-		self.sleep_divisions = 60
 		self.debug_mode = debug_mode
 		self.bot_logger = logging.getLogger('Bot_Sender')
 		self.logger = logging.getLogger('Sending_Manager')
 		self.user_manager = UserManager(bot_controller_factory, self.debug_mode)
 		self.users = self.user_manager.users
 		self.user_card_manager = {}
-		self.init_time = 180
 
 
 	def upd_users(self):
@@ -35,23 +33,13 @@ class SendingManager():
 				self.user_card_manager[user_id] = UserSendingCardManager(user)
 
 	def stop(self):
-		self.continue_flag = False
-
-	def partial_sleep(self, sleep, divisions):
-		cnt = divisions
-		mini_sleep = sleep / divisions
-		while cnt > 0 and self.continue_flag:
-			time.sleep(mini_sleep)
-			cnt -= 1
+		self.__stop.set()
 
 	def run(self):
-		self.continue_flag = True
-
-		self.logger.warning("Wait {} seconds to initialize sending manager".format(self.init_time))
-		self.partial_sleep(self.init_time, self.sleep_divisions)
+		self.__stop.clear()
 
 		cycles = 0
-		while self.continue_flag:
+		while not self.__stop.wait(self.sleep):
 			try:
 				if cycles % 2 == 0:
 					self.logger.warning("Collect garbage")
@@ -65,20 +53,18 @@ class SendingManager():
 						continue
 					user_card_manager.run()
 				self.logger.info("Sleep {}".format(self.sleep))
-				self.partial_sleep(self.sleep, self.sleep_divisions)
 			except Exception as e:
 				self.bot_logger.error("EXCEPTION on sending manager", exc_info=True)
 				self.logger.error("EXCEPTION on sending manager", exc_info=True)
-				self.partial_sleep(self.sleep, self.sleep_divisions)
 
 		self.logger.warning("Sending manager turned off")
 		self.bot_logger.warning("Sending manager turned off")
 
 
-class SendingManagerThread(Thread):
+class SendingManagerThread(threading.Thread):
 
 	def __init__(self, sending_manager):
-		Thread.__init__(self)
+		threading.Thread.__init__(self, name="SendingManagerThread")
 		self.sending_manager = sending_manager
 
 	def stop(self):

@@ -8,31 +8,26 @@ from MessageHandler import MessageHandlerThread, MessageHandler
 from SendingManager import SendingManagerThread, SendingManager
 from BotController import BotControllerFactory
 from utilities import logging_utils
-from threading import Thread
+import threading
 import gc
 
-class LearnItThread(Thread):
+class LearnItThread(threading.Thread):
 
 	def __init__(self, message_handler, sending_manager, bot_controller_factory):
-		Thread.__init__(self)
-		self.locked = True
-		self.continue_flag = True
+		threading.Thread.__init__(self, name="LearnItThread")
+		self.lock = threading.Lock()
+		self.__stop = threading.Event()
+
 		logging_utils.setup_learnit()
 		logging_utils.setup_message_handler()
 		logging_utils.setup_sending_manager()
 		logging_utils.setup_database()
 		logging_utils.setup_bot_sender(bot_controller_factory)
+		self.bot_logger = logging.getLogger('Bot_Sender')
 		self.logger = logging.getLogger('LearnIt')
 		self.message_handler_thread = MessageHandlerThread(message_handler)
 		self.sending_manager_thread = SendingManagerThread(sending_manager)
 		self.backup_time = 3600 * 8
-
-	def partial_sleep(self, sleep, divisions):
-		cnt = divisions
-		mini_sleep = sleep / divisions
-		while cnt > 0 and self.continue_flag:
-			time.sleep(mini_sleep)
-			cnt -= 1
 
 	def start_message_handler(self):
 		self.message_handler_thread.start()
@@ -62,9 +57,9 @@ class LearnItThread(Thread):
 		self.logger.warning("Ended backup")
 
 	def safe_stop(self):
-		self.continue_flag = False
-		while self.locked == True:
-			time.sleep(0.5)
+		self.__stop.set()
+		self.lock.acquire()
+
 		self.logger.warning("LearnIt Safe Stop!")
 
 		self.stop_sending_manager()
@@ -81,13 +76,26 @@ class LearnItThread(Thread):
 			self.sending_manager_thread.join()
 		self.logger.warning("Sending manager stopped!")
 
+		self.lock.release()
 
 	def run(self):
 		self.logger.warning("Running LearniIt")
 		self.default()
 		time_ini = time.time()
-		while self.continue_flag:
-			self.locked = True
+		last_thread_check = time.time()
+		sleep = 1
+		while not self.__stop.wait(sleep):
+			if time.time() - last_thread_check > 5:
+				for x in threading.enumerate():
+					print(x)
+				self.bot_logger.warning("Threads: " + str(threading.active_count()))
+				last_thread_check = time.time()
+
+			self.lock.acquire()
+			if self.__stop.wait(0):
+				self.lock.release()
+				break
+
 			self.logger.info("Check if idle time exceeded")
 			sleep = self.message_handler_thread.idle_time_exceed()
 			self.logger.info("LearnIt Sleep {}".format(sleep))
@@ -95,11 +103,6 @@ class LearnItThread(Thread):
 				self.restart_bot_message_handler()
 				sleep = self.message_handler_thread.get_max_idle_time()
 				self.logger.info("LearnIt Sleep {}".format(sleep))
-				self.locked = False
-				self.partial_sleep(sleep, 10)
-			else:
-				self.locked = False
-				self.partial_sleep(sleep, 10)
 
 			time_fim = time.time()
 			self.logger.info("Time last backup: {}".format(time_fim - time_ini))
@@ -107,18 +110,21 @@ class LearnItThread(Thread):
 				time_ini = time.time()
 				self.backup()
 
+			self.lock.release()
+
+
 
 class Container():
 
 		def end_func(self, signal, frame):
 			print("---------End LearnIt---------")
-			self.continue_flag = False
+			self.__stop.set()
 
 		def __init__(self, debug_mode):
 			signal.signal(signal.SIGINT, self.end_func)
 			signal.signal(signal.SIGTERM, self.end_func)
 
-			self.continue_flag = True
+			self.__stop = threading.Event()
 
 			self.debug_mode = debug_mode
 			self.message_handler = None
@@ -198,8 +204,7 @@ class Container():
 
 		def run(self):
 			self.turn_on()
-			while self.continue_flag:
-				time.sleep(0.5)
+			self.__stop.wait()
 			self.turn_off()
 
 if __name__ == '__main__':
