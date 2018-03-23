@@ -45,7 +45,7 @@ class SendingManager():
 					self.logger.warning("Collect garbage")
 					gc.collect()
 
-				self.logger.warning("Sending Manager Woke Up - Cycles: {}".format(cycles))
+				self.logger.warning("SM Woke Up - Cycles: {}".format(cycles))
 				cycles += 1
 				self.upd_users()
 				for user_id, user_card_manager in self.user_card_manager.items():
@@ -54,11 +54,11 @@ class SendingManager():
 					user_card_manager.run()
 				self.logger.info("Sleep {}".format(self.sleep))
 			except Exception as e:
-				self.bot_logger.error("EXCEPTION on sending manager", exc_info=True)
-				self.logger.error("EXCEPTION on sending manager", exc_info=True)
+				self.bot_logger.error("EXCEPTION on SM", exc_info=True)
+				self.logger.error("EXCEPTION on SM", exc_info=True)
 
-		self.logger.warning("Sending manager turned off")
-		self.bot_logger.warning("Sending manager turned off")
+		self.logger.warning("SM turned off")
+		self.bot_logger.warning("SM turned off")
 
 
 class SendingManagerThread(threading.Thread):

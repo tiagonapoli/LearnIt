@@ -13,11 +13,12 @@ import gc
 
 class LearnItThread(threading.Thread):
 
-	def __init__(self, message_handler, sending_manager, bot_controller_factory):
+	def __init__(self, learnit_sleep, message_handler, sending_manager, bot_controller_factory):
 		threading.Thread.__init__(self, name="LearnItThread")
 		self.lock = threading.Lock()
 		self.__stop = threading.Event()
 
+		self.learnit_sleep = learnit_sleep
 		logging_utils.setup_learnit()
 		logging_utils.setup_message_handler()
 		logging_utils.setup_sending_manager()
@@ -27,25 +28,24 @@ class LearnItThread(threading.Thread):
 		self.logger = logging.getLogger('LearnIt')
 		self.message_handler_thread = MessageHandlerThread(message_handler)
 		self.sending_manager_thread = SendingManagerThread(sending_manager)
-		self.backup_time = 3600 * 8
 
 	def start_message_handler(self):
 		self.message_handler_thread.start()
 
 	def restart_bot_message_handler(self):
-		self.logger.warning("Set to restart message handler bot")
+		self.logger.warning("Set to restart MH bot")
 		self.message_handler_thread.restart_bot()
 
 	def stop_message_handler(self):
 		self.message_handler_thread.stop()
-		self.logger.warning("Requested message handler to stop")
+		self.logger.warning("Requested MH to stop")
 
 	def start_sending_manager(self):
 		self.sending_manager_thread.start()
 
 	def stop_sending_manager(self):
 		self.sending_manager_thread.stop()
-		self.logger.warning("Requested sending manager to stop")
+		self.logger.warning("Requested SM to stop")
 
 	def default(self):
 		self.start_message_handler()
@@ -67,50 +67,50 @@ class LearnItThread(threading.Thread):
 
 		self.backup()
 
-		self.logger.warning("Waiting message handler to stop")
-		if self.message_handler_thread.is_alive():
-			self.message_handler_thread.join()
-		self.logger.warning("Message handler stopped!")
-		self.logger.warning("Waiting send manager to stop")
-		if self.sending_manager_thread.is_alive():
-			self.sending_manager_thread.join()
-		self.logger.warning("Sending manager stopped!")
+		self.logger.warning("Waiting MH to stop")
+		while self.message_handler_thread.is_alive():
+			try:
+				self.message_handler_thread.join(2)
+			except:
+				pass
+			self.stop_message_handler()
+		self.logger.warning("MH stopped!")
+		self.logger.warning("Waiting SM to stop")
+		while self.sending_manager_thread.is_alive():
+			try:
+				self.sending_manager_thread.join(2)
+			except:
+				pass
+			self.stop_sending_manager()
+
+		self.logger.warning("SM stopped!")
 
 		self.lock.release()
 
 	def run(self):
 		self.logger.warning("Running LearniIt")
 		self.default()
-		time_ini = time.time()
-		last_thread_check = time.time()
-		sleep = 1
-		while not self.__stop.wait(sleep):
-			if time.time() - last_thread_check > 5:
-				for x in threading.enumerate():
-					print(x)
-				self.bot_logger.warning("Threads: " + str(threading.active_count()))
-				last_thread_check = time.time()
+		cycles = 0
+		while not self.__stop.wait(self.learnit_sleep):
+			msg = ''
+			for x in threading.enumerate():
+				msg += str(x.name) + "\n"
+
+			self.logger.warning("LearnIt_Cycles:{}  Threads: ".format(cycles) + str(threading.active_count()) + "\n" + msg)
+			self.bot_logger.warning("LearnIt_Cycles:{}  Threads: ".format(cycles) + str(threading.active_count()) + "\n" + msg)
 
 			self.lock.acquire()
 			if self.__stop.wait(0):
 				self.lock.release()
 				break
 
-			self.logger.info("Check if idle time exceeded")
-			sleep = self.message_handler_thread.idle_time_exceed()
-			self.logger.info("LearnIt Sleep {}".format(sleep))
-			if sleep < 1:
+			if cycles % 4 == 3:
 				self.restart_bot_message_handler()
-				sleep = self.message_handler_thread.get_max_idle_time()
-				self.logger.info("LearnIt Sleep {}".format(sleep))
-
-			time_fim = time.time()
-			self.logger.info("Time last backup: {}".format(time_fim - time_ini))
-			if time_fim - time_ini > self.backup_time:
-				time_ini = time.time()
 				self.backup()
 
 			self.lock.release()
+			self.logger.info("LearnIt Sleep {}".format(self.learnit_sleep))
+			cycles += 1
 
 
 
@@ -130,13 +130,13 @@ class Container():
 			self.message_handler = None
 			self.sending_manager = None
 			self.learnit = None
-			self.MESSAGE_HANDLER_MAX_IDLE_TIME = 180
 			self.SENDING_MANAGER_SLEEP_TIME = 120
+			self.LEARNIT_SLEEP = 3600
 			self.INSTALLED = False
 			self.read_data()
 			self.save_data()
 
-			print("Installed: {}\nMax time idle: {}\nSleep time: {}\n".format(self.INSTALLED, self.MESSAGE_HANDLER_MAX_IDLE_TIME, self.SENDING_MANAGER_SLEEP_TIME))
+			print("Installed: {}\nLearnIt Sleep: {}\nSM Sleep time: {}\n".format(self.INSTALLED, self.LEARNIT_SLEEP,self.SENDING_MANAGER_SLEEP_TIME))
 
 			if self.INSTALLED == False:
 				self.install()
@@ -156,7 +156,7 @@ class Container():
 
 		def save_data(self):
 			f = open('../config.ini', 'w')
-			f.write("{} {} {}".format(self.INSTALLED, self.SENDING_MANAGER_SLEEP_TIME, self.MESSAGE_HANDLER_MAX_IDLE_TIME))
+			f.write("{} {} {}".format(self.INSTALLED,self.LEARNIT_SLEEP, self.SENDING_MANAGER_SLEEP_TIME))
 			f.close()
 
 		def read_data(self):
@@ -171,8 +171,8 @@ class Container():
 					self.INSTALLED = True
 				else:
 					self.INSTALLED = False
-				self.SENDING_MANAGER_SLEEP_TIME = int(data[1])
-				self.MESSAGE_HANDLER_MAX_IDLE_TIME = int(data[2])
+				self.LEARNIT_SLEEP = int(data[1])
+				self.SENDING_MANAGER_SLEEP_TIME = int(data[2])
 			except FileNotFoundError:
 				print("config.ini doesn't exist...")
 
@@ -196,9 +196,9 @@ class Container():
 		def turn_on(self):
 			print("System turning on")
 			self.bot_controller_factory = BotControllerFactory(self.TOKEN)
-			self.message_handler = MessageHandler(self.MESSAGE_HANDLER_MAX_IDLE_TIME, self.bot_controller_factory, self.debug_mode)
+			self.message_handler = MessageHandler(self.bot_controller_factory, self.debug_mode)
 			self.sending_manager = SendingManager(self.SENDING_MANAGER_SLEEP_TIME, self.bot_controller_factory, self.debug_mode)
-			self.learnit = LearnItThread(self.message_handler, self.sending_manager, self.bot_controller_factory)
+			self.learnit = LearnItThread(self.LEARNIT_SLEEP, self.message_handler, self.sending_manager, self.bot_controller_factory)
 			self.learnit.start()
 			print("System turned on")
 

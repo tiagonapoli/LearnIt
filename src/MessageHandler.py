@@ -26,8 +26,9 @@ import gc
 
 class MessageHandler():
 
-	def __init__(self, max_idle_time, bot_controller_factory, debug_mode):
-		self.max_idle_time = max_idle_time
+	def __init__(self, bot_controller_factory, debug_mode):
+		self.cycles = 0
+		#self.max_idle_time = max_idle_time
 		self.debug_mode = debug_mode
 		self.bot_controller_factory = bot_controller_factory
 		self.logger = logging.getLogger('Message_Handler')
@@ -37,17 +38,17 @@ class MessageHandler():
 		self.user_manager.reset_all_states()
 		self.__stop = threading.Event()
 
-	def idle_time_exceed(self):
-		now = time.time()
-		ret = 99999999
-		for user_id, user in self.user_manager.users.items():
-			idle_time = now - user.get_last_op_time()
-			user.maybe_wake_user_up()
-			if ret > idle_time:
-				ret = idle_time
-		if ret == 99999999:
-			ret = 0
-		return self.max_idle_time - ret
+	# def idle_time_exceed(self):
+	# 	now = time.time()
+	# 	ret = 99999999
+	# 	for user_id, user in self.user_manager.users.items():
+	# 		idle_time = now - user.get_last_op_time()
+	# 		user.maybe_wake_user_up()
+	# 		if ret > idle_time:
+	# 			ret = idle_time
+	# 	if ret == 99999999:
+	# 		ret = 0
+	# 	return self.max_idle_time - ret
 
 	def restart_bot(self):
 		if self.bot != None:
@@ -64,10 +65,12 @@ class MessageHandler():
 
 	def backup(self):
 		utils.backup(self.user_manager,self.debug_mode)
+		self.bot_logger.warning("Backup time!")
 
 	def setup_bot(self):
-		self.logger.warning("Restart Message Handler Bot")
-		self.bot_logger.warning("Restart Message Handler Bot")
+		self.logger.warning("Start MH Bot. MH_Cycles:{}".format(self.cycles))
+		self.bot_logger.warning("Start MH Bot. MH_Cycles:{}".format(self.cycles))
+		self.cycles += 1
 		if self.bot != None:
 			self.bot.stop_instance()
 			del self.bot
@@ -93,23 +96,20 @@ class MessageHandler():
 
 	def run(self):
 		self.__stop.clear()
-		self.bot_logger.warning("Message Handler on")
-		cycles = 0
+		self.bot_logger.warning("MH on")
 		while not self.__stop.wait(3):
 			try:
-				if cycles % 2 == 0:
-					self.logger.warning("Collect garbage")
-					gc.collect()
+				self.logger.warning("Collect garbage")
+				gc.collect()
 				self.setup_bot()
-				cycles += 1
 				self.bot.polling()
 			except Exception as e:
 				self.restart_bot()
 				self.reset_exception()
-				self.bot_logger.error("Message Handler Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
-				self.logger.error("Message Handler Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
+				self.bot_logger.error("MH Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
+				self.logger.error("MH Bot Crashed {}".format(e.__class__.__name__), exc_info=True)
 
-		self.bot_logger.warning("Message Handler off")
+		self.bot_logger.warning("MH off")
 
 
 class MessageHandlerThread(threading.Thread):
@@ -130,11 +130,11 @@ class MessageHandlerThread(threading.Thread):
 	def backup(self):
 		self.message_handler.backup()
 
-	def idle_time_exceed(self):
-		return self.message_handler.idle_time_exceed()
-
-	def get_max_idle_time(self):
-		return self.message_handler.max_idle_time
+	# def idle_time_exceed(self):
+	# 	return self.message_handler.idle_time_exceed()
+	#
+	# def get_max_idle_time(self):
+	# 	return self.message_handler.max_idle_time
 
 if __name__ == '__main__':
 	import BotController
