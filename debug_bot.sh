@@ -1,3 +1,3 @@
 #!/bin/bash
 cd src
-reset && ./console.py --debug
+reset && ./LearnIt.py --debug

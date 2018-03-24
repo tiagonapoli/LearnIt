@@ -20,6 +20,8 @@ class UserSendingCardManager():
 	def __init__(self, user):
 		self.user = user
 		self.logger = logging.getLogger(str(user.get_id()))
+		self.bot_logger = logging.getLogger('Bot_Sender')
+
 		self.grades_for_day = {}
 		self.user.set_card_waiting(0)
 		self.initialized_for_day = False
@@ -76,7 +78,7 @@ class UserSendingCardManager():
 			self.logger.info("Update sending queue")
 			self.update()
 
-		if self.user.get_state() == fsm.IDLE:
+		if self.user.get_state() == fsm.IDLE and self.user.get_active() == 1:
 			self.user.set_state(fsm.LOCKED)
 
 			self.logger.debug("Grades map:\n{}".format(map_to_str(self.grades_for_day)))
@@ -117,8 +119,12 @@ class UserSendingCardManager():
 		if cnt == 0:
 			return
 		grade /= cnt
+
+		old_date = card.get_next_date()
 		card.calc_next_date(grade)
 		self.user.set_supermemo_data(card)
+		self.bot_logger.warning("\n[Learning]\nUser: {}\nStudyItem: {}\nQuestion: {}\nGrade: {}\nInterval: {}\nEasiness:{}\nAttempts:{}\n{} -> {}".format(
+			self.user.get_username(), card.get_study_item()[1], card.get_question()[1], grade, card.interval, card.ef, card.attempts, old_date, card.next_date.strftime('%Y-%m-%d')))
 		self.logger.debug("Grade = {}  -  NextDate = {}".format(grade, card.get_next_date()))
 		self.sending_queue.remove_card(card)
 		self.grades_for_day.pop(card.get_card_id(), None)
@@ -153,5 +159,8 @@ class UserSendingCardManager():
 				if (cnt >= self.NUMBER_OF_LAST_CARDS and (tot / cnt) >= 4.0) or last == 5:
 					self.finish_learn_card(aux_card)
 			elif waiting_type == REVIEW:
+				old_date = aux_card.get_next_date()
 				aux_card.calc_next_date(grade)
+				self.bot_logger.warning("\n[Review]\nUser: {}\nStudyItem: {}\nQuestion: {}\nGrade: {}\nInterval: {}\nEasiness:{}\nAttempts:{}\n{} -> {}".format(
+					self.user.get_username(), aux_card.get_study_item()[1], aux_card.get_question()[1], grade, aux_card.interval, aux_card.ef, aux_card.attempts, old_date, aux_card.next_date.strftime('%Y-%m-%d')))
 				self.user.set_supermemo_data(aux_card)

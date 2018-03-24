@@ -205,6 +205,7 @@ class Container():
 		def run(self):
 			self.turn_on()
 			self.__stop.wait()
+			print("Stop ask stop bot")
 			self.turn_off()
 
 if __name__ == '__main__':
