@@ -311,16 +311,16 @@ message = { "#setup_user_username_error":
 				 1: "_Selecione quantas cartas deseja receber:_"},		
 
 			"#image_question": 
-				{0: "*Image question:*",
-				 1: "*Pergunta com imagem:*"},
+				{0: "*Image answer:*",
+				 1: "*Resposta com imagem:*"},
 
 			"#audio_question": 
-				{0: "*Audio question:*",
-				 1: "*Pergunta com áudio:*"},
+				{0: "*Audio answer:*",
+				 1: "*Resposta com áudio:*"},
 
 			"#text_question": 
-				{0: "*Text question:*",
-				 1: "*Pergunta com texto:*"},
+				{0: "*Text answer:*",
+				 1: "*Resposta com texto:*"},
 
 			"#card_type": 
 				{0: "*%s card%s!*",
@@ -496,10 +496,18 @@ message = { "#setup_user_username_error":
 
 			"#too_much_time_on_menu":
 				{0: "Oops, maybe you forgot to quit this menu, we will do that for you...",
-				 1: "Oops, talvez você se esqueceu de sair desse menu, vamos fazer isso por você..."}
+				 1: "Oops, talvez você se esqueceu de sair desse menu, vamos fazer isso por você..."},
+
+			"#ask_for_audio":
+				{0: "Do you want to receive audios?",
+				 1 : "Você gostaria de receber audios?"},
+
+			"#review_length":
+				{0: "There are %s review cards in total",
+				 1 : "Total de cards: %s"},
+
+			'#all_cards':
+				{0: "All cards",
+				 1 : "Todos os cards"}
 
 }
-
-
-
-

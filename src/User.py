@@ -56,6 +56,8 @@ class User:
 				self.set_state(fsm.IDLE)
 
 
+	def translate(self, text):
+		return translation.translate(text, self.native)
 
 	def get_username(self):
 		return self.username

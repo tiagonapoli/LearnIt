@@ -38,6 +38,7 @@ TOPIC_ERASE = 31
 ITEM_ERASE = 32
 SELECT = 33
 SELECT_TRAINING = 34
+AUDIO_OPT = 35
 
 
 '''FSM'''
@@ -147,6 +148,8 @@ next_state.update({
 							  'no topics' : IDLE,
 							  'done' : (REVIEW, GET_TOPICS)},
 	(REVIEW, GET_TOPICS) : {'continue' : (REVIEW, GET_TOPICS),
+							'done' : (REVIEW, AUDIO_OPT)},
+	(REVIEW, AUDIO_OPT) : {	'error' : (REVIEW, AUDIO_OPT),
 							'done' : (REVIEW, GET_NUMBER)},
 	(REVIEW, GET_NUMBER) : {'error' : (REVIEW, GET_NUMBER),
 							'done' : (REVIEW, WAITING_CARD_ANS)},

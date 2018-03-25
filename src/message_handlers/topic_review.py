@@ -78,12 +78,42 @@ def handle_topic_review(bot, user_manager, debug_mode):
 			user.cards_to_review = []
 			for i in btn_set:
 				user.cards_to_review.extend(user.get_cards_on_topic(user.temp_subject, btn[i][0]))
-
-			options = ['5', '10', '15', '20', '25']
-			user.send_string_keyboard("#review_card_number", options)
+			options = ['Yes', 'No']
+			user.send_string_keyboard("#ask_for_audio", options, translate_options=True)
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_TOPICS)]['done'])
 		else:
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_TOPICS)]['continue'])
+
+
+	@bot.message_handler(func = lambda msg:
+					user_manager.get_user(get_id(msg)).get_state() == (fsm.REVIEW, fsm.AUDIO_OPT),
+					content_types=['text'])
+	def audio_option(msg):
+
+		user_id = get_id(msg)
+		user = user_manager.get_user(user_id)
+		user.set_state(fsm.LOCKED)
+		logger = user.logger
+
+		valid, option, keyboard_option, keyboard_len = user.parse_keyboard_ans(msg)
+
+		if valid == False:
+			user.send_message("#choose_from_keyboard", markup=None)
+			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.AUDIO_OPT)]['error'])
+			return
+
+		if keyboard_option == 1:
+			cards_list = []
+			for card in user.cards_to_review:
+				if card.get_question_type() != 'audio':
+					cards_list.append(card)
+			user.cards_to_review = cards_list
+
+		user.send_message('#review_length', (len(user.cards_to_review),))
+
+		options = ['5', '10', '15', '20', '25', '40', '50', user.translate('#all_cards')]
+		user.send_string_keyboard("#review_card_number", options)
+		user.set_state(fsm.next_state[(fsm.REVIEW, fsm.AUDIO_OPT)]['done'])
 
 
 	@bot.message_handler(func = lambda msg:
@@ -103,7 +133,11 @@ def handle_topic_review(bot, user_manager, debug_mode):
 			user.set_state(fsm.next_state[(fsm.REVIEW, fsm.GET_NUMBER)]['error'])
 			return
 
-		user.counter = int(number)
+		try:
+			user.counter = int(number)
+		except ValueError:
+			user.counter = len(user.cards_to_review)
+
 		user.pos = 0
 		user.review_card_number = 1
 		
