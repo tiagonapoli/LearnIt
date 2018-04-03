@@ -155,12 +155,12 @@ message = { "#setup_user_username_error":
 				 1: "_Não há tópicos registrados nessa matéria ainda. Por favor,_ *envie-me um novo tópico*"},
 
 			"#character_exceeded":
-				{0: "Please, don't exceed %s characters. You digited %s characters. Send the language again:",
-				 1: "Por favor, não exceda %s caracteres. Você digitou %s caracteres. Me envie a linguagem novamente:"},
+				{0: "_Please, don't exceed %s characters. You digited %s characters. Send again:_",
+				 1: "_Por favor, não exceda %s caracteres. Você digitou %s caracteres. Me novamente:_"},
 
 			"#character_null": 
-				{0: "Please, don't use / or \ or _ or *. Send the language again:",
-				 1: "Por favor, não use / ou \ ou _ ou *. Me envie a linguagem novamente:"},
+				{0: "_Please, don't use / or \ or _ or *. Send the language again:_",
+				 1: "_Por favor, não use / ou \ ou _ ou *. Me envie a linguagem novamente:_"},
 
 			"#add_item_initial_hint":
 				{0: "_Hint: The process to add a word is way easier on Telegram Desktop_",
@@ -479,7 +479,7 @@ message = { "#setup_user_username_error":
 				 1: "O bot está sendo reiniciado, a operação será cancelada. Desculpe pela inconveniência."},
 
 			"#select_training_select_topics":
-				{0: "_Select the topics you want to be active for your training (Unselected will be unactive):__",
+				{0: "_Select the topics you want to be active for your training (Unselected will be unactive):_",
 				 1: "_Selectione os tópicos que deseja que fiquem ativos para treinamento (Os não selecionados ficarão inativos:_"},
 
 			"#active_topics_listing":
